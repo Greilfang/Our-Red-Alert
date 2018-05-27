@@ -26,14 +26,14 @@ bool CombatScene::init() {
 
 
 
-	/* ¼ÓÔØµØÍ¼ */
+	/* åŠ è½½åœ°å›¾ */
 	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
 
 
 
-	/* ¼ÓÔØÊó±êÊÂ¼ş */
+	/* åŠ è½½é¼ æ ‡äº‹ä»¶ */
 	auto mouse_event = EventListenerMouse::create();
 	mouse_event->onMouseMove = [&](Event *event) {
 		EventMouse* pem = static_cast<EventMouse*>(event);
@@ -41,13 +41,13 @@ bool CombatScene::init() {
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouse_event, 1);
 
-	/*Éú²ú»ùµØ°´Å¥*/
+	/*ç”Ÿäº§åŸºåœ°æŒ‰é’®*/
 	auto base_button = Sprite::create("basebutton.jpg");
 	base_button->setPosition(Vec2(origin.x + visibleSize.width - 60,
 		origin.y + visibleSize.height / 2));
 	addChild(base_button, 10);
 
-	/*Éú²ú»ùµØ°´Å¥µ¥µã´¥Ãş¼àÌıÆ÷*/
+	/*ç”Ÿäº§åŸºåœ°æŒ‰é’®å•ç‚¹è§¦æ‘¸ç›‘å¬å™¨*/
 	auto listener1 = EventListenerTouchOneByOne::create();
 	listener1->setSwallowTouches(true);
 	listener1->onTouchBegan = [](Touch* touch, Event* event) {
@@ -69,7 +69,7 @@ bool CombatScene::init() {
 		Vec2 touchLocation = touch->getLocation();
 		auto new_msg = msgs->add_game_message();
 		new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CRT);
-		//´Ë´¦ÓĞÎÊÌâ£¬ÎŞ·¨×Ô¶¯ÊÍ·Å£¬µ«»¹²»ÄÜËæ±ãÉ¾
+		//æ­¤å¤„æœ‰é—®é¢˜ï¼Œæ— æ³•è‡ªåŠ¨é‡Šæ”¾ï¼Œä½†è¿˜ä¸èƒ½éšä¾¿åˆ 
 		GridPath *gridpath = new GridPath;
 		auto newgridpoint = gridpath->add_grid_point();
 		newgridpoint->set_x(touchLocation.x);
@@ -127,7 +127,7 @@ void CombatScene::updateUnitsState()
 	{
 		const GameMessage&  msg = msgs->game_message(i);
 
-		/*Èç¹ûÊÇ´´½¨ĞÂµ¥Î»ÏûÏ¢*/
+		/*å¦‚æœæ˜¯åˆ›å»ºæ–°å•ä½æ¶ˆæ¯*/
 		if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_CRT)
 		{
 
@@ -136,7 +136,7 @@ void CombatScene::updateUnitsState()
 			_player->setPosition(-map_center.x + msg.grid_path().grid_point(0).x(), -map_center.y + msg.grid_path().grid_point(0).y());
 
 		}
-		/*Èç¹ûÊÇÓĞ¹ØÒÆ¶¯µÄÏûÏ¢*/
+		/*å¦‚æœæ˜¯æœ‰å…³ç§»åŠ¨çš„æ¶ˆæ¯*/
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_MOV)
 		{
 			log("Empty Message, there must be something wrong");

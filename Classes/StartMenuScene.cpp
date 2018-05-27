@@ -28,7 +28,9 @@ bool GameMenu::init() {
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("SovietMarch.mp3", true);
 
 	/* BackGroundPicture */
-	auto back_ground = Sprite::create("background.jpg");//¸Ä³ÉÁËjpg£¿
+
+	auto back_ground = Sprite::create("background.jpg");
+
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);

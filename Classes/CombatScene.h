@@ -22,7 +22,7 @@ public:
 
 	virtual void update(float f);
 	void scrollMap();
-	//由于onExit比较短先放在这里
+	//鐢变簬onExit姣旇緝鐭厛鏀惧湪杩欓噷
 	void onExit() {
 		Layer::onExit();
 		delete msgs;
