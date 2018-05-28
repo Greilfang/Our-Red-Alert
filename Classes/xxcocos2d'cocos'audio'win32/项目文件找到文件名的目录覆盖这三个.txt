@@ -1,0 +1,2 @@
+xxcocos2d'cocos'audio'win32
+进入这个路径修改这三个文件（需要用修改后的preLoad，否则设置好的音量一旦回退就失效了），想要知道为啥就看下面的txt
