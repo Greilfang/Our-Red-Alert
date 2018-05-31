@@ -1,0 +1,92 @@
+protoc --cpp_out=. addressbook.proto
+PreLoad类中添加静态成员isPlayingBgm,防止在startMenuScene中多次加载bgm
+cocos里查看setBackgroundMusicVolume（）和setEffectsVolume（）这两个方法在官方代码库里面的源代码会发现，里面是空的。需要手动补充才可以实现音量大小的调节功能。
+涉及文件：SimpleAudioEngine.cpp，MciPlayer.h，MciPlayer.cpp（因为MCI_STATUS等，要#include <Digitalv.h>）
+找到自己该项目下的xx\cocos2d\cocos\audio\win32里面的SimpleAudioEngine.cpp这个文件，打开以后找到对应的四个方法，然后手动添加如下的代码:
+float SimpleAudioEngine::getBackgroundMusicVolume()
+
+{
+
+    return sharedMusic().Volume()/1000.0f;
+
+}
+
+ 
+
+void SimpleAudioEngine::setBackgroundMusicVolume(float volume)
+
+{sharedMusic().Volume((UINT)(volume*1000.0));
+
+}
+
+ 
+
+float SimpleAudioEngine::getEffectsVolume()
+
+{
+
+    returnsharedList().begin()->second->Volume()/1000.0f;  // XXX returning the first
+
+}
+
+ 
+
+void SimpleAudioEngine::setEffectsVolume(float volume)
+
+{ 
+
+        EffectList::iterator iter;
+
+       for(iter=sharedList().begin();iter!=sharedList().end();++iter)
+
+       {
+              iter->second->Volume((UINT)(volume*1000.0));
+
+       }    
+}
+ 除此之外呢还要找到同目录下MciPlayer.h文件，加入如下代码（自己找一下位置），红色的是我们要改变的：
+
+// volume value ranges from 0 .. 1000
+
+      void Volume(UINT volume);
+
+       // return value ranges from 0 .. 1000
+
+       UINT Volume() const;
+然后到MciPlayer.cpp文件中找到对应的方法，并修改里面的代码:
+
+void MciPlayer::Volume(UINT volume)
+
+{
+
+       if(!_dev)
+
+             return;
+
+      MCI_DGV_SETAUDIO_PARMS mciParams = {0};
+
+      mciParams.dwItem = MCI_DGV_SETAUDIO_VOLUME;
+
+      mciParams.dwValue = volume;
+
+          mciSendCommand(_dev, MCI_SETAUDIO,MCI_DGV_SETAUDIO_ITEM | MCI_DGV_SETAUDIO_VALUE, (DWORD)&mciParams);
+
+}
+
+UINT MciPlayer::Volume() const
+
+{
+
+       if(!_dev)
+
+             return 0;
+
+      MCI_STATUS_PARMS mciParams = {0};
+
+      mciParams.dwItem = MCI_DGV_STATUS_VOLUME;
+
+          mciSendCommand(_dev, MCI_STATUS,MCI_STATUS_ITEM, (DWORD)&mciParams);
+
+      return mciParams.dwReturn;
+
+}

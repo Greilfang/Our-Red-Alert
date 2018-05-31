@@ -17,6 +17,7 @@ protected:
 	// 进度条更新频率
 	float _progressInterval;
 public:
+	static bool hasPlayedBgm;
 	static cocos2d::Scene* createScene();
 	virtual bool init();
 
