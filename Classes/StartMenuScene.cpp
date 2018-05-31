@@ -1,7 +1,7 @@
 #include "StartMenuScene.h"
 #include "ui/CocosGUI.h"
 #include "PreLoadScene.h"
-#include "SettingScene.h"
+#include "AudioControlScene.h"
 #include "CombatScene.h"
 #include "StartScene.h"
 
@@ -25,13 +25,13 @@ bool GameMenu::init() {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	//BackGroundMusic
-	CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("SovietMarch.mp3", true);
-
+	if (!PreLoad::hasPlayedBgm)
+	{
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("SovietMarch.mp3", true);
+		PreLoad::hasPlayedBgm = true;
+	}
 	/* BackGroundPicture */
-
-	auto back_ground = Sprite::create("background.jpg");
-
-	auto back_ground = Sprite::create("background.jpg");//�ĳ���jpg��
+	auto back_ground = Sprite::create("background.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -61,7 +61,7 @@ bool GameMenu::init() {
 	setting_button->setPosition(Vec2(origin.x + visibleSize.width * 0.7, origin.y + visibleSize.height*0.5));
 	setting_button->addTouchEventListener([](Ref* pSender, Widget::TouchEventType type) {
 		if (type == Widget::TouchEventType::ENDED) {
-			auto transition = TransitionFlipY::create(1.0, SettingScene::createScene());
+			auto transition = TransitionFlipY::create(1.0, AudioControl::createScene());
 			Director::getInstance()->replaceScene(transition);
 		}
 	});

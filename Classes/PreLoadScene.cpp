@@ -4,6 +4,8 @@
 
 USING_NS_CC;
 
+bool PreLoad::hasPlayedBgm = false;
+
 Scene* PreLoad::createScene() {
 	auto scene = Scene::create();
 	auto layer = PreLoad::create();
@@ -11,8 +13,6 @@ Scene* PreLoad::createScene() {
 	scene->addChild(layer);
 	return scene;
 }
-
-bool PreLoad::hasPlayedBgm = false;
 
 bool PreLoad::init() {
 	if (!Layer::init()) {
