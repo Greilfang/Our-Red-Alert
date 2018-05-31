@@ -81,7 +81,7 @@ bool CombatScene::init() {
 	return true;
 }
 
-void CombatScene::update(float f) {
+
 void CombatScene::update(float f){
 	updateUnitsState();
 	scrollMap();
@@ -89,7 +89,7 @@ void CombatScene::update(float f){
 	
 }
 
-void CombatScene::scrollMap() {
+
 void CombatScene::scrollMap(){
 	map_center = _combat_map->getPosition();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -114,7 +114,7 @@ void CombatScene::scrollMap(){
 		_combat_map->setPosition(map_center);
 }
 
-void MouseRect::update(float f) {
+
 void MouseRect::update(float f){
 	clear();
 	Node* parent = getParent();
