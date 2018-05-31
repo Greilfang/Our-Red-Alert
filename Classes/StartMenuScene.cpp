@@ -31,6 +31,7 @@ bool GameMenu::init() {
 
 	auto back_ground = Sprite::create("background.jpg");
 
+	auto back_ground = Sprite::create("background.jpg");//�ĳ���jpg��
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);

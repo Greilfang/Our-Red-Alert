@@ -1,0 +1,1 @@
+protoc --cpp_out=./ GameMessage.proto

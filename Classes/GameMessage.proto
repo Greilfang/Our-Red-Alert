@@ -1,0 +1,35 @@
+
+syntax = "proto3";
+
+
+//option optimize_for = LITE_RUNTIME;
+message GameMessage {
+
+    enum CmdCode {
+        CRT = 0;
+        MOV = 1;
+        ATK = 2;
+    }
+
+
+    CmdCode cmd_code = 1;
+    int32 unit_0 = 2;
+    int32 unit_1 = 3;
+
+    int32 damage = 4;
+
+    GridPath grid_path = 5;
+    int32 camp =6;
+    int32 unit_type = 7;
+}
+message GridPoint {
+    int32 x = 1;
+    int32 y = 2;
+}
+message GridPath {
+    repeated GridPoint grid_point = 1;
+}
+
+message GameMessageSet {
+    repeated GameMessage game_message = 1;
+}
