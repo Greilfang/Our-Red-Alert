@@ -124,6 +124,11 @@ int Unit::getType() const
 	return type;
 }
 
+int Unit::getSpeed() const
+{
+	return speed;
+}
+
 bool Unit::is_in(Point p1, Point p2) {
 	Point unitPoint = this->getPosition();
 	if (abs(unitPoint.x - p1.x) + abs(unitPoint.x - p2.x) != abs(p1.x - p2.x)) {
@@ -208,7 +213,6 @@ void UnitManager::updateUnitsState()
 	for (int i = 0; i < msgs->game_message_size(); i++)
 	{
 		const GameMessage&  msg = msgs->game_message(i);
-		//log("UnitManager: Read Message %d Success", i);
 		if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_CRT)
 		{
 			int id = msg.unit_0();
@@ -282,16 +286,14 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 	}
 
 	nu->unit_manager = this;
+	nu->setProperties();
 	nu->id = id;
 	nu->camp = camp;
-	nu->setProperties();
 	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
 	nu->setListener();
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
 	nu->setPosition(x, y);
 	tiled_map->addChild(nu);
-	//nu->initBars();
-	//nu->initFlag();
 	nu->schedule(schedule_selector(Unit::update));
 
 	return(nu);
@@ -304,6 +306,7 @@ void UnitManager::genCreateMessage(int _unit_type,int camp, float x,float y)
 	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CRT);
 	new_msg->set_unit_type(_unit_type);
 	new_msg->set_camp(camp);
+	new_msg->set_unit_0(next_id);
 	GridPath *gridpath = new GridPath;
 	auto newgridpoint = gridpath->add_grid_point();
 	newgridpoint->set_x(x);
@@ -312,12 +315,73 @@ void UnitManager::genCreateMessage(int _unit_type,int camp, float x,float y)
 	next_id += MAX_PLAYER_NUM;
 }
 
+float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed) 
+{
+	float duration =sqrtf((end_pos.x - start_pos.x)*(end_pos.x - start_pos.x) +
+		(end_pos.y - start_pos.y)*(end_pos.y - start_pos.y))/ _speed;
+	return duration;
+}
+
+void UnitManager::playMover(Point position, Unit * _sprite) {
+	//获得精灵移动的时间
+	float duration = getPlayerMoveTime(_sprite->getPosition(), position,_sprite->getSpeed());
+	auto moveTo = MoveTo::create(duration, position);
+	auto sequence = Sequence::create(moveTo, nullptr);
+	_sprite->runAction(sequence);
+};
+
+void UnitManager::selectEmpty(Point position)
+{
+	for (auto& id : selected_ids)
+	{
+		if (id_map.at(id)->getNumberOfRunningActions() != 0)
+		{
+			id_map.at(id)->stopAllActions();
+		}
+		if (id_map.at(id)->isMobile())
+		{
+			playMover(position, id_map.at(id));
+		}
+	}
+}
+
+void UnitManager::selectPointUnits(Unit * _unit)
+{
+	if (_unit->camp == player_id)
+	{
+		cancellClickedUnit();
+		selected_ids.push_back(_unit->id);
+		getClickedUnit();
+	}
+}
+
+void UnitManager::getClickedUnit() 
+{
+	for (auto& id : selected_ids)
+	{
+		id_map.at(id)->displayHP();
+		id_map.at(id)->setOpacity(180);
+	}
+}
+
+void UnitManager::cancellClickedUnit() 
+{
+	for (auto& id : selected_ids)
+	{
+		id_map.at(id)->hideHP();
+		id_map.at(id)->setOpacity(255);
+	}
+	selected_ids.clear();
+	selected_ids.shrink_to_fit();
+}
+/*
 void UnitManager::deselectAllUnits()
 {
 	for (auto& id : selected_ids)
 		id_map.at(id)->hideHP();
 	selected_ids.clear();
 }
+*/
 /*
 void UnitManager::selectUnits(Point select_point)
 {

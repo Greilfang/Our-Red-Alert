@@ -20,30 +20,17 @@ void CombatScene::DrawRectArea(Point p1, Point p2) {
 	this->addChild(drawNode);
 	drawNode->drawRect(p1, p2, Color4F(0, 1, 0, 1));
 }
+//将框中的友方单位加入selectedd_ids
 void CombatScene::getLayerUnit(Point p1, Point p2) {
 	const auto&arrayNode = this->_combat_map->getChildren();
 	for (auto&child : arrayNode) {
 		Unit * pnode = static_cast<Unit *>(child);
-		if (pnode && pnode->is_in(p1-delta, p2-delta)) {
-			selected_box.push_back(pnode);
-			
+		if (pnode && pnode->is_in(p1-delta, p2-delta) && (pnode->camp == unit_manager->player_id)) {
+			unit_manager->selected_ids.push_back(pnode->id);
+			log("%d", pnode->id);
 		}
 	}
 }
-float CombatScene::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos) {
-	float duration = 0.05f;
-	duration = duration*sqrtf((end_pos.x - start_pos.x)*(end_pos.x - start_pos.x) +
-		(end_pos.y - start_pos.y)*(end_pos.y - start_pos.y));
-	return duration;
-}
-void CombatScene::playMover(Point position, Unit * _sprite) {
-	//获得精灵移动的时间
-	float duration = getPlayerMoveTime(_sprite->getPosition(), position);
-	auto moveTo = MoveTo::create(duration, position);
-	auto sequence = Sequence::create(moveTo, nullptr);
-	_sprite->runAction(sequence);
-};
-
 Scene * CombatScene::createScene() {
 	auto scene = Scene::create();
 	auto layer = CombatScene::create();
@@ -108,10 +95,7 @@ bool CombatScene::init() {
 		Size s = target->getContentSize();
 		Rect rect = Rect(0, 0, s.width, s.height);
 		if (rect.containsPoint(locationInNode)) {
-			//log("touch %d", target);
-			cancellClickedUnit();
-			selected_box.push_back(target);
-			getClickedUnit();
+			unit_manager->selectPointUnits(target);
 			return true;
 		}
 		return false;
@@ -143,36 +127,22 @@ bool CombatScene::init() {
 		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
 			mouse_rect->unschedule(schedule_selector(MouseRect::update));
 		mouse_rect->touch_end = touch->getLocation();			
-#ifdef DEBUG
-		//AllocConsole();
-		//freopen("CONIN$", "r", stdin);
-		//freopen("CONOUT$", "w", stdout);
-		//freopen("CONOUT$", "w", stderr);
-		//log("get posititon %f %f", _combat_map->getPosition().x, _combat_map->getPosition().y);
-		//log("error buffer:%f %f", mouse_rect->touch_start.x, mouse_rect->touch_start.y);
-		//log("error buffer:%f %f", mouse_rect->touch_end.x, mouse_rect->touch_end.y);
-		//log("%f", Distance_m2(mouse_rect->touch_start, mouse_rect->touch_end));
-#endif // DEBUG
+		mouse_rect->setVisible(false);
+		//如果是框选而非点选则清空selecetd_ids
 		if (Tri_Dsitance(mouse_rect->touch_start, mouse_rect->touch_end) > 8) {
-			cancellClickedUnit();
+			unit_manager->cancellClickedUnit();
 		}
-		if (selected_box.size()) {
-			for (int i = 0; i != selected_box.size(); i++) {
-				if (selected_box[i]->getNumberOfRunningActions() != 0) {
-					selected_box[i]->stopAllActions();
-				}
-				mouse_rect->setVisible(false);
-				if (selected_box[i]->isMobile())
-					playMover(mouse_rect->touch_end - delta, selected_box[i]);
-			}
+		//如果是点选，则执行selecctEmpty
+		if (unit_manager->selected_ids.size()) {
+			unit_manager->selectEmpty(mouse_rect->touch_end - delta);
 		}
-		else {
-			mouse_rect->setVisible(false);
+		//如果是框选，就将框中所有的己方单位添加到selected_ids并执行操作
+		else {		
 			if (mouse_rect->isScheduled(schedule_selector(MouseRect::update))) {
 				mouse_rect->unschedule(schedule_selector(MouseRect::update));
 			}
 			getLayerUnit(mouse_rect->touch_start, mouse_rect->touch_end);
-			getClickedUnit();
+			unit_manager->getClickedUnit();
 		}
 	};
 	Director::getInstance()->getEventDispatcher()

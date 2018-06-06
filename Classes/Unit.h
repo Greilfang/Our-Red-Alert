@@ -41,6 +41,7 @@ public:
 	int player_id = 0;
 	GameMessageSet* msgs = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener;
+	std::vector<int> selected_ids;
 
 	CREATE_FUNC(UnitManager);
 	bool init();
@@ -50,6 +51,10 @@ public:
 	void setPlayerID(int _player_id);
 	void setCombatScene(CombatScene* _combat_scene);
 	void setBuilding(Building * _building);
+	//获取运动的时间
+	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed);
+	//执行运动的操作
+	void playMover(Point position, Unit * _sprite);
 
 	CombatScene * getCombatScene();
 	EventListenerTouchOneByOne * getSpriteTouchListener();
@@ -63,12 +68,16 @@ public:
 	void setBasePosition(Point base_pos);
 	Point getBasePosition()const;
 
-	void deselectAllUnits();
-	//void selectUnits(cocos2d::Point select_point);
-	//void selectUnits(cocos2d::Rect select_rect);
+	//当点击空地时的操作
+	void selectEmpty(Point position);
+	//当点击单位时的操作（我方，他方)
+	void selectPointUnits(Unit * _unit);
+	//对selected_ids里单位的操作
+	void getClickedUnit();
+	//清空selected_ids
+	void cancellClickedUnit();
 private:
 	cocos2d::Map<int, Unit*> id_map;
-	std::vector<int> selected_ids;
 	std::map<int, int> base_map;
 
 	cocos2d::TMXTiledMap* tiled_map = nullptr;
@@ -119,6 +128,7 @@ public:
 	void setMobile(bool can);
 	int getCamp() const;
 	int getType() const;
+	int getSpeed() const;
 	bool isMobile();
 	//构造函数
 	Unit(int _max_life, int _atk_freq, double _atk_range, int _speed) 

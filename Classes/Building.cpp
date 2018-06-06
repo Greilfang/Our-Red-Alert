@@ -63,9 +63,7 @@ bool Base::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	// 如果位置矩形包含触摸点
 	if (rect.containsPoint(locationInNode))
 	{
-		log("onTouchBegan... x = %f, y = %f", locationInNode.x, locationInNode.y);
-		// 设置透明度		
-		target->setOpacity(180);
+		unit_manager->selectPointUnits(target);
 		// 表明用户触摸事件已经被处理，后续的onTouchMoved、onTouchEnded和onTouchCancelled会接着响应，其他事件监听器则不会再去进行监听本次触摸事件。
 		return true;
 	}
@@ -160,9 +158,7 @@ bool MilitaryCamp::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	// 如果位置矩形包含触摸点
 	if (rect.containsPoint(locationInNode))
 	{
-		log("onTouchBegan... x = %f, y = %f", locationInNode.x, locationInNode.y);
-		// 设置透明度
-		target->setOpacity(180);
+		unit_manager->selectPointUnits(target);
 		// 表明用户触摸事件已经被处理，后续的onTouchMoved、onTouchEnded和onTouchCancelled会接着响应，其他事件监听器则不会再去进行监听本次触摸事件。
 		return true;
 	}

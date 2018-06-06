@@ -22,15 +22,8 @@ public:
 class CombatScene :public Layer{
 public:
 	GameMessageSet * msgs;
-	/*计算玩家移动时间函数*/
-	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos);
-	/*控制目标移动*/
-	void playMover(Point position, Unit * _sprite);
 	/*构建选框*/
 	void DrawRectArea(Point p1, Point p2);
-	/*加入被选与取消被选*/
-	void getClickedUnit();
-	void cancellClickedUnit();
 	/*向selected_box中收入被选中的节点*/
 	void getLayerUnit(Point p1, Point p2);
 	/*滚动地图*/
@@ -49,7 +42,6 @@ public:
 	CREATE_FUNC(CombatScene);
 private:
 	Point delta = { 0,0 };
-	std::vector<Unit *> selected_box;//存放选中栏的所有单位
 	bool is_clicked = false;
 	cocos2d::Point last_touch{ 0, 0 };//鼠标最后一次碰到的点
 	MouseRect* mouse_rect = nullptr;//选框
@@ -64,18 +56,5 @@ inline float Tri_Dsitance(Point t1, Point t2) {
 #endif
 	return fabs(t1.x - t2.x) + fabs(t1.y - t2.y);
 }
-inline void CombatScene::getClickedUnit() {
-	for (int i = 0; i != selected_box.size(); i++) {
-		selected_box[i]->setOpacity(180);
-		selected_box[i]->displayHP();
-	}
-}
-inline void CombatScene::cancellClickedUnit() {
-	for (int i = 0; i != selected_box.size(); i++) {
-		selected_box[i]->setOpacity(255);
-		selected_box[i]->hideHP();
-	}
-	selected_box.clear();
-	selected_box.shrink_to_fit();
-}
+
 #endif
