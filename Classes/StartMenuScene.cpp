@@ -46,7 +46,7 @@ bool GameMenu::init() {
 	start_button->setPosition(Vec2(origin.x + visibleSize.width * 0.7, origin.y + visibleSize.height*0.7));
 	start_button->addTouchEventListener([](Ref* pSender, Widget::TouchEventType type) {
 		if (type == Widget::TouchEventType::ENDED) {
-			auto transition = TransitionSlideInR::create(1.0, CombatScene::createScene());
+			auto transition = TransitionSlideInR::create(1.0, StartScene::createScene());
 			Director::getInstance()->replaceScene(transition);
 		}
 	});

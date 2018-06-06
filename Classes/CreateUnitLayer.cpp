@@ -53,7 +53,7 @@ void BaseLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(11);
+			unit_manager->genCreateMessage(11,2, 100,100);
 			/*
 			log("new militartCamp");
 			auto militaryCamp1 = Building::create("/Picture/units/base_3.png");
@@ -126,7 +126,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(1);
+			unit_manager->genCreateMessage(1,1,100,100);
 			/*
 			log("new airplane");
 			auto airplane1 = Unit::create("Picture/units/airplane_0.png");
@@ -151,7 +151,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(2);
+			unit_manager->genCreateMessage(2,1,100,100);
 			/*
 			log("new tank");
 			auto tank1 = Unit::create("Picture/units/tank.png");
@@ -176,7 +176,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(3);
+			unit_manager->genCreateMessage(3,1,100,100);
 			/*
 			log("new soldier");
 			auto soldier1 = Unit::create("Picture/units/soldier.png");

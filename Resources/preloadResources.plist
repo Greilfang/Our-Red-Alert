@@ -4,9 +4,11 @@
 <dict>
 	<key>Sounds</key>
 	<array>
+		<string>s3.wav</string>
 	</array>
 	<key>SpriteSheets</key>
 	<array>
+		<string>airfightSheet.png</string>
 	</array>
 	<key>Musics</key>
 	<array>

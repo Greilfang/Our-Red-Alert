@@ -55,8 +55,13 @@ public:
 	EventListenerTouchOneByOne * getSpriteTouchListener();
 	int  getUnitTeam(int unit_id);
 	//生成新单位的信息
-	void genCreateMessage(int _unit_type);
+	void genCreateMessage(int _unit_type, int team, float x, float y);
 	void updateUnitsState();
+
+	void initializeUnitGroup();
+
+	void setBasePosition(Point base_pos);
+	Point getBasePosition()const;
 
 	void deselectAllUnits();
 	//void selectUnits(cocos2d::Point select_point);
@@ -72,8 +77,10 @@ private:
 	int next_id = 1;
 	int base_id = 1;
 
+	Point _base_pos{ 0,0 };
+
 	Building * building = nullptr;
-	Unit* createNewUnit(int id, int team, int uint_type);
+	Unit* createNewUnit(int id, int team, int uint_type, float x, float y);
 };
 
 class Unit :public cocos2d::Sprite {

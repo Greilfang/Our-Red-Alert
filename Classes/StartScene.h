@@ -26,6 +26,8 @@ public:
 	void menuStartGameCallback(cocos2d::Ref* pSender);
 	void menuBackCallback(cocos2d::Ref* pSender);
 
+	void connectionUpdate(float f);
+
 	CREATE_FUNC(ServerMenu);
 };
 
@@ -36,6 +38,8 @@ public:
 
 	void menuStartGameCallback(cocos2d::Ref* pSender);
 	void menuBackCallback(cocos2d::Ref* pSender);
+
+	CREATE_FUNC(ClientMenu);
 };
 
 #endif

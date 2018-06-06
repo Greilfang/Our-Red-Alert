@@ -3,6 +3,7 @@
 #include "AdvancedUnit.h"
 #include "Building.h"
 #include "CreateUnitLayer.h"
+#include "CombatScene.h"
 #include<string>
 #include<random>
 //#define DEBUG
@@ -211,14 +212,45 @@ void UnitManager::updateUnitsState()
 			int id = msg.unit_0();
 			int team = msg.camp();
 			int unit_type = msg.unit_type();
-			Unit* new_unit = createNewUnit(id, team, unit_type);
+			auto grid_point = msg.grid_path().grid_point(0);
+			Unit* new_unit = createNewUnit(id, team, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
 		}
 	}
 	msgs->clear_game_message();
 }
 
-Unit* UnitManager::createNewUnit(int id, int team, int unit_type)
+void UnitManager::initializeUnitGroup(){
+	/* 加载初始化对象 */
+	auto* obj_group = tiled_map->getObjectGroup("InitialUnits");
+	auto& objs = obj_group->getObjects();
+	log(objs.size());
+	for (auto& obj : objs) {
+		auto& dict = obj.asValueMap();
+		float x = dict["x"].asFloat();
+		float y = dict["y"].asFloat();
+		int team = dict["team"].asInt();
+		int type = dict["type"].asInt();
+
+		if (team == player_id) {
+			genCreateMessage(type,team, x, y);
+		}
+
+	}
+}
+
+void UnitManager::setBasePosition(Point base_pos)
+{
+	_base_pos = base_pos;
+	combat_scene->focusOnBase();
+}
+
+Point UnitManager::getBasePosition() const
+{
+	return _base_pos;
+}
+
+Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y)
 {
 	Unit* nu;
 	Base* tmp_base;
@@ -238,6 +270,8 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type)
 		tmp_base = Base::create("Picture/units/base_0.png");
 		base_map[id] = team;
 		nu = tmp_base;
+		if (team == player_id)
+			setBasePosition(Point(x, y));
 		break;
 	case 11:
 		nu = MilitaryCamp::create("Picture/units/base_2.png");
@@ -253,7 +287,7 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type)
 	nu->setListener();
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
 	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
-	nu->setPosition(100, 100 + id);
+	nu->setPosition(x, y);
 	tiled_map->addChild(nu);
 	//nu->initBars();
 	//nu->initFlag();
@@ -263,15 +297,16 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type)
 }
 
 //生成新单位测试程序
-void UnitManager::genCreateMessage(int _unit_type)
+void UnitManager::genCreateMessage(int _unit_type,int team, float x,float y)
 {
 	auto new_msg = msgs->add_game_message();
 	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CRT);
 	new_msg->set_unit_type(_unit_type);
+	new_msg->set_camp(team);
 	GridPath *gridpath = new GridPath;
 	auto newgridpoint = gridpath->add_grid_point();
-	newgridpoint->set_x(100);
-	newgridpoint->set_y(100);
+	newgridpoint->set_x(x);
+	newgridpoint->set_y(y);
 	new_msg->set_allocated_grid_path(gridpath);
 	next_id += MAX_PLAYER_NUM;
 }

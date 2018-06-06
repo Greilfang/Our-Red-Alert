@@ -1,11 +1,9 @@
 #include "AppDelegate.h"
-
-#include "StartMenuScene.h"
 #include "PreLoadScene.h"
-
-#include "StartMenuScene.h"
-// #define USE_AUDIO_ENGINE 1
-// #define USE_SIMPLE_AUDIO_ENGINE 1
+#include "CombatScene.h"
+//#define USE_AUDIO_ENGINE 1
+#define USE_SIMPLE_AUDIO_ENGINE 1
+#define DEBUG
 
 #if USE_AUDIO_ENGINE && USE_SIMPLE_AUDIO_ENGINE
 #error "Don't use AudioEngine and SimpleAudioEngine at the same time. Please just select one in your game!"
@@ -97,8 +95,11 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
     // create a scene. it's an autorelease object
-
-    auto scene = GameMenu::createScene();
+#ifdef DEBUG
+    auto scene = CombatScene::createScene();
+#elif
+	auto scene = PreLoad::createScene();
+#endif
 
     // run
     director->runWithScene(scene);

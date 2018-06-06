@@ -1,5 +1,8 @@
 #include "PreLoadScene.h"
 #include "StartMenuScene.h"
+#include <string>
+#include <cstring>
+using std::string;
 
 
 USING_NS_CC;
@@ -54,14 +57,14 @@ bool PreLoad::init() {
 }
 
 void PreLoad::onEnterTransitionDidFinish() {
-	// 读取preloadResources文件中的游戏资源名称列表
+	//读取preloadResources文件中的游戏资源名称列表
 	ValueMap map = FileUtils::getInstance()->getValueMapFromFile("preloadResources.plist");
 	ValueVector spriteSheets = map.at("SpriteSheets").asValueVector();
 	ValueVector effects = map.at("Sounds").asValueVector();
 	ValueVector musics = map.at("Musics").asValueVector();
 
 	_sourceCount = spriteSheets.size() + effects.size() + musics.size();
-	// 设置进度条更新次数=100/需要加载的资源数量
+	// 设置进度条更新间隔=100/需要加载的资源数量
 	_progressInterval = 100 / _sourceCount;
 
 	loadMusic(musics);
@@ -70,22 +73,25 @@ void PreLoad::onEnterTransitionDidFinish() {
 }
 
 void PreLoad::loadMusic(ValueVector musicFiles) {
-	for (Value &v : musicFiles) {
-		SimpleAudioEngine::getInstance()->preloadBackgroundMusic(v.asString().c_str());
+	for (Value &v: musicFiles) {
+		string str = v.asString();
+		SimpleAudioEngine::getInstance()->preloadBackgroundMusic(str.c_str());
 		progressUpdate();
 	}
 }
 
 void PreLoad::loadEffect(ValueVector effectFiles) {
 	for (Value &v : effectFiles) {
-		SimpleAudioEngine::getInstance()->preloadEffect(v.asString().c_str());
+		string str = v.asString();
+		SimpleAudioEngine::getInstance()->preloadEffect(str.c_str());
 		progressUpdate();
 	}
 }
 
 void PreLoad::loadSpriteSheets(ValueVector spriteSheets) {
 	for (Value &v : spriteSheets) {
-		SpriteFrameCache::getInstance()->addSpriteFramesWithFile(v.asString().c_str());
+		string str = v.asString();
+		SpriteFrameCache::getInstance()->addSpriteFramesWithFile(str.c_str());
 		progressUpdate();
 	}
 }
