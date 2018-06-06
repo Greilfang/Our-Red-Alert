@@ -63,7 +63,7 @@ Unit * Unit::create(const std::string & filename)
 void Unit::setProperties()
 {
 	type = -1;
-	team = 0;
+	camp = 0;
 	selected = 0;
 
 }
@@ -109,14 +109,14 @@ bool Unit::isMobile()
 	return mobile;
 }
 
-void Unit::setTeam(int _team)
+void Unit::setCamp(int _camp)
 {
-	team = _team;
+	camp = _camp;
 }
 
-int Unit::getTeam() const
+int Unit::getCamp() const
 {
-	return team;
+	return camp;
 }
 
 int Unit::getType() const
@@ -179,11 +179,11 @@ GridPoint UnitManager::getUnitPosition(int _unit_id)
 		return{ -1, -1 };
 }
 */
-int UnitManager::getUnitTeam(int unit_id)
+int UnitManager::getUnitCamp(int unit_id)
 {
 	Unit* unit = id_map.at(unit_id);
 	if (unit)
-		return(unit->team);
+		return(unit->camp);
 	else
 		return 0;
 }
@@ -212,10 +212,10 @@ void UnitManager::updateUnitsState()
 		if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_CRT)
 		{
 			int id = msg.unit_0();
-			int team = msg.camp();
+			int camp = msg.camp();
 			int unit_type = msg.unit_type();
 			auto grid_point = msg.grid_path().grid_point(0);
-			Unit* new_unit = createNewUnit(id, team, unit_type,grid_point.x(),grid_point.y());
+			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
 		}
 	}
@@ -231,11 +231,11 @@ void UnitManager::initializeUnitGroup(){
 		auto& dict = obj.asValueMap();
 		float x = dict["x"].asFloat();
 		float y = dict["y"].asFloat();
-		int team = dict["team"].asInt();
+		int camp = dict["camp"].asInt();
 		int type = dict["type"].asInt();
 
-		if (team == player_id) {
-			genCreateMessage(type,team, x, y);
+		if (camp == player_id) {
+			genCreateMessage(type,camp, x, y);
 		}
 	}
 }
@@ -251,7 +251,7 @@ Point UnitManager::getBasePosition() const
 	return _base_pos;
 }
 
-Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y)
+Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y)
 {
 	Unit* nu;
 	Base* tmp_base;
@@ -269,9 +269,9 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y
 		break;
 	case 0:
 		tmp_base = Base::create("Picture/units/base_0.png");
-		base_map[id] = team;
+		base_map[id] = camp;
 		nu = tmp_base;
-		if (team == player_id)
+		if (camp == player_id)
 			setBasePosition(Point(x, y));
 		break;
 	case 11:
@@ -283,7 +283,7 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y
 
 	nu->unit_manager = this;
 	nu->id = id;
-	nu->team = team;
+	nu->camp = camp;
 	nu->setProperties();
 	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
 	nu->setListener();
@@ -298,12 +298,12 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y
 }
 
 //生成新单位测试程序
-void UnitManager::genCreateMessage(int _unit_type,int team, float x,float y)
+void UnitManager::genCreateMessage(int _unit_type,int camp, float x,float y)
 {
 	auto new_msg = msgs->add_game_message();
 	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CRT);
 	new_msg->set_unit_type(_unit_type);
-	new_msg->set_camp(team);
+	new_msg->set_camp(camp);
 	GridPath *gridpath = new GridPath;
 	auto newgridpoint = gridpath->add_grid_point();
 	newgridpoint->set_x(x);
@@ -326,7 +326,7 @@ void UnitManager::selectUnits(Point select_point)
 	{
 		
 		for (auto & id_unit : id_map)
-			if (id_unit.second->team != player_id && id_unit.second->getBoundingBox().containsPoint(select_point))
+			if (id_unit.second->camp != player_id && id_unit.second->getBoundingBox().containsPoint(select_point))
 			{
 
 				for (auto & id : selected_ids)
@@ -389,7 +389,7 @@ void UnitManager::selectUnits(Rect select_rect)
 {
 	deselectAllUnits();
 	for (auto & id_unit : id_map)
-		if (id_unit.second->team == player_id && select_rect.containsPoint(id_unit.second->getPosition()))
+		if (id_unit.second->camp == player_id && select_rect.containsPoint(id_unit.second->getPosition()))
 		{
 			selected_ids.push_back(id_unit.first);
 			id_unit.second->displayHP();

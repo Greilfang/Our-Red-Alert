@@ -6,7 +6,7 @@
  <tileset firstgid="3881" name="RMXP_Grid_Earth" tilewidth="32" tileheight="32" tilecount="24" columns="8">
   <image source="RMXP_Grid_Earth.png" width="256" height="96"/>
  </tileset>
- <layer name="TerrainLayer" width="128" height="128" locked="1">
+ <layer name="TerrainLayer" width="128" height="128">
   <data encoding="csv">
 1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,
 1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,1761,
@@ -138,7 +138,7 @@
 453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453,453
 </data>
  </layer>
- <layer name="DecorationLayer" width="128" height="128" locked="1">
+ <layer name="DecorationLayer" width="128" height="128">
   <data encoding="csv">
 1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,
 1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,1794,
@@ -270,155 +270,155 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="InitialUnits" visible="0" locked="1" opacity="0">
+ <objectgroup name="InitialUnits" visible="0" opacity="0">
   <object id="1" x="250" y="2772" width="50" height="50">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="2" x="250" y="2772" width="50" height="50">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
   <object id="3" x="3479.5" y="3065" width="50" height="50">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
   <object id="4" x="3500" y="3006">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="5" x="3398" y="3064">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="6" x="3604" y="3030">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="7" x="234" y="2702">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="8" x="354" y="2718">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="9" x="413" y="2830">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="13" x="541" y="426" height="1"/>
   <object id="29" x="488" y="240" width="50" height="50">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
   <object id="30" x="440" y="330">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="31" x="526" y="354">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="32" x="634" y="284">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="34" x="3454" y="484" width="50" height="50">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
   <object id="35" x="3330" y="512">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="36" x="3402" y="602">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="37" x="3534" y="610">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="1"/>
    </properties>
   </object>
   <object id="38" x="304" y="2660">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="39" x="414.667" y="2756">
    <properties>
-    <property name="team" type="int" value="1"/>
+    <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="40" x="3432" y="3001.33">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="41" x="3562.67" y="2988">
    <properties>
-    <property name="team" type="int" value="2"/>
+    <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="42" x="597.333" y="326.667">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="43" x="482.667" y="353.333">
    <properties>
-    <property name="team" type="int" value="3"/>
+    <property name="camp" type="int" value="3"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="44" x="3360" y="561.333">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>
   <object id="45" x="3469.33" y="614.667">
    <properties>
-    <property name="team" type="int" value="4"/>
+    <property name="camp" type="int" value="4"/>
     <property name="type" type="int" value="2"/>
    </properties>
   </object>

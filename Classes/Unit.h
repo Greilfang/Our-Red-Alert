@@ -53,9 +53,9 @@ public:
 
 	CombatScene * getCombatScene();
 	EventListenerTouchOneByOne * getSpriteTouchListener();
-	int  getUnitTeam(int unit_id);
+	int  getUnitCamp(int unit_id);
 	//生成新单位的信息
-	void genCreateMessage(int _unit_type, int team, float x, float y);
+	void genCreateMessage(int _unit_type, int camp, float x, float y);
 	void updateUnitsState();
 
 	void initializeUnitGroup();
@@ -80,7 +80,7 @@ private:
 	Point _base_pos{ 0,0 };
 
 	Building * building = nullptr;
-	Unit* createNewUnit(int id, int team, int uint_type, float x, float y);
+	Unit* createNewUnit(int id, int camp, int uint_type, float x, float y);
 };
 
 class Unit :public cocos2d::Sprite {
@@ -105,7 +105,7 @@ public:
 	void setUnitManager(UnitManager*);
 	
 	int id;
-	int team = 0;
+	int camp = 0;
 	int z_index;
 	UnitManager* unit_manager = nullptr;
 	
@@ -115,9 +115,9 @@ public:
 	//virtual void addToMaps(cocos2d::TMXTiledMap* _tiled_map);
 	//void removeFromMaps();
 
-	virtual void setTeam(int _team);
+	virtual void setCamp(int _camp);
 	void setMobile(bool can);
-	int getTeam() const;
+	int getCamp() const;
 	int getType() const;
 	bool isMobile();
 	//构造函数
