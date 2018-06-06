@@ -1,5 +1,5 @@
 #include "Building.h"
-#include "CreateUnitLayer.h"
+
 
 USING_NS_CC;
 
@@ -64,12 +64,7 @@ bool Base::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	if (rect.containsPoint(locationInNode))
 	{
 		log("onTouchBegan... x = %f, y = %f", locationInNode.x, locationInNode.y);
-		// 设置透明度
-		
-		//unit_manager->deselectAllUnits();
-		//unit_manager->getCombatScene()->getSelected_box().push_back(target);
-		//unit_manager->getCombatScene()->getClickedUnit();
-		
+		// 设置透明度		
 		target->setOpacity(180);
 		// 表明用户触摸事件已经被处理，后续的onTouchMoved、onTouchEnded和onTouchCancelled会接着响应，其他事件监听器则不会再去进行监听本次触摸事件。
 		return true;
@@ -90,14 +85,19 @@ void Base::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 	target->setOpacity(255);
 	std::string name;
 	if (target == this)
-	{		
-		auto createUnitLayer = BaseLayer::create();
-		createUnitLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
-		createUnitLayer->unit_manager = unit_manager;
-		createUnitLayer->msgs = msgs;
-		createUnitLayer->set(tiled_map, combat_scene, spriteTouchListener);
-		combat_scene->addChild(createUnitLayer, 10);
-		
+	{	
+		if (layer_is_created == false)
+		{
+			baselayer = BaseLayer::create();
+			baselayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
+			baselayer->unit_manager = unit_manager;
+			combat_scene->addChild(baselayer, 10);
+			layer_is_created = true;
+		}
+		else
+		{
+			baselayer->setVisible(true);
+		}
 	}
 }
 
@@ -162,11 +162,6 @@ bool MilitaryCamp::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	{
 		log("onTouchBegan... x = %f, y = %f", locationInNode.x, locationInNode.y);
 		// 设置透明度
-
-		//unit_manager->deselectAllUnits();
-		//unit_manager->getCombatScene()->getSelected_box().push_back(target);
-		//unit_manager->getCombatScene()->getClickedUnit();
-
 		target->setOpacity(180);
 		// 表明用户触摸事件已经被处理，后续的onTouchMoved、onTouchEnded和onTouchCancelled会接着响应，其他事件监听器则不会再去进行监听本次触摸事件。
 		return true;
@@ -188,11 +183,17 @@ void MilitaryCamp::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 	std::string name;
 	if (target == this)
 	{
-		auto createUnitLayer = MilitaryCampLayer::create();
-		createUnitLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
-		createUnitLayer->unit_manager = unit_manager;
-		createUnitLayer->msgs = msgs;
-		createUnitLayer->set(tiled_map, combat_scene, spriteTouchListener);
-		combat_scene->addChild(createUnitLayer, 10);
+		if (layer_is_created == false)
+		{
+			militaryCampLayer = MilitaryCampLayer::create();
+			militaryCampLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
+			militaryCampLayer->unit_manager = unit_manager;
+			combat_scene->addChild(militaryCampLayer, 10);
+			layer_is_created = true;
+		}
+		else
+		{
+			militaryCampLayer->setVisible(true);
+		}
 	}
 }

@@ -90,6 +90,8 @@ void Unit::set(TMXTiledMap * _tiledMap, Layer * _combatScene, EventListenerTouch
 
 void Unit::setListener()
 {
+	Director::getInstance()->getEventDispatcher()
+		->addEventListenerWithSceneGraphPriority(spriteTouchListener->clone(), this);
 }
 
 void Unit::setUnitManager(UnitManager * _unit_manager)
@@ -235,7 +237,6 @@ void UnitManager::initializeUnitGroup(){
 		if (team == player_id) {
 			genCreateMessage(type,team, x, y);
 		}
-
 	}
 }
 
@@ -284,9 +285,9 @@ Unit* UnitManager::createNewUnit(int id, int team, int unit_type,float x,float y
 	nu->id = id;
 	nu->team = team;
 	nu->setProperties();
+	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
 	nu->setListener();
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
-	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
 	nu->setPosition(x, y);
 	tiled_map->addChild(nu);
 	//nu->initBars();

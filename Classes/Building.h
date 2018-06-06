@@ -4,6 +4,7 @@
 
 #include "cocos2d.h"
 #include "Unit.h"
+#include "CreateUnitLayer.h"
 
 USING_NS_CC;
 class CombatScene;
@@ -13,6 +14,8 @@ class Base : public Unit
 private:
 	void setProperties() override;
 public:
+	BaseLayer * baselayer = nullptr;
+	bool layer_is_created = false;
 	static Base* create(const std::string & filename);
 	void set(TMXTiledMap *, Layer *, EventListenerTouchOneByOne *);
 	void setListener();
@@ -26,6 +29,8 @@ class MilitaryCamp : public Unit
 private:
 	void setProperties() override;
 public:
+	MilitaryCampLayer * militaryCampLayer = nullptr;
+	bool layer_is_created = false;
 	static MilitaryCamp* create(const std::string & filename);
 	void set(TMXTiledMap *, Layer *, EventListenerTouchOneByOne *);
 	void setListener();

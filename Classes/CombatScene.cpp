@@ -43,12 +43,7 @@ void CombatScene::playMover(Point position, Unit * _sprite) {
 	auto sequence = Sequence::create(moveTo, nullptr);
 	_sprite->runAction(sequence);
 };
-/*
-std::vector<Unit*> & CombatScene::getSelected_box()
-{
-	return selected_box;
-}
-*/
+
 Scene * CombatScene::createScene() {
 	auto scene = Scene::create();
 	auto layer = CombatScene::create();
@@ -83,13 +78,8 @@ bool CombatScene::init() {
 	unit_manager->setCombatScene(this);
 
 #ifdef DEBUG//测试
-	/*
-	auto worker_sprite = Unit::create("MagentaSquare.png");
-	worker_sprite->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2));
-	*/
 	auto farmer_sprite = Unit::create("MagentaSquare.png");
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));
-	//this->_combat_map->addChild(worker_sprite,10);
 	this->_combat_map->addChild(farmer_sprite,10);
 #endif
 	/*刷新接受滚轮响应*/
@@ -132,17 +122,8 @@ bool CombatScene::init() {
 	unit_manager->setSpriteTouchListener(spriteListener);
 #ifdef DEBUG
 	schedule(schedule_selector(CombatScene::update));
-	/*
-	auto base1 = Building::create("base_0.png");
-	base1->set(this->_combat_map, this);
-	base1->setType(0);
-	base1->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2));
-	this->_combat_map->addChild(base1, 10);
-	*/
-	//Director::getInstance()->getEventDispatcher()
-	//	->addEventListenerWithSceneGraphPriority(spriteListener, worker_sprite);
 	Director::getInstance()->getEventDispatcher()
-		->addEventListenerWithSceneGraphPriority(spriteListener->clone(), farmer_sprite);
+		->addEventListenerWithSceneGraphPriority(spriteListener, farmer_sprite);
 #endif
 	/*加载层监听器时间*/
 	auto destListener = EventListenerTouchOneByOne::create();
@@ -204,7 +185,7 @@ void CombatScene::focusOnBase(){
 	auto base_point = unit_manager->getBasePosition();
 	Vec2 base_vec = base_point - visibleSize / 2;
 
-	/* 如果以基地为中心的视野超出了GridMap的大小 */
+	/* 如果以基地为中心的视野超出了TiledMap的大小 */
 	if(_combat_map->getBoundingBox().size.height<base_vec.y+visibleSize.height)
 		base_vec.y = _combat_map->getBoundingBox().size.height - visibleSize.height;
 	if (_combat_map->getBoundingBox().size.width < base_vec.x + visibleSize.width)

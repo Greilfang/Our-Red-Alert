@@ -3,33 +3,22 @@
 USING_NS_CC;
 using namespace ui;
 
-Layer * CreateUnitLayer::getLayer()
+BaseLayer* BaseLayer::create()
 {
-	return combatScene;
-}
-
-TMXTiledMap * CreateUnitLayer::getMap()
-{
-	return tiledMap;
-}
-
-bool BaseLayer::init()
-{
-	if (!Layer::init())
+	BaseLayer *ret = new BaseLayer();
+	if (ret && ret->init())
 	{
-		return false;
+		ret->autorelease();
+		return ret;
+	}
+	else
+	{
+		CC_SAFE_DELETE(ret);
+		return nullptr;
 	}
 }
 
-void BaseLayer::set(TMXTiledMap * AM, Layer * AL, EventListenerTouchOneByOne * ALis)
-{
-	tiledMap = AM;
-	combatScene = AL;
-	spriteTouchListener = ALis;
-	realInit();
-}
-//type为0的基地弹出的菜单
-void BaseLayer::realInit()
+bool BaseLayer::init()
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto bc = Sprite::create("bc.png");
@@ -40,7 +29,7 @@ void BaseLayer::realInit()
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
 	layout->setBackGroundImage("bc.png");
 	this->addChild(layout);
-
+	//添加创建建筑的按钮
 	// 创建一个创建militaryCamp的Button对象，设置在Layout的左上角
 	Button* militaryCamp = Button::create("/Picture/units/base_3.png",
 		"/Picture/units/base_3.png");
@@ -53,17 +42,7 @@ void BaseLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(11,2, 100,100);
-			/*
-			log("new militartCamp");
-			auto militaryCamp1 = Building::create("/Picture/units/base_3.png");
-			militaryCamp1->set(addMap, addLayer, addTouchListener);
-			militaryCamp1->setType(1);
-			militaryCamp1->setPosition(150, 250);
-			Director::getInstance()->getEventDispatcher()
-			->addEventListenerWithSceneGraphPriority(addTouchListener->clone(), militaryCamp1);
-			addMap->addChild(militaryCamp1);
-			*/
+			unit_manager->genCreateMessage(11,1,200,100);
 		}
 	});
 
@@ -80,9 +59,25 @@ void BaseLayer::realInit()
 		if (type == Widget::TouchEventType::BEGAN)
 		{
 			log("exit CreateUnitLayer layer");
-			combatScene->removeChild(this);
+			this->setVisible(false);
 		}
 	});
+	return true;
+}
+
+MilitaryCampLayer* MilitaryCampLayer::create()
+{
+	MilitaryCampLayer *ret = new MilitaryCampLayer();
+	if (ret && ret->init())
+	{
+		ret->autorelease();
+		return ret;
+	}
+	else
+	{
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
 }
 
 bool MilitaryCampLayer::init()
@@ -91,18 +86,6 @@ bool MilitaryCampLayer::init()
 	{
 		return false;
 	}
-}
-
-void MilitaryCampLayer::set(TMXTiledMap * AM,Layer * AL, EventListenerTouchOneByOne * ALis)
-{
-	tiledMap = AM;
-	combatScene = AL;
-	spriteTouchListener = ALis;
-	realInit();
-}
-//type为1的兵营弹出的菜单
-void MilitaryCampLayer::realInit()
-{
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto bc = Sprite::create("bc.png");
 	//初始化layout
@@ -126,15 +109,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(1,1,100,100);
-			/*
-			log("new airplane");
-			auto airplane1 = Unit::create("Picture/units/airplane_0.png");
-			airplane1->setPosition(100, 100);
-			Director::getInstance()->getEventDispatcher()
-				->addEventListenerWithSceneGraphPriority(addTouchListener->clone(), airplane1);
-			addMap->addChild(airplane1);	
-			*/
+			unit_manager->genCreateMessage(1,1,200,100);
 		}
 	});
 
@@ -151,15 +126,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(2,1,100,100);
-			/*
-			log("new tank");
-			auto tank1 = Unit::create("Picture/units/tank.png");
-			tank1->setPosition(100, 300);
-			addMap->addChild(tank1);
-			Director::getInstance()->getEventDispatcher()
-				->addEventListenerWithSceneGraphPriority(addTouchListener->clone(), tank1);
-			*/
+			unit_manager->genCreateMessage(2,1,300,100);
 		}
 	});
 
@@ -176,15 +143,7 @@ void MilitaryCampLayer::realInit()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(3,1,100,100);
-			/*
-			log("new soldier");
-			auto soldier1 = Unit::create("Picture/units/soldier.png");
-			soldier1->setPosition(100, 200);
-			addMap->addChild(soldier1);
-			Director::getInstance()->getEventDispatcher()
-				->addEventListenerWithSceneGraphPriority(addTouchListener->clone(), soldier1);
-			*/
+			unit_manager->genCreateMessage(3,1,400,100);
 		}
 	});
 
@@ -201,8 +160,11 @@ void MilitaryCampLayer::realInit()
 		if (type == Widget::TouchEventType::BEGAN)
 		{
 			log("exit CreateUnitLayer layer");
-			combatScene->removeChild(this);
+			this->setVisible(false);
 		}
 	});
+	return true;
 }
+
+
 
