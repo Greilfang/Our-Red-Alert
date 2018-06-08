@@ -46,6 +46,7 @@ private:
 	cocos2d::Point last_touch{ 0, 0 };//鼠标最后一次碰到的点
 	MouseRect* mouse_rect = nullptr;//选框
 	TMXTiledMap* _combat_map = nullptr;//加载瓦片地图所用的指针
+	GridMap * _grid_map = nullptr;
 	Point _cursor_position{ 0,0 };
 	UnitManager * unit_manager;
 };

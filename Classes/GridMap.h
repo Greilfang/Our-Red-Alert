@@ -4,8 +4,8 @@
 
 #include "cocos2d.h"
 #include <vector>
-
 typedef std::vector<std::vector<int>> dyadic_array;
+
 
 struct GridPoint {
 	int _x, _y;

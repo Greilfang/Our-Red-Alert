@@ -126,6 +126,7 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
+
 			unit_manager->genCreateMessage(2,1,300,100);
 		}
 	});

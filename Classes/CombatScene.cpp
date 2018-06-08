@@ -51,7 +51,9 @@ bool CombatScene::init() {
 	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
-
+	/* 加载格点地图 */
+	_grid_map = GridMap::create(_combat_map);
+	_grid_map->retain();
 	/*加载矩形选框对象*/
 	mouse_rect = MouseRect::create();
 	mouse_rect->setVisible(false);
@@ -62,6 +64,7 @@ bool CombatScene::init() {
 	unit_manager->retain();
 	unit_manager->setMessageSet(msgs);
 	unit_manager->setTiledMap(_combat_map);
+	unit_manager->setGridMap(_grid_map);
 	unit_manager->setCombatScene(this);
 
 #ifdef DEBUG//测试

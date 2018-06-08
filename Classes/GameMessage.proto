@@ -18,16 +18,16 @@ message GameMessage {
 
     int32 damage = 4;
 
-    GridPath grid_path = 5;
+    MsgGridPath msg_grid_path = 5;
     int32 camp =6;
     int32 unit_type = 7;
 }
-message GridPoint {
+message MsgGridPoint {
     int32 x = 1;
     int32 y = 2;
 }
-message GridPath {
-    repeated GridPoint grid_point = 1;
+message MsgGridPath {
+    repeated MsgGridPoint msg_grid_point = 1;
 }
 
 message GameMessageSet {
