@@ -45,7 +45,7 @@ void PathFinding::searchForPath()
 		checkSurroundedGrid(*grid_now);
 		grid_now->setFlag(CLOSE);
 		_close_list.push_back(grid_now);
-		removeFromOpenList(*grid_now);
+		removeFromOpenList(grid_now);
 	}
 }
 
@@ -127,7 +127,7 @@ int PathFinding::getManhattanDistance(Grid & g1, Grid & g2)
 	return (abs(g1.getX() - g2.getX()) + abs(g1.getY() - g2.getY())) * DISTANCE;
 }
 
-void PathFinding::removeFromOpenList(Grid & grid)
+void PathFinding::removeFromOpenList(Grid * grid)
 {
 	auto iter = find(_open_list.begin(), _open_list.end(), grid);
 	if (iter != _open_list.end())

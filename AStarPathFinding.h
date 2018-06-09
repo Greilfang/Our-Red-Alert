@@ -79,7 +79,7 @@ private:
 	int getManhattanDistance(Grid & g1, Grid & g2);
 
 	//从开放列表中移除已加入封闭列表的格点
-	void removeFromOpenList(Grid & grid);
+	void removeFromOpenList(Grid * grid);
 };
 
 
