@@ -270,26 +270,20 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="InitialUnits" visible="0" opacity="0">
-  <object id="1" x="250" y="2772" width="50" height="50">
-   <properties>
-    <property name="camp" type="int" value="1"/>
-    <property name="type" type="int" value="1"/>
-   </properties>
-  </object>
-  <object id="2" x="250" y="2772" width="50" height="50">
+ <objectgroup name="InitialUnits">
+  <object id="2" x="256" y="2784" width="50" height="50">
    <properties>
     <property name="camp" type="int" value="1"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
-  <object id="3" x="3479.5" y="3065" width="50" height="50">
+  <object id="3" x="3479.5" y="3053" width="50" height="50">
    <properties>
     <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="0"/>
    </properties>
   </object>
-  <object id="4" x="3500" y="3006">
+  <object id="4" x="3496" y="2966">
    <properties>
     <property name="camp" type="int" value="2"/>
     <property name="type" type="int" value="1"/>
