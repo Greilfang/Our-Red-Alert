@@ -3,7 +3,7 @@
 #define _UNIT_H_
 
 #include <iostream>
-#include "cocos2d.h"
+#include <cocos2d.h>
 #include "GameMessage.pb.h"
 #include "ui/CocosGUI.h"
 #include "GridMap.h"
@@ -94,6 +94,7 @@ private:
 
 	Building * building = nullptr;
 	Unit* createNewUnit(int id, int camp, int uint_type, float x, float y);
+	void genAttackEffect(int unit_id0, int unit_id1);
 };
 
 class Unit :public cocos2d::Sprite {
@@ -105,6 +106,7 @@ protected:
 	EventListenerTouchOneByOne * spriteTouchListener;
 	int type;
 	bool mobile;
+	bool is_attack;
 	bool selected = false;//是否被选中当前位置和当前目标
 	int current_life=100;
 	int max_life=100;
@@ -122,6 +124,9 @@ public:
 	int id;
 	int camp = 0;
 	int z_index;
+	int attack_id;
+	int attack_freq = 50;
+	int timer = 0;
 	UnitManager* unit_manager = nullptr;
 	
 	static Unit* create(const std::string & filename);
@@ -146,8 +151,24 @@ public:
 	//对血条的显示和隐藏操作
 	void displayHP();
 	void hideHP();
-
+	void attack();
+	void searchEnemy();
+	bool underAttack(int damage);
 	friend void UnitManager::updateUnitsState();
+	virtual void update(float f);
+};
+class TrajectoryEffect : public cocos2d::ParticleFire
+{
+public:
+	virtual bool init() override;
+	void setPath(cocos2d::Vec2, cocos2d::Vec2);
+
+	CREATE_FUNC(TrajectoryEffect);
+private:
+	void updatefire(float);
+	cocos2d::Vec2 from_, to_, move_;
+	int speed_ = 3;
+
 };
 
 

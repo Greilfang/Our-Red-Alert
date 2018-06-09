@@ -144,7 +144,45 @@ bool Unit::is_in(Point p1, Point p2) {
 	}
 	return true;
 }
+void Unit::update(float f) {
+	timer++;
+	if (camp == unit_manager->player_id && timer % attack_freq == 0)
+	{
+		if (is_attack) {
+			attack();
+		}
+		else {
+			searchEnemy();
+		}
+	}
+}
+void Unit::searchEnemy() {
+	is_attack = 1;
+	attack_id = 5;
+}
+void Unit::attack()
+{
 
+	//unit_manager->msgs->add_game_message()->genGameMessage(GameMessage::CmdCode::GameMessage_CmdCode_ATK, id, target_id, atk, camp, 0, {});
+	auto new_msg = unit_manager->msgs->add_game_message();
+	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_ATK);
+	new_msg->set_unit_0(id);
+	new_msg->set_unit_1(attack_id);
+	new_msg->set_damage(5);
+	new_msg->set_camp(camp);
+
+
+}
+bool Unit::underAttack(int damage)
+{
+	if (current_life > 0) {
+		current_life -= damage;
+		hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
+		log("life:%d", current_life);
+	}
+	return true;
+
+}
 bool UnitManager::init()
 {
 	return true;
@@ -231,7 +269,23 @@ void UnitManager::updateUnitsState()
 			auto grid_point = msg.msg_grid_path().msg_grid_point(0);
 			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
+			log("id:%d", id);
 		}
+		else
+			if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
+			{
+				int unitid_0 = msg.unit_0();
+				int unitid_1 = msg.unit_1();
+				int damage = msg.damage();
+				//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
+				Unit * unit_1 = id_map.at(unitid_1);
+				if (unit_1)
+				{
+					genAttackEffect(unitid_0, unitid_1);
+					unit_1->underAttack(damage);
+
+				}
+			}
 	}
 	msgs->clear_game_message();
 }
@@ -385,7 +439,43 @@ void UnitManager::cancellClickedUnit()
 	selected_ids.clear();
 	selected_ids.shrink_to_fit();
 }
+void UnitManager::genAttackEffect(int unit_id0, int unit_id1)
+{
+	//log("position %f,%f,%f,%f", cur_fp.x, cur_fp.y, target_fp.x, target_fp.y);
+	Unit* unit_0 = id_map.at(unit_id0);
+	Unit* unit_1 = id_map.at(unit_id1);
+	if (unit_0 && unit_1)
+	{
+		auto trajectory_effect = TrajectoryEffect::create();
+		trajectory_effect->setPath(unit_0->getPosition(), unit_1->getPosition());
+		tiled_map->addChild(trajectory_effect, 20);
+	}
+}
+bool TrajectoryEffect::init()
+{
+	if (!ParticleFire::init())
+		return false;
+	setScale(0.1);
+	setPositionType(PositionType::RELATIVE);
+	return true;
+}
 
+void TrajectoryEffect::setPath(cocos2d::Vec2 from, cocos2d::Vec2 to)
+{
+	from_ = from;
+	to_ = to;
+	setPosition(from_);
+	move_ = (to_ - from_).getNormalized()*speed_;
+	schedule(schedule_selector(TrajectoryEffect::updatefire));
+}
+
+void TrajectoryEffect::updatefire(float)
+{
+	if (((abs(getPosition().x - to_.x)<speed_) && (abs(getPosition().y - to_.y)<speed_)))
+		removeFromParent();
+	else
+		setPosition(getPosition() + move_);
+}
 /*
 void UnitManager::selectUnits(Point select_point)
 {
