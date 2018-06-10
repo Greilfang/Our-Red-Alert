@@ -12,7 +12,6 @@ USING_NS_CC;
 class MouseRect : public cocos2d::DrawNode
 {
 public:
-	
 	CREATE_FUNC(MouseRect);
 	cocos2d::Point touch_start, touch_end;
 	void update(float f) override;
@@ -21,6 +20,8 @@ public:
 
 class CombatScene :public Layer{
 public:
+	EventListenerTouchOneByOne * destListener = nullptr;
+	Point delta = { 0,0 };
 	GameMessageSet * msgs;
 	/*构建选框*/
 	void DrawRectArea(Point p1, Point p2);
@@ -41,7 +42,6 @@ public:
 	
 	CREATE_FUNC(CombatScene);
 private:
-	Point delta = { 0,0 };
 	bool is_clicked = false;
 	cocos2d::Point last_touch{ 0, 0 };//鼠标最后一次碰到的点
 	MouseRect* mouse_rect = nullptr;//选框

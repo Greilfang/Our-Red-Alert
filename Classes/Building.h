@@ -8,31 +8,40 @@
 
 USING_NS_CC;
 class CombatScene;
-//建筑物类,继承于Unit
-class Base : public Unit
+//建筑物类,继承于Building
+
+class Building : public Unit
+{
+private:
+	GridRect rec;
+	void setProperties() = 0;
+public:
+	Building() : rec(GridRect{ 0,0 }) {	Unit();	};
+	void addToGmap(Point p) override;
+	bool layer_is_created = false;
+	void setListener() = 0;
+	
+};
+class Base : public Building
 {
 private:
 	void setProperties() override;
 public:
 	BaseLayer * baselayer = nullptr;
-	bool layer_is_created = false;
 	static Base* create(const std::string & filename);
-	void set(TMXTiledMap *, Layer *, EventListenerTouchOneByOne *);
 	void setListener();
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);
 };
 
-class MilitaryCamp : public Unit
+class MilitaryCamp : public Building
 {
 private:
 	void setProperties() override;
 public:
 	MilitaryCampLayer * militaryCampLayer = nullptr;
-	bool layer_is_created = false;
 	static MilitaryCamp* create(const std::string & filename);
-	void set(TMXTiledMap *, Layer *, EventListenerTouchOneByOne *);
 	void setListener();
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);

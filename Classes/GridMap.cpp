@@ -38,11 +38,86 @@ void GridMap::occupyPosition(const GridPoint & pos){
 	_gmap[pos._x][pos._y] = 1;
 }
 
+void GridMap::occupyPosition(const GridRect& grec)
+{
+
+	for (int x = grec.lower_left._x; x <= grec.lower_left._x + grec.size.width; x++)
+	{
+		for (int y = grec.lower_left._y; y <= grec.lower_left._y + grec.size.height; y++)
+		{
+			_gmap[x][y] = 1;
+		}
+	}
+}
+
 void GridMap::occupyPosition(const cocos2d::Point & pos){
 	occupyPosition(getGridPoint(pos));
 }
 
+bool GridMap::checkPosition(const GridPoint & gp)
+{
+	if (gp._x >= 0 && gp._x < _map_width && gp._y >= 0 && gp._y < _map_height && _gmap[gp._x][gp._y] == 0)
+		return true;
+	return false;
+}
+
+bool GridMap::checkPosition(const GridRect& grec)
+{
+	for (int x = grec.lower_left._x; x <= grec.lower_left._x + grec.size.width; x++)
+	{
+		for (int y = grec.lower_left._y; y <= grec.lower_left._y + grec.size.height; y++)
+		{
+			if (x < 0 || x >= _map_width || y < 0 || y >= _map_height || _gmap[x][y] == 1)
+				return(false);
+		}
+	}
+	return(true);
+}
+
+GridPoint GridMap::findFreePositionNear(const GridPoint & origin_gp)
+{
+	if (checkPosition(origin_gp))
+		return(origin_gp);
+
+	for (int i = 1; i < _map_height + _map_width; i++)
+	{
+		GridPath dir_vec = { GridVec(1, 1), GridVec(1, -1), GridVec(-1, -1), GridVec(-1, 1) };
+		GridPoint gp = origin_gp + GridVec(-i, 0);
+		for (int dir = 0; dir < 4; dir++)
+			for (int j = 1; j <= i; j++)
+			{
+				gp = gp + dir_vec[dir];
+				if (checkPosition(gp))
+					return(gp);
+			}
+
+	}
+	return GridPoint(-1, -1);
+}
+
 const dyadic_array & GridMap::getLogicalGridMap(){
 	return _gmap;
+}
+
+bool GridPoint::operator==(const GridPoint & gp2) const
+{
+	return(_x == gp2._x && _y == gp2._y);
+}
+
+GridPoint operator+(const GridPoint & gp1, const GridPoint & gp2)
+{
+	return GridPoint(gp1._x + gp2._x, gp1._y + gp2._y);
+}
+
+GridPoint operator-(const GridPoint & gp1, const GridPoint & gp2)
+{
+	return GridPoint(gp1._x - gp2._x, gp1._y - gp2._y);
+}
+
+GridRect::GridRect(GridPoint _center, GridSize _size)
+{
+	center = _center;
+	size = _size;
+	lower_left = GridPoint(_center._x - size.width/2, _center._y - size.height / 2);
 }
 

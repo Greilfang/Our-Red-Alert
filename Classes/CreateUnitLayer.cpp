@@ -1,5 +1,6 @@
 #include "CreateUnitLayer.h"
 #include "Building.h"
+#include "CombatScene.h"
 USING_NS_CC;
 using namespace ui;
 
@@ -42,10 +43,18 @@ bool BaseLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(11,1,200,100);
+			building = true;
+		}
+		if (building)
+		{
+			//禁用层监听器
+			unit_manager->getCombatScene()->destListener->setEnabled(false);
+			//隐藏菜单
+			this->setVisible(false);
+			onBuilding(11);
 		}
 	});
-
+	
 	// 创建一个退出该layer的Button对象
 	Button* exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -64,6 +73,7 @@ bool BaseLayer::init()
 	});
 	return true;
 }
+
 
 MilitaryCampLayer* MilitaryCampLayer::create()
 {
@@ -109,7 +119,8 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(1,1,200,100);
+			auto position = findFreePosition();
+			unit_manager->genCreateMessage(1,1,position.x,position.y);
 		}
 	});
 
@@ -126,8 +137,8 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-
-			unit_manager->genCreateMessage(2,1,300,100);
+			auto position = findFreePosition();
+			unit_manager->genCreateMessage(2,1,position.x,position.y);
 		}
 	});
 
@@ -144,7 +155,8 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			unit_manager->genCreateMessage(3,1,400,100);
+			auto position = findFreePosition();
+			unit_manager->genCreateMessage(3, 1, position.x, position.y);
 		}
 	});
 
@@ -167,5 +179,76 @@ bool MilitaryCampLayer::init()
 	return true;
 }
 
+Point MilitaryCampLayer::findFreePosition()
+{
+	Point military_point = unit_manager->getMilitaryPosition();
+	GridPoint military = unit_manager->getGridPoint(military_point);
+	GridPoint a = unit_manager->grid_map->findFreePositionNear(military);
+	log("%d %d", a._x, a._y);
+	Point p = unit_manager->getPoint(a);
+	return p;
+}
 
 
+void CreateUnitLayer::addListenerToRect(int type)
+{
+	auto spriteListener = EventListenerTouchOneByOne::create();
+	spriteListener->setSwallowTouches(false);
+	spriteListener->onTouchBegan = [=](Touch* touch, Event* event) {
+		auto target = static_cast<Unit*>(event->getCurrentTarget());
+		Point locationInNode = target->convertToNodeSpace(touch->getLocation());
+		Size s = target->getContentSize();
+		Rect rect = Rect(0, 0, s.width, s.height);
+		if (rect.containsPoint(locationInNode)) {
+			if (can_build)
+			{
+				rec->setVisible(false);
+				unit_manager->genCreateMessage(type,1,rec_abs_center.x,rec_abs_center.y);
+				building = false;
+				//显示菜单
+				this->setVisible(true);
+				//重新启用层监听器
+				unit_manager->getCombatScene()->destListener->setEnabled(true);
+				unit_manager->getCombatScene()->removeChild(rec);
+				return true;
+			}			
+		}
+		return false;
+	};
+	Director::getInstance()->getEventDispatcher()
+		->addEventListenerWithSceneGraphPriority(spriteListener, rec);
+}
+
+void CreateUnitLayer::onBuilding(int type)
+{
+	rec = Sprite::create("MagentaSquare.png");
+	rec->setAnchorPoint(Vec2(0.5, 0.5));
+	rec_size = rec->getContentSize();
+	unit_manager->getCombatScene()->addChild(rec);
+	rec->setVisible(false);
+	addListenerToRect(type);
+	auto mouse_event = EventListenerMouse::create();
+	mouse_event->onMouseMove = [&](Event *event) {
+		if (building)
+		{
+			EventMouse* pem = static_cast<EventMouse*>(event);
+			Point delta = unit_manager->getCombatScene()->delta;
+			rec_center = Vec2(pem->getCursorX(), pem->getCursorY());
+			rec->setPosition(rec_center);
+			rec_abs_center = rec_center - delta;
+			if (unit_manager->grid_map->checkPosition(unit_manager->getGridRect(rec_abs_center, rec_size)))
+			{
+				can_build = true;
+				rec->setOpacity(255);
+			}
+			else
+			{
+				can_build = false;
+				rec->setOpacity(120);
+			}
+			rec->setVisible(true);
+		}
+	};
+	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouse_event, 1);
+
+}

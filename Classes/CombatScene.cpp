@@ -74,10 +74,11 @@ bool CombatScene::init() {
 #endif
 	/*刷新接受滚轮响应*/
 	schedule(schedule_selector(CombatScene::update));
-
+	
 	/* 得到鼠标每一帧的位置 */
 	auto mouse_event = EventListenerMouse::create();
 	mouse_event->onMouseMove = [&](Event *event) {
+		
 		EventMouse* pem = static_cast<EventMouse*>(event);
 		_cursor_position = Vec2(pem->getCursorX(), pem->getCursorY());
 	};
@@ -113,7 +114,7 @@ bool CombatScene::init() {
 		->addEventListenerWithSceneGraphPriority(spriteListener, farmer_sprite);
 #endif
 	/*加载层监听器时间*/
-	auto destListener = EventListenerTouchOneByOne::create();
+	destListener = EventListenerTouchOneByOne::create();
 
 	destListener->onTouchBegan = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_start = touch->getLocation();

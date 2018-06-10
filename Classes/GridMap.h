@@ -6,16 +6,34 @@
 #include <vector>
 typedef std::vector<std::vector<int>> dyadic_array;
 
-
 struct GridPoint {
 	int _x, _y;
-	GridPoint(int x, int y) :_x(x), _y(y) { }
+	GridPoint(int x = 0, int y = 0) :_x(x), _y(y) { }
+
+	bool operator==(const GridPoint& gp2) const;
+	friend GridPoint operator+(const GridPoint& gp1, const GridPoint& gp2);
+	friend GridPoint operator-(const GridPoint& gp1, const GridPoint& gp2);
 };
 
 typedef GridPoint GridVec;
 
 typedef std::vector<GridPoint> GridPath;
 
+struct GridSize
+{
+	int width;
+	int height;
+	GridSize(int _width = 0, int _height = 0) : width(_width), height(_height) {};
+};
+
+struct GridRect
+{
+	GridPoint center;
+	GridPoint lower_left;
+	GridSize size;
+
+	GridRect(GridPoint _center, GridSize _size);
+};
 
 class GridMap:public cocos2d::Ref{
 public:
@@ -24,9 +42,14 @@ public:
 
 	cocos2d::Point getPoint(const GridPoint& great_point);
 	GridPoint getGridPoint(const cocos2d::Point& point);
+
 	void occupyPosition(const GridPoint& pos);
+	void occupyPosition(const GridRect& grec);
 	void occupyPosition(const cocos2d::Point& pos);
 
+	bool checkPosition(const GridPoint & gp);
+	bool checkPosition(const GridRect & grec);
+	GridPoint findFreePositionNear(const GridPoint& origin_gp);
 	const dyadic_array& getLogicalGridMap();
 private:
 	dyadic_array _gmap;

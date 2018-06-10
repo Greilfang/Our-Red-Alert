@@ -12,12 +12,6 @@ const int MAX_PLAYER_NUM = 4;
 USING_NS_CC;
 /*血条更新*/
 void Bar::updateBarDisplay(float rate) {
-#ifdef DEBUG
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
-#endif // DEBUG
 	
 	setVisible(true);
 	clear();
@@ -62,6 +56,7 @@ Unit * Unit::create(const std::string & filename)
 
 void Unit::setProperties()
 {
+	
 	type = -1;
 	camp = 0;
 	selected = 0;
@@ -86,11 +81,19 @@ void Unit::setGridMap(GridMap * _grid_map)
 	grid_map = _grid_map;
 }
 
-void Unit::set(TMXTiledMap * _tiledMap, Layer * _combatScene, EventListenerTouchOneByOne * _listener)
+void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap,Layer* _combat_scene, EventListenerTouchOneByOne * _listener)
 {
 	tiled_map = _tiledMap;
-	combat_scene = _combatScene;
+	tiled_map->addChild(this, z_index);
+	combat_scene = _combat_scene;
+	grid_map = _gridMap;
 	spriteTouchListener = _listener;
+	setListener();
+}
+
+void Unit::addToGmap(Point p)
+{
+	grid_map->occupyPosition(p);
 }
 
 void Unit::setListener()
@@ -102,6 +105,11 @@ void Unit::setListener()
 void Unit::setUnitManager(UnitManager * _unit_manager)
 {
 	unit_manager = _unit_manager;
+}
+
+EventListenerTouchOneByOne * Unit::getListener()
+{
+	return spriteTouchListener;
 }
 
 void Unit::setMobile(bool can)
@@ -144,45 +152,7 @@ bool Unit::is_in(Point p1, Point p2) {
 	}
 	return true;
 }
-void Unit::update(float f) {
-	timer++;
-	if (camp == unit_manager->player_id && timer % attack_freq == 0)
-	{
-		if (is_attack) {
-			attack();
-		}
-		else {
-			searchEnemy();
-		}
-	}
-}
-void Unit::searchEnemy() {
-	is_attack = 1;
-	attack_id = 5;
-}
-void Unit::attack()
-{
 
-	//unit_manager->msgs->add_game_message()->genGameMessage(GameMessage::CmdCode::GameMessage_CmdCode_ATK, id, target_id, atk, camp, 0, {});
-	auto new_msg = unit_manager->msgs->add_game_message();
-	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_ATK);
-	new_msg->set_unit_0(id);
-	new_msg->set_unit_1(attack_id);
-	new_msg->set_damage(5);
-	new_msg->set_camp(camp);
-
-
-}
-bool Unit::underAttack(int damage)
-{
-	if (current_life > 0) {
-		current_life -= damage;
-		hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
-		log("life:%d", current_life);
-	}
-	return true;
-
-}
 bool UnitManager::init()
 {
 	return true;
@@ -251,6 +221,11 @@ CombatScene * UnitManager::getCombatScene()
 	return combat_scene;
 }
 
+TMXTiledMap * UnitManager::getTiledMap()
+{
+	return tiled_map;
+}
+
 EventListenerTouchOneByOne * UnitManager::getSpriteTouchListener()
 {
 	return spriteTouchListener;
@@ -269,23 +244,7 @@ void UnitManager::updateUnitsState()
 			auto grid_point = msg.msg_grid_path().msg_grid_point(0);
 			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
-			log("id:%d", id);
 		}
-		else
-			if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
-			{
-				int unitid_0 = msg.unit_0();
-				int unitid_1 = msg.unit_1();
-				int damage = msg.damage();
-				//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
-				Unit * unit_1 = id_map.at(unitid_1);
-				if (unit_1)
-				{
-					genAttackEffect(unitid_0, unitid_1);
-					unit_1->underAttack(damage);
-
-				}
-			}
 	}
 	msgs->clear_game_message();
 }
@@ -308,16 +267,48 @@ void UnitManager::initializeUnitGroup(){
 	}
 }
 
+void UnitManager::setMilitaryPosition(Point military_pos)
+{
+	_military_camp_pos = military_pos;
+}
+
 void UnitManager::setBasePosition(Point base_pos)
 {
 	_base_pos = base_pos;
 	combat_scene->focusOnBase();
 }
 
+Point UnitManager::getMilitaryPosition()
+{
+	return _military_camp_pos;
+}
+
 Point UnitManager::getBasePosition() const
 {
 	return _base_pos;
 }
+
+GridSize UnitManager::getGridSize(Size _size)
+{
+	auto size = getGridPoint(_size);
+	return GridSize(size._x,size._y);
+}
+
+GridRect UnitManager::getGridRect(Point _p, Size _size)
+{
+	return GridRect(getGridPoint(_p),getGridSize(_size));
+}
+
+GridPoint UnitManager::getGridPoint(Point p)
+{
+	return grid_map->getGridPoint(p);
+}
+
+Point UnitManager::getPoint(GridPoint gp)
+{
+	return grid_map->getPoint(gp);
+}
+
 
 Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y)
 {
@@ -344,6 +335,7 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 		break;
 	case 11:
 		nu = MilitaryCamp::create("Picture/units/base_2.png");
+		setMilitaryPosition(Point(x, y));
 		break;
 	default:
 		break;
@@ -353,12 +345,28 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 	nu->setProperties();
 	nu->id = id;
 	nu->camp = camp;
-	nu->set(tiled_map, (Layer *)combat_scene, spriteTouchListener);
-	nu->setGridMap(grid_map);
-	nu->setListener();
+	nu->set(tiled_map, grid_map, (Layer*)combat_scene,spriteTouchListener);
+
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
-	nu->setPosition(x, y);
-	tiled_map->addChild(nu);
+	if (nu->isMobile())
+	{
+		if (_military_camp_pos != Point(0, 0))
+		{
+			nu->setPosition(getMilitaryPosition().x, getMilitaryPosition().y - nu->getContentSize().height);
+			//log("%f,%f;%f,%f", getMilitaryPosition().x, getMilitaryPosition().y - nu->getContentSize().height, nu->getPositionX(), nu->getPositionY());
+			playMover(Point(x, y), nu);
+			//nu->setPosition(x, y);
+		}
+		else
+		{
+			nu->setPosition(x, y);
+		}
+	}
+	else
+	{
+		nu->setPosition(x, y);
+	}
+	nu->addToGmap(Point(x,y));
 	nu->schedule(schedule_selector(Unit::update));
 
 	return(nu);
@@ -390,6 +398,7 @@ float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed)
 void UnitManager::playMover(Point position, Unit * _sprite) {
 	//获得精灵移动的时间
 	float duration = getPlayerMoveTime(_sprite->getPosition(), position,_sprite->getSpeed());
+	log("%f,%f", _sprite->getPositionX(), _sprite->getPositionY());
 	auto moveTo = MoveTo::create(duration, position);
 	auto sequence = Sequence::create(moveTo, nullptr);
 	_sprite->runAction(sequence);
@@ -439,43 +448,7 @@ void UnitManager::cancellClickedUnit()
 	selected_ids.clear();
 	selected_ids.shrink_to_fit();
 }
-void UnitManager::genAttackEffect(int unit_id0, int unit_id1)
-{
-	//log("position %f,%f,%f,%f", cur_fp.x, cur_fp.y, target_fp.x, target_fp.y);
-	Unit* unit_0 = id_map.at(unit_id0);
-	Unit* unit_1 = id_map.at(unit_id1);
-	if (unit_0 && unit_1)
-	{
-		auto trajectory_effect = TrajectoryEffect::create();
-		trajectory_effect->setPath(unit_0->getPosition(), unit_1->getPosition());
-		tiled_map->addChild(trajectory_effect, 20);
-	}
-}
-bool TrajectoryEffect::init()
-{
-	if (!ParticleFire::init())
-		return false;
-	setScale(0.1);
-	setPositionType(PositionType::RELATIVE);
-	return true;
-}
 
-void TrajectoryEffect::setPath(cocos2d::Vec2 from, cocos2d::Vec2 to)
-{
-	from_ = from;
-	to_ = to;
-	setPosition(from_);
-	move_ = (to_ - from_).getNormalized()*speed_;
-	schedule(schedule_selector(TrajectoryEffect::updatefire));
-}
-
-void TrajectoryEffect::updatefire(float)
-{
-	if (((abs(getPosition().x - to_.x)<speed_) && (abs(getPosition().y - to_.y)<speed_)))
-		removeFromParent();
-	else
-		setPosition(getPosition() + move_);
-}
 /*
 void UnitManager::selectUnits(Point select_point)
 {

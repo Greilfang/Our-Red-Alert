@@ -23,13 +23,6 @@ Base* Base::create(const std::string & filename)
 	return nullptr;
 }
 
-void Base::set(TMXTiledMap * AM, Layer * AL, EventListenerTouchOneByOne * ALis)
-{
-	tiled_map = AM;
-	combat_scene = AL;
-	spriteTouchListener = ALis;
-}
-
 void Base::setProperties()
 {
 	type = 0;
@@ -40,6 +33,7 @@ void Base::setListener()
 {
 	// Register Touch Event
 	auto listener = EventListenerTouchOneByOne::create();
+	spriteTouchListener = listener;
 	listener->setSwallowTouches(true);
 
 	listener->onTouchBegan = CC_CALLBACK_2(Base::onTouchBegan, this);
@@ -89,7 +83,7 @@ void Base::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 			baselayer = BaseLayer::create();
 			baselayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			baselayer->unit_manager = unit_manager;
-			combat_scene->addChild(baselayer, 10);
+			combat_scene->addChild(baselayer, 15);
 			layer_is_created = true;
 		}
 		else
@@ -116,13 +110,6 @@ MilitaryCamp* MilitaryCamp::create(const std::string & filename)
 	}
 	CC_SAFE_DELETE(ret);
 	return nullptr;
-}
-
-void MilitaryCamp::set(TMXTiledMap * AM, Layer * AL, EventListenerTouchOneByOne * ALis)
-{
-	tiled_map = AM;
-	combat_scene = AL;
-	spriteTouchListener = ALis;
 }
 
 void MilitaryCamp::setProperties()
@@ -184,7 +171,7 @@ void MilitaryCamp::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 			militaryCampLayer = MilitaryCampLayer::create();
 			militaryCampLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			militaryCampLayer->unit_manager = unit_manager;
-			combat_scene->addChild(militaryCampLayer, 10);
+			combat_scene->addChild(militaryCampLayer, 15);
 			layer_is_created = true;
 		}
 		else
@@ -193,3 +180,11 @@ void MilitaryCamp::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 		}
 	}
 }
+
+void Building::addToGmap(Point p)
+{
+	rec = unit_manager->getGridRect(p, this->getContentSize());
+	unit_manager->grid_map->occupyPosition(rec);
+}
+
+
