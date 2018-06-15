@@ -1,6 +1,8 @@
 #include "CreateUnitLayer.h"
 #include "Building.h"
 #include "CombatScene.h"
+#include "SimpleAudioEngine.h"
+#include "Const.h"
 USING_NS_CC;
 using namespace ui;
 
@@ -24,7 +26,7 @@ bool BaseLayer::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto bc = Sprite::create("bc.png");
 	//初始化layout
-	Layout* layout = Layout::create();
+	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
 	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
@@ -32,7 +34,7 @@ bool BaseLayer::init()
 	this->addChild(layout);
 	//添加创建建筑的按钮
 	// 创建一个创建militaryCamp的Button对象，设置在Layout的左上角
-	Button* militaryCamp = Button::create("/Picture/units/base_3.png",
+	militaryCamp = Button::create("/Picture/units/base_3.png",
 		"/Picture/units/base_3.png");
 	layout->addChild(militaryCamp);
 	RelativeLayoutParameter* rp_LeftCenter = RelativeLayoutParameter::create();
@@ -42,21 +44,91 @@ bool BaseLayer::init()
 	militaryCamp->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
 	{
 		if (type == Widget::TouchEventType::BEGAN)
-		{
-			building = true;
-		}
-		if (building)
-		{
-			//禁用层监听器
-			unit_manager->getCombatScene()->destListener->setEnabled(false);
-			//隐藏菜单
-			this->setVisible(false);
-			onBuilding(11);
+		{			
+			if (checkBuilding(MILITARY_CAMP_MONEY, BUILDING_CONSUME_POWER))
+			{				
+				//禁用层监听器
+				unit_manager->getCombatScene()->destListener->setEnabled(false);
+				//隐藏菜单
+				this->setVisible(false);
+				onBuilding(11,MilitaryCamp::size);
+			}				
+		}				
+	});
+	//添加一个创建mine的Button对象，设置在layout的右上角
+	Button* mine = Button::create("/Picture/ui/gold.png",
+		"/Picture/ui/gold.png");
+	mine->setScale(0.1);
+	layout->addChild(mine);
+	RelativeLayoutParameter* rp_top_right = RelativeLayoutParameter::create();
+	rp_top_right->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_RIGHT);
+	mine->setLayoutParameter(rp_top_right);
+	//给mine添加监听器
+	mine->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{			
+			if (checkBuilding(MINE_MONEY, BUILDING_CONSUME_POWER))
+			{
+				//禁用层监听器
+				unit_manager->getCombatScene()->destListener->setEnabled(false);
+				//隐藏菜单
+				this->setVisible(false);
+				onBuilding(12,Mine::size);
+			}
 		}
 	});
-	
+
+	//添加一个创建powerPlant的Button对象，设置在layout的左中部
+	powerPlant = Button::create("power.png",
+		"power.png");
+	powerPlant->setScale(0.15);
+	layout->addChild(powerPlant);
+	RelativeLayoutParameter* rp_left_center = RelativeLayoutParameter::create();
+	rp_left_center->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_LEFT_CENTER_VERTICAL);
+	powerPlant->setLayoutParameter(rp_left_center);
+	//给powerPlant添加监听器
+	powerPlant->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			if (checkBuilding(POWER_PLANT_MONEY, 0))
+			{
+				//禁用层监听器
+				unit_manager->getCombatScene()->destListener->setEnabled(false);
+				//隐藏菜单
+				this->setVisible(false);
+				onBuilding(13, PowerPlant::size);
+			}
+		}
+	});
+
+	//添加一个创建TankFactary的Button对象，设置在layout的右部
+	tankFactary = Button::create("basebutton.png",
+		"basebutton.png");
+	tankFactary->setScale(0.8);
+	layout->addChild(tankFactary);
+	RelativeLayoutParameter* rp_right_center = RelativeLayoutParameter::create();
+	rp_right_center->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_RIGHT_CENTER_VERTICAL);
+	tankFactary->setLayoutParameter(rp_right_center);
+	//给tankFacktary添加监听器
+	tankFactary->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			if (checkBuilding(TANK_FACTARY_MONEY, BUILDING_CONSUME_POWER))
+			{
+				//禁用层监听器
+				unit_manager->getCombatScene()->destListener->setEnabled(false);
+				//隐藏菜单
+				this->setVisible(false);
+				onBuilding(14,TankFactary::size);
+			}
+		}
+	});
+
 	// 创建一个退出该layer的Button对象
-	Button* exit = Button::create("backNormal.png",
+	exit = Button::create("backNormal.png",
 		"backNormal.png");
 	layout->addChild(exit);
 	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
@@ -99,7 +171,7 @@ bool MilitaryCampLayer::init()
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	auto bc = Sprite::create("bc.png");
 	//初始化layout
-	Layout* layout = Layout::create();
+	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
 	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
@@ -107,7 +179,7 @@ bool MilitaryCampLayer::init()
 	this->addChild(layout);
 
 	// 创建一个创建ariplain的Button对象，设置在Layout的左上角
-	Button* airplane = Button::create("/Picture/menu/airplane-menu-up.png",
+	airplane = Button::create("/Picture/menu/airplane-menu-up.png",
 		"/Picture/menu/airplane-menu-down.png");
 	layout->addChild(airplane);
 	RelativeLayoutParameter* rp_TopLeft = RelativeLayoutParameter::create();
@@ -116,34 +188,22 @@ bool MilitaryCampLayer::init()
 	airplane->setScale(0.65);
 	//给airplane添加监听器
 	airplane->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
-	{
+	{		
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			auto position = findFreePosition();
-			unit_manager->genCreateMessage(1,1,position.x,position.y);
-		}
-	});
-
-	// 创建一个创建tank的Button对象，设置在Layout的右上角
-	Button* tank = Button::create("/Picture/menu/tank-menu-up.png",
-		"/Picture/menu/tank-menu-down.png");
-	layout->addChild(tank);
-	RelativeLayoutParameter* rp_TopRight = RelativeLayoutParameter::create();
-	rp_TopRight->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_RIGHT);
-	tank->setLayoutParameter(rp_TopRight);
-	tank->setScale(0.65);
-	//给tank添加监听器
-	tank->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
-	{
-		if (type == Widget::TouchEventType::BEGAN)
-		{
-			auto position = findFreePosition();
-			unit_manager->genCreateMessage(2,1,position.x,position.y);
+			if (unit_manager->money->checkMoney(2000))
+			{
+				auto position = findFreePosition();
+				unit_manager->genCreateMessage(1, 1, position.x, position.y);
+				unit_manager->money->spendMoney(2000);
+			}
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");	
 		}
 	});
 
 	// 创建一个创建soldier的Button对象，设置在Layout的中左部
-	Button* soldier = Button::create("/Picture/menu/soldier-menu-up.png",
+	soldier = Button::create("/Picture/menu/soldier-menu-up.png",
 		"/Picture/menu/soldier-menu-down.png");
 	layout->addChild(soldier);
 	RelativeLayoutParameter* rp_LeftCenter = RelativeLayoutParameter::create();
@@ -155,13 +215,19 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			auto position = findFreePosition();
-			unit_manager->genCreateMessage(3, 1, position.x, position.y);
+			if (unit_manager->money->checkMoney(2000))
+			{
+				auto position = findFreePosition();
+				unit_manager->genCreateMessage(3, 1, position.x, position.y);
+				unit_manager->money->spendMoney(2000);
+			}
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
 
 	// 创建一个退出该layer的Button对象
-	Button* exit = Button::create("backNormal.png",
+	exit = Button::create("backNormal.png",
 		"backNormal.png");
 	layout->addChild(exit);
 	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
@@ -179,16 +245,93 @@ bool MilitaryCampLayer::init()
 	return true;
 }
 
-Point MilitaryCampLayer::findFreePosition()
+
+bool TankFactaryLayer::init()
 {
-	Point military_point = unit_manager->getMilitaryPosition();
-	GridPoint military = unit_manager->getGridPoint(military_point);
-	GridPoint a = unit_manager->grid_map->findFreePositionNear(military);
-	log("%d %d", a._x, a._y);
+	if (!Layer::init())
+	{
+		return false;
+	}
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	auto bc = Sprite::create("bc.png");
+	//初始化layout
+	layout = Layout::create();
+	layout->setLayoutType(LayoutType::RELATIVE);
+	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
+	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
+	layout->setBackGroundImage("bc.png");
+	this->addChild(layout);
+
+	// 创建一个创建天启坦克的Button对象，设置在Layout的左上角
+	tank = Button::create("/Picture/menu/tianqi.png",
+		"/Picture/menu/tianqi.png");
+	layout->addChild(tank);
+	RelativeLayoutParameter* rp_TopLeft = RelativeLayoutParameter::create();
+	rp_TopLeft->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_LEFT);
+	tank->setLayoutParameter(rp_TopLeft);
+	tank->setScale(0.33);
+	//给天启坦克添加监听器
+	tank->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			if (unit_manager->money->checkMoney(2000))
+			{
+				auto position = findFreePosition();
+				unit_manager->genCreateMessage(2, 1, position.x, position.y);
+				unit_manager->money->spendMoney(2000);
+			}
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+		}
+	});
+	// 创建一个退出该layer的Button对象
+	exit = Button::create("backNormal.png",
+		"backNormal.png");
+	layout->addChild(exit);
+	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
+	rp_exit->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_RIGHT_BOTTOM);
+	exit->setLayoutParameter(rp_exit);
+	//给exit添加监听器
+	exit->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			log("exit CreateUnitLayer layer");
+			this->setVisible(false);
+		}
+	});
+	return true;
+}
+
+TankFactaryLayer * TankFactaryLayer::create()
+{
+	TankFactaryLayer *ret = new TankFactaryLayer();
+	if (ret && ret->init())
+	{
+		ret->autorelease();
+		return ret;
+	}
+	else
+	{
+		CC_SAFE_DELETE(ret);
+		return nullptr;
+	}
+}
+
+Point CreateUnitLayer::findFreePosition()
+{
+	GridPoint create_center = unit_manager->getGridPoint(center_position);
+	GridPoint a = unit_manager->grid_map->findFreePositionNear(create_center);
+	unit_manager->setUnitCreateCenter(center_position);
 	Point p = unit_manager->getPoint(a);
 	return p;
 }
 
+void CreateUnitLayer::setCenterPosition(Point p)
+{
+	center_position = p;
+}
 
 void CreateUnitLayer::addListenerToRect(int type)
 {
@@ -210,6 +353,8 @@ void CreateUnitLayer::addListenerToRect(int type)
 				//重新启用层监听器
 				unit_manager->getCombatScene()->destListener->setEnabled(true);
 				unit_manager->getCombatScene()->removeChild(rec);
+				//关闭基地建造范围
+				unit_manager->constructRange->setVisible(false);
 				return true;
 			}			
 		}
@@ -219,11 +364,36 @@ void CreateUnitLayer::addListenerToRect(int type)
 		->addEventListenerWithSceneGraphPriority(spriteListener, rec);
 }
 
-void CreateUnitLayer::onBuilding(int type)
+bool CreateUnitLayer::checkBuilding(int money, int power)
 {
+	if (unit_manager->money->checkMoney(money))
+	{
+		if (unit_manager->power->checkPower(power))
+		{
+			building = true;		
+			unit_manager->money->spendMoney(money);
+			unit_manager->power->spendPower(power);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+		return false;
+	}
+}
+
+void CreateUnitLayer::onBuilding(int type,Size size)
+{
+	unit_manager->constructRange->setVisible(true);
 	rec = Sprite::create("MagentaSquare.png");
 	rec->setAnchorPoint(Vec2(0.5, 0.5));
-	rec_size = rec->getContentSize();
+	rec->setContentSize(size);
+	rec_size = size;
 	unit_manager->getCombatScene()->addChild(rec);
 	rec->setVisible(false);
 	addListenerToRect(type);
@@ -236,7 +406,7 @@ void CreateUnitLayer::onBuilding(int type)
 			rec_center = Vec2(pem->getCursorX(), pem->getCursorY());
 			rec->setPosition(rec_center);
 			rec_abs_center = rec_center - delta;
-			if (unit_manager->grid_map->checkPosition(unit_manager->getGridRect(rec_abs_center, rec_size)))
+			if (unit_manager->grid_map->checkPosition(unit_manager->getGridRect(rec_abs_center, rec_size)) && checkInRange(rec_abs_center))
 			{
 				can_build = true;
 				rec->setOpacity(255);
@@ -250,5 +420,13 @@ void CreateUnitLayer::onBuilding(int type)
 		}
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouse_event, 1);
-
 }
+
+bool CreateUnitLayer::checkInRange(Point p)
+{
+	Point baseP = unit_manager->getBasePosition();
+	float range = unit_manager->base->construct_range;
+	float distance = (p.x - baseP.x)*(p.x - baseP.x) + (p.y - baseP.y)*(p.y - baseP.y);
+	return distance <= range * range;
+}
+

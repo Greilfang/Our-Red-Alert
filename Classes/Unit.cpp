@@ -54,6 +54,17 @@ Unit * Unit::create(const std::string & filename)
 	return nullptr;
 }
 
+void Unit::initBar()
+{
+	if (current_life) {
+		hp_bar = Bar::create();
+		float rate = static_cast<float>(current_life) / static_cast<float>(max_life);
+		addChild(hp_bar, 10);
+		hp_bar->updateBarDisplay(rate);
+		hp_bar->stopKeepingVisible();
+	}
+}
+
 void Unit::setProperties()
 {
 	
@@ -153,6 +164,47 @@ bool Unit::is_in(Point p1, Point p2) {
 	return true;
 }
 
+void Unit::update(float f) 
+{
+	timer++;
+	if (camp == unit_manager->player_id && timer % attack_freq == 0)
+	{
+		if (is_attack) {
+			attack();
+		}
+		else {
+			searchEnemy();
+		}
+	}
+}
+
+void Unit::searchEnemy() 
+{
+	is_attack = 1;
+	attack_id = 5;
+}
+
+void Unit::attack()
+{
+	auto new_msg = unit_manager->msgs->add_game_message();
+	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_ATK);
+	new_msg->set_unit_0(id);
+	new_msg->set_unit_1(attack_id);
+	new_msg->set_damage(5);
+	new_msg->set_camp(camp);
+}
+
+bool Unit::underAttack(int damage)
+{
+	if (current_life > 0) {
+		current_life -= damage;
+		hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
+		log("life:%d", current_life);
+	}
+	return true;
+
+}
+
 bool UnitManager::init()
 {
 	return true;
@@ -188,10 +240,6 @@ void UnitManager::setCombatScene(CombatScene * _combat_scene)
 	combat_scene = _combat_scene;
 }
 
-void UnitManager::setBuilding(Building * _building)
-{
-	building = _building;
-}
 /*
 GridPoint UnitManager::getUnitPosition(int _unit_id)
 {
@@ -245,6 +293,21 @@ void UnitManager::updateUnitsState()
 			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
 		}
+		else 
+			if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
+			{
+				int unitid_0 = msg.unit_0();
+				int unitid_1 = msg.unit_1();
+				int damage = msg.damage();
+				//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
+				Unit * unit_1 = id_map.at(unitid_1);
+				if (unit_1)
+				{
+					genAttackEffect(unitid_0, unitid_1);
+					unit_1->underAttack(damage);
+
+				}
+			}
 	}
 	msgs->clear_game_message();
 }
@@ -267,9 +330,19 @@ void UnitManager::initializeUnitGroup(){
 	}
 }
 
-void UnitManager::setMilitaryPosition(Point military_pos)
+void UnitManager::setMax_power(int delta)
 {
-	_military_camp_pos = military_pos;
+	power->addMax_power(delta);
+}
+
+void UnitManager::setIncreasingAmount(int amount)
+{
+	money->setIncreasingAmount(amount);
+}
+
+void UnitManager::setUnitCreateCenter(Point center)
+{
+	unit_create_center = center;
 }
 
 void UnitManager::setBasePosition(Point base_pos)
@@ -278,14 +351,14 @@ void UnitManager::setBasePosition(Point base_pos)
 	combat_scene->focusOnBase();
 }
 
-Point UnitManager::getMilitaryPosition()
-{
-	return _military_camp_pos;
-}
-
 Point UnitManager::getBasePosition() const
 {
 	return _base_pos;
+}
+
+Point UnitManager::getUnitCreateCenter()
+{
+	return unit_create_center;
 }
 
 GridSize UnitManager::getGridSize(Size _size)
@@ -328,32 +401,43 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 		break;
 	case 0:
 		tmp_base = Base::create("Picture/units/base_0.png");
+		base = tmp_base;
 		base_map[id] = camp;
 		nu = tmp_base;
 		if (camp == player_id)
 			setBasePosition(Point(x, y));
+		constructRange = ConstructRange::create();
+		constructRange->drawRange(Point(x, y), tmp_base->construct_range);
+		constructRange->setVisible(false);
+		getTiledMap()->addChild(constructRange, 4);
 		break;
 	case 11:
-		nu = MilitaryCamp::create("Picture/units/base_2.png");
-		setMilitaryPosition(Point(x, y));
+		nu = MilitaryCamp::create("Picture/units/military.png");
 		break;
+	case 12:
+		nu = Mine::create("Picture/units/mine_0.png");
+		break;
+	case 13:
+		nu = PowerPlant::create("Picture/units/power_0.png");
+		break;
+	case 14:
+		nu = TankFactary::create("Picture/units/base_3.png");
 	default:
 		break;
 	}
-
+	
 	nu->unit_manager = this;
 	nu->setProperties();
 	nu->id = id;
 	nu->camp = camp;
 	nu->set(tiled_map, grid_map, (Layer*)combat_scene,spriteTouchListener);
-
+	nu->initBar();
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
 	if (nu->isMobile())
 	{
-		if (_military_camp_pos != Point(0, 0))
+		if (getUnitCreateCenter() != Point(0, 0))
 		{
-			nu->setPosition(getMilitaryPosition().x, getMilitaryPosition().y - nu->getContentSize().height);
-			//log("%f,%f;%f,%f", getMilitaryPosition().x, getMilitaryPosition().y - nu->getContentSize().height, nu->getPositionX(), nu->getPositionY());
+			nu->setPosition(getUnitCreateCenter().x, getUnitCreateCenter().y - nu->getContentSize().height);
 			playMover(Point(x, y), nu);
 			//nu->setPosition(x, y);
 		}
@@ -367,8 +451,9 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 		nu->setPosition(x, y);
 	}
 	nu->addToGmap(Point(x,y));
+	//刷新电力条
+	power->updatePowerDisplay();
 	nu->schedule(schedule_selector(Unit::update));
-
 	return(nu);
 }
 
@@ -449,6 +534,44 @@ void UnitManager::cancellClickedUnit()
 	selected_ids.shrink_to_fit();
 }
 
+void UnitManager::genAttackEffect(int unit_id0, int unit_id1)
+{
+	//log("position %f,%f,%f,%f", cur_fp.x, cur_fp.y, target_fp.x, target_fp.y);
+	Unit* unit_0 = id_map.at(unit_id0);
+	Unit* unit_1 = id_map.at(unit_id1);
+	if (unit_0 && unit_1)
+	{
+		auto trajectory_effect = TrajectoryEffect::create();
+		trajectory_effect->setPath(unit_0->getPosition(), unit_1->getPosition());
+		tiled_map->addChild(trajectory_effect, 20);
+	}
+}
+bool TrajectoryEffect::init()
+{
+	if (!ParticleFire::init())
+		return false;
+	setScale(0.1);
+	setPositionType(PositionType::RELATIVE);
+	return true;
+}
+
+void TrajectoryEffect::setPath(cocos2d::Vec2 from, cocos2d::Vec2 to)
+{
+	from_ = from;
+	to_ = to;
+	setPosition(from_);
+	move_ = (to_ - from_).getNormalized()*speed_;
+	schedule(schedule_selector(TrajectoryEffect::updatefire));
+}
+
+void TrajectoryEffect::updatefire(float)
+{
+	if (((abs(getPosition().x - to_.x)<speed_) && (abs(getPosition().y - to_.y)<speed_)))
+		removeFromParent();
+	else
+		setPosition(getPosition() + move_);
+}
+
 /*
 void UnitManager::selectUnits(Point select_point)
 {
@@ -515,3 +638,9 @@ void UnitManager::selectUnits(Point select_point)
 	return;
 }
 */
+
+void ConstructRange::drawRange(Point p,float r)
+{
+
+		drawDot(p, r, color);
+}

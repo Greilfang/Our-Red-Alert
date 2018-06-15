@@ -15,6 +15,9 @@ class Unit;
 class UnitManager;
 class Bar;
 class Building;
+class Money;
+class Power;
+class Base;
 class CombatScene;
 
 class Bar :public DrawNode {
@@ -36,10 +39,23 @@ public:
 
 };
 
+class ConstructRange : public DrawNode
+{
+private:
+	Color4F color{ 0.5,0.8,0.95,0.5 };
+public:
+	void drawRange(Point p,float r);
+	CREATE_FUNC(ConstructRange);
+};
+
 class UnitManager : public cocos2d::Ref
 {
 public:
 	int player_id = 0;
+	Base * base = nullptr;
+	Money * money = nullptr;
+	Power * power = nullptr;
+	ConstructRange * constructRange = nullptr;
 	GameMessageSet* msgs = nullptr;
 	GridMap* grid_map = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener;
@@ -70,10 +86,12 @@ public:
 
 	void initializeUnitGroup();
 
-	void setMilitaryPosition(Point military_pos);
+	void setMax_power(int delta);
+	void setIncreasingAmount(int amount);
+	void setUnitCreateCenter(Point center);
 	void setBasePosition(Point base_pos);
-	Point getMilitaryPosition();
 	Point getBasePosition()const;
+	Point getUnitCreateCenter();
 
 	GridSize getGridSize(Size);
 	GridRect getGridRect(Point, Size);
@@ -98,9 +116,10 @@ private:
 	int base_id = 1;
 
 	Point _base_pos{ 0,0 };
-	Point _military_camp_pos{ 0,0 };
-	Building * building = nullptr;
+	Point unit_create_center{ 0,0 };
 	Unit* createNewUnit(int id, int camp, int uint_type, float x, float y);
+
+	void genAttackEffect(int unit_id0, int unit_id1);
 };
 
 class Unit :public cocos2d::Sprite {
@@ -112,9 +131,11 @@ protected:
 	EventListenerTouchOneByOne * spriteTouchListener = nullptr;
 	int type;
 	bool mobile;
+	bool is_attack;
 	bool selected = false;//是否被选中当前位置和当前目标
 	int current_life=100;
 	int max_life=100;
+	int ATK = 0;
 	int attack_frequency ;
 	double attack_range ;
 	int speed ;
@@ -130,12 +151,15 @@ public:
 	int id;
 	int camp = 0;
 	int z_index;
+	int attack_id;
+	int attack_freq = 50;
+	int timer = 0;
 	UnitManager* unit_manager = nullptr;
 	
 	static Unit* create(const std::string & filename);
 
+	void initBar();
 	virtual void setProperties();
-	//virtual void addToMaps(cocos2d::TMXTiledMap* _tiled_map);
 	//void removeFromMaps();
 
 	virtual void setCamp(int _camp);
@@ -154,9 +178,25 @@ public:
 	//对血条的显示和隐藏操作
 	void displayHP();
 	void hideHP();
-
+	void attack();
+	void searchEnemy();
+	bool underAttack(int damage);
 	friend void UnitManager::updateUnitsState();
+	virtual void update(float f);
 };
 
+class TrajectoryEffect : public cocos2d::ParticleFire
+{
+public:
+	virtual bool init() override;
+	void setPath(cocos2d::Vec2, cocos2d::Vec2);
+
+	CREATE_FUNC(TrajectoryEffect);
+private:
+	void updatefire(float);
+	cocos2d::Vec2 from_, to_, move_;
+	int speed_ = 3;
+
+};
 
 #endif

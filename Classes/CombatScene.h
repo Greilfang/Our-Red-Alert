@@ -6,8 +6,10 @@
 #include"Unit.h"
 #include <cocos2d.h>
 #include<vector>
+#include "Const.h"
 #include "GameMessage.pb.h"
 USING_NS_CC;
+
 
 class MouseRect : public cocos2d::DrawNode
 {
@@ -17,12 +19,62 @@ public:
 	void update(float f) override;
 };
 
+class PowerDisplay : public Label	
+{
+public:
+	bool init() override;
+	void updateDisplay(Power * power);
+	CREATE_FUNC(PowerDisplay);
+};
+class Power : public DrawNode
+{
+private:
+	int max_power = INITIAL_POWER;
+	int used_power = 0;
+	int cur_length = 0;
+	int length = 130;
+	int width = 35;
+	cocos2d::Color4F red{ 1, 0, 0, 1 };
+	cocos2d::Color4F yellow{ 1, 1, 0, 1 };
+	cocos2d::Color4F green{ 0, 1, 0.5, 1 };
+	cocos2d::Color4F blue{ 0.1, 0.5, 1, 1 };
+public:
+	PowerDisplay * powerDisplay = nullptr;
+	void addMax_power(int delta);
+	void spendPower(int power);
+	void setCur_length();
+	bool checkPower(int delta);
+	Color4F getColor();
+	void updatePowerDisplay();
+	friend void PowerDisplay::updateDisplay(Power * power);
+	CREATE_FUNC(Power);
+};
+
+class Money : public Label
+{
+public:
+	bool init() override;
+	void update(float f) override;
+	void updateMoneyDisplay();
+	bool checkMoney(int price) const;
+	void spendMoney(int cost);
+	int getIncreasingAmount() const;
+	void setIncreasingAmount(int amount);
+	CREATE_FUNC(Money);
+private:
+	int money = 0;
+	int timer = 0;
+	int update_period = 20;
+	int increase_amount = 0;
+};
 
 class CombatScene :public Layer{
 public:
 	EventListenerTouchOneByOne * destListener = nullptr;
 	Point delta = { 0,0 };
 	GameMessageSet * msgs;
+	Power * power = nullptr;
+	Money * money = nullptr;
 	/*构建选框*/
 	void DrawRectArea(Point p1, Point p2);
 	/*向selected_box中收入被选中的节点*/

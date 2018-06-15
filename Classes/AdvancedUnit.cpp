@@ -8,13 +8,6 @@ Fighter* Fighter::create(const std::string& filename)
 	if (ret && ret->initWithFile(filename))
 	{
 		ret->autorelease();
-		if (ret->current_life) {
-			ret->hp_bar = Bar::create();
-			float rate = static_cast<float>(ret->current_life) / static_cast<float>(ret->max_life);
-			ret->addChild(ret->hp_bar, 10);
-			ret->hp_bar->updateBarDisplay(rate);
-			ret->hp_bar->stopKeepingVisible();
-		}
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
@@ -96,13 +89,6 @@ Tank* Tank::create(const std::string& filename)
 	if (ret && ret->initWithFile(filename))
 	{
 		ret->autorelease();
-		if (ret->current_life) {
-			ret->hp_bar = Bar::create();
-			float rate = static_cast<float>(ret->current_life) / static_cast<float>(ret->max_life);
-			ret->addChild(ret->hp_bar, 10);
-			ret->hp_bar->updateBarDisplay(rate);
-			ret->hp_bar->stopKeepingVisible();
-		}
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
@@ -150,13 +136,6 @@ Soldier* Soldier::create(const std::string& filename)
 	if (ret && ret->initWithFile(filename))
 	{
 		ret->autorelease();
-		if (ret->current_life) {
-			ret->hp_bar = Bar::create();
-			float rate = static_cast<float>(ret->current_life) / static_cast<float>(ret->max_life);
-			ret->addChild(ret->hp_bar, 10);
-			ret->hp_bar->updateBarDisplay(rate);
-			ret->hp_bar->stopKeepingVisible();
-		}
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
