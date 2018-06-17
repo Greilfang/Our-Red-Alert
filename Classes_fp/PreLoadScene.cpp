@@ -1,8 +1,10 @@
 #include "PreLoadScene.h"
-#include "GameMenu.h"
+#include "StartMenuScene.h"
 
 
 USING_NS_CC;
+
+bool PreLoad::hasPlayedBgm = false;
 
 Scene* PreLoad::createScene() {
 	auto scene = Scene::create();
@@ -11,8 +13,6 @@ Scene* PreLoad::createScene() {
 	scene->addChild(layer);
 	return scene;
 }
-
-bool PreLoad::hasPlayedBgm = false;
 
 bool PreLoad::init() {
 	if (!Layer::init()) {
@@ -26,7 +26,7 @@ bool PreLoad::init() {
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
-	addChild(back_ground, -5);
+	addChild(back_ground, 0);
 
 	auto bar_sprite = Sprite::create("slider2.png");
 	auto bar_back_ground_sprite = Sprite::create("slider1.png");

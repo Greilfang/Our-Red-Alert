@@ -1,8 +1,12 @@
+#define ASIO_STANDALONE
+#pragma warning(disable:4996)
 #pragma once
 #ifndef START_SCENE_H_
 #define START_SCENE_H_
 #include <cocos2d.h>
-
+#include"asio.hpp"
+#include"chat_server.h"
+#include"chat_client.h"
 USING_NS_CC;
 
 class StartScene :public cocos2d::Layer {
@@ -15,6 +19,7 @@ public:
 	void menuBackCallback(cocos2d::Ref* pSender);
 
 	CREATE_FUNC(StartScene);
+
 };
 
 class ServerMenu :public cocos2d::Layer{
@@ -26,7 +31,13 @@ public:
 	void menuStartGameCallback(cocos2d::Ref* pSender);
 	void menuBackCallback(cocos2d::Ref* pSender);
 
+	void connectionUpdate(float f);
+
 	CREATE_FUNC(ServerMenu);
+private:
+	//         增加两个数据成员,server需要服务端和客户端
+	chat_server * server_side = nullptr;
+	chat_client * client_side = nullptr;
 };
 
 class ClientMenu :public cocos2d::Layer {
@@ -36,6 +47,13 @@ public:
 
 	void menuStartGameCallback(cocos2d::Ref* pSender);
 	void menuBackCallback(cocos2d::Ref* pSender);
+
+	CREATE_FUNC(ClientMenu);
+	//         增加一个数据成员,client只需要客户端
+	chat_client *client_side = { nullptr };
+	void startSchedule(float f);
+	void wait_start();
+
 };
 
 #endif

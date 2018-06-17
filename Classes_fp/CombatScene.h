@@ -1,15 +1,23 @@
+
+#define ASIO_STANDALONE
+#pragma warning(disable:4996)
 #pragma once
 #ifndef COMBAT_SCENE_H_
 #define COMBAT_SCENE_H_
 #define DEBUG
+#include "asio.hpp"
 #include"Unit.h"
 #include <cocos2d.h>
 #include<vector>
+#include "GameMessage.pb.h"
+#include<chat_client.h>
+#include<chat_server.h>
 USING_NS_CC;
 
 class MouseRect : public cocos2d::DrawNode
 {
 public:
+	
 	CREATE_FUNC(MouseRect);
 	cocos2d::Point touch_start, touch_end;
 	void update(float f) override;
@@ -18,6 +26,8 @@ public:
 
 class CombatScene :public Layer{
 public:
+
+	GameMessageSet * msgs;
 	/*计算玩家移动时间函数*/
 	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos);
 	/*控制目标移动*/
@@ -33,14 +43,17 @@ public:
 	void scrollMap();
 	/*用于滚动地图后的刷新*/
 	virtual void update(float f);
-	
-	static Scene* createScene();
+	/*用于返回selected_box*/
+	//std::vector<Unit *> & getSelected_box();
+	static Scene* createScene(chat_server * server_context_,chat_client * client_context_ );
 	virtual bool init();
 	
 	
 	
 	CREATE_FUNC(CombatScene);
 private:
+	chat_client * client_side = nullptr;//服务端指针
+	chat_server * server_side = nullptr;//服务端指针
 	Point delta = { 0,0 };
 	std::vector<Unit *> selected_box;//存放选中栏的所有单位
 	bool is_clicked = false;
@@ -48,6 +61,7 @@ private:
 	MouseRect* mouse_rect = nullptr;//选框
 	TMXTiledMap* _combat_map = nullptr;//加载瓦片地图所用的指针
 	Point _cursor_position{ 0,0 };
+	UnitManager * unit_manager;
 };
 
 inline float Tri_Dsitance(Point t1, Point t2) {
@@ -67,6 +81,7 @@ inline void CombatScene::cancellClickedUnit() {
 		selected_box[i]->setOpacity(255);
 		selected_box[i]->hideHP();
 	}
-	selected_box.clear(); selected_box.shrink_to_fit();
+	selected_box.clear();
+	selected_box.shrink_to_fit();
 }
 #endif

@@ -1,5 +1,10 @@
+#pragma warning (disable : 4996)
+#define ASIO_STANDALONE
+#include"asio.hpp"
+
 #include "CombatScene.h"
 #include "ui\CocosGUI.h"
+#include "Unit.h"
 #define DEBUG
 USING_NS_CC;
 using namespace ui;
@@ -34,18 +39,19 @@ float CombatScene::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos) {
 	return duration;
 }
 void CombatScene::playMover(Point position, Unit * _sprite) {
-	//获得精灵移动的时间
 	float duration = getPlayerMoveTime(_sprite->getPosition(), position);
 	auto moveTo = MoveTo::create(duration, position);
 	auto sequence = Sequence::create(moveTo, nullptr);
 	_sprite->runAction(sequence);
 };
 
-Scene * CombatScene::createScene() {
+Scene * CombatScene::createScene(chat_server * server_context_, chat_client * client_context_) {
+
 	auto scene = Scene::create();
 	auto layer = CombatScene::create();
-
 	scene->addChild(layer);
+	layer->server_side = server_context_;
+	layer->client_side = client_context_;
 	return scene;
 }
 
@@ -57,36 +63,41 @@ bool CombatScene::init() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-	/* 加载地图 */
+	
 	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
 
-	/*加载矩形选框对象*/
+	
 	mouse_rect = MouseRect::create();
 	mouse_rect->setVisible(false);
 	addChild(mouse_rect, 15);
 
-#ifdef DEBUG//测试
+	msgs = new GameMessageSet;
+	unit_manager = UnitManager::create();
+	unit_manager->retain();
+	unit_manager->setMessageSet(msgs);
+	unit_manager->setTiledMap(_combat_map);
+	unit_manager->setCombatScene(this);
+
+#ifdef DEBUG
+	/*
 	auto worker_sprite = Unit::create("MagentaSquare.png");
 	worker_sprite->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2));
-
+	*/
 	auto farmer_sprite = Unit::create("MagentaSquare.png");
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));
-	this->_combat_map->addChild(worker_sprite,10);
+	//this->_combat_map->addChild(worker_sprite,10);
 	this->_combat_map->addChild(farmer_sprite,10);
 #endif
-	/*刷新接受滚轮响应*/
 	schedule(schedule_selector(CombatScene::update));
 
-	/* 得到鼠标每一帧的位置 */
 	auto mouse_event = EventListenerMouse::create();
 	mouse_event->onMouseMove = [&](Event *event) {
 		EventMouse* pem = static_cast<EventMouse*>(event);
 		_cursor_position = Vec2(pem->getCursorX(), pem->getCursorY());
 	};
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouse_event, 1);
-	/*加载精灵监听器时间*/
 	auto spriteListener = EventListenerTouchOneByOne::create();
 	spriteListener->setSwallowTouches(true);
 	spriteListener->onTouchBegan = [this](Touch* touch, Event* event) {
@@ -107,13 +118,22 @@ bool CombatScene::init() {
 	spriteListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_end = touch->getLocation();
 	};
+	unit_manager->setSpriteTouchListener(spriteListener);
 #ifdef DEBUG
-	Director::getInstance()->getEventDispatcher()
-		->addEventListenerWithSceneGraphPriority(spriteListener, worker_sprite);
+	unit_manager->genCreateMessage(0);
+	schedule(schedule_selector(CombatScene::update));
+	/*
+	auto base1 = Building::create("base_0.png");
+	base1->set(this->_combat_map, this);
+	base1->setType(0);
+	base1->setPosition(Vec2(visibleSize.width / 2 - 100, visibleSize.height / 2));
+	this->_combat_map->addChild(base1, 10);
+	*/
+	//Director::getInstance()->getEventDispatcher()
+	//	->addEventListenerWithSceneGraphPriority(spriteListener, worker_sprite);
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(spriteListener->clone(), farmer_sprite);
 #endif
-	/*加载层监听器时间*/
 	auto destListener = EventListenerTouchOneByOne::create();
 
 	destListener->onTouchBegan = [this](Touch* touch, Event* event) {
@@ -123,12 +143,14 @@ bool CombatScene::init() {
 	};
 
 	destListener->onTouchMoved = [this](Touch* touch, Event* event) {
-		mouse_rect->touch_end = touch->getLocation();//更新最后接触的点
+		mouse_rect->touch_end = touch->getLocation();//锟斤拷锟斤拷锟斤拷锟接达拷锟侥碉拷
 		mouse_rect->setVisible(true);
 	};
 
 	destListener->onTouchEnded = [this](Touch* touch, Event* event) {
-		mouse_rect->touch_end = touch->getLocation();
+		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
+			mouse_rect->unschedule(schedule_selector(MouseRect::update));
+		mouse_rect->touch_end = touch->getLocation();			
 #ifdef DEBUG
 		AllocConsole();
 		freopen("CONIN$", "r", stdin);
@@ -148,7 +170,8 @@ bool CombatScene::init() {
 					selected_box[i]->stopAllActions();
 				}
 				mouse_rect->setVisible(false);
-				playMover(mouse_rect->touch_end - delta, selected_box[i]);
+				if (selected_box[i]->isMobile())
+					playMover(mouse_rect->touch_end - delta, selected_box[i]);
 			}
 		}
 		else {
@@ -160,16 +183,13 @@ bool CombatScene::init() {
 			getClickedUnit();
 		}
 	};
-#ifdef DEBUG
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(destListener, this->_combat_map);
-	//playMover(Point(1000, 2000), farmer_sprite);
-#endif // DEBUG
-
 	return true;
 }
 
 void CombatScene::update(float f){
+	unit_manager->updateUnitsState();
 	scrollMap();
 	delta = _combat_map->getPosition();
 }

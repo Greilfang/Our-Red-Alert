@@ -1,6 +1,6 @@
 #include "AudioControlScene.h"
 #include "ui/CocosGUI.h"
-#include "GameMenu.h"
+#include "StartMenuScene.h"
 #include "SimpleAudioEngine.h"
 
 using namespace CocosDenshion;
@@ -27,7 +27,7 @@ bool AudioControl::init() {
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
-	addChild(back_ground, -5);
+	addChild(back_ground, 0);
 
 	/* BgmVolume */
 	auto music_label = Label::createWithTTF("BGM VOLUME", "fonts/Marker Felt.ttf", 32);
