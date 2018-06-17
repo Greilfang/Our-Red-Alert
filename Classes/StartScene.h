@@ -1,7 +1,12 @@
+#define ASIO_STANDALONE
+#pragma warning(disable:4996)
 #pragma once
 #ifndef START_SCENE_H_
 #define START_SCENE_H_
 #include <cocos2d.h>
+#include"asio.hpp"
+#include"chat_server.h"
+#include"chat_client.h"
 
 USING_NS_CC;
 
@@ -29,6 +34,9 @@ public:
 	void connectionUpdate(float f);
 
 	CREATE_FUNC(ServerMenu);
+private:
+	chat_server * server_side = nullptr;
+	chat_client * client_side = nullptr;
 };
 
 class ClientMenu :public cocos2d::Layer {
@@ -40,6 +48,12 @@ public:
 	void menuBackCallback(cocos2d::Ref* pSender);
 
 	CREATE_FUNC(ClientMenu);
+	void startSchedule(float f);
+	void wait_start();
+	
+	
+	
+	chat_client *client_side = { nullptr };
 };
 
 #endif

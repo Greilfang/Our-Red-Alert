@@ -32,11 +32,13 @@ void CombatScene::getLayerUnit(Point p1, Point p2) {
 		}
 	}
 }
-Scene * CombatScene::createScene() {
+Scene * CombatScene::createScene(chat_server * server_context_, chat_client * client_context_) {
+
 	auto scene = Scene::create();
 	auto layer = CombatScene::create();
-
 	scene->addChild(layer);
+	layer->server_side = server_context_;
+	layer->client_side = client_context_;
 	return scene;
 }
 

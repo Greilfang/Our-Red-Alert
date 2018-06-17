@@ -95,11 +95,9 @@ bool AppDelegate::applicationDidFinishLaunching() {
     register_all_packages();
 
     // create a scene. it's an autorelease object
-#ifdef DEBUG
-    auto scene = CombatScene::createScene();
-#elif
+    //auto scene = CombatScene::createScene();
 	auto scene = PreLoad::createScene();
-#endif
+
 
     // run
     director->runWithScene(scene);

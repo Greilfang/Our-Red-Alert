@@ -1,13 +1,17 @@
+#define ASIO_STANDALONE
+#pragma warning(disable:4996)
 #pragma once
 #ifndef COMBAT_SCENE_H_
 #define COMBAT_SCENE_H_
 #define DEBUG
-
+#include "asio.hpp"
 #include"Unit.h"
 #include <cocos2d.h>
 #include<vector>
-#include "Const.h"
 #include "GameMessage.pb.h"
+#include<chat_client.h>
+#include<chat_server.h>
+#include"Const.h"
 USING_NS_CC;
 
 
@@ -85,7 +89,7 @@ public:
 	virtual void update(float f);
 	/*用于返回selected_box*/
 	//std::vector<Unit *> & getSelected_box();
-	static Scene* createScene();
+	static Scene* createScene(chat_server * server_context_, chat_client * client_context_);
 	virtual bool init();
 	
 	/* 视野中心为基地 */
@@ -94,6 +98,8 @@ public:
 	
 	CREATE_FUNC(CombatScene);
 private:
+	chat_client * client_side = nullptr;//服务端指针
+	chat_server * server_side = nullptr;//服务端指针
 	bool is_clicked = false;
 	cocos2d::Point last_touch{ 0, 0 };//鼠标最后一次碰到的点
 	MouseRect* mouse_rect = nullptr;//选框

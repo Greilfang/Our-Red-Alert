@@ -1,8 +1,15 @@
+#define ASIO_STANDALONE
+#pragma warning(disable:4996)
+#pragma once
+#include<iostream>
 #include "StartScene.h"
 #include "StartMenuScene.h"
 #include "CombatScene.h"
 #include "ui\CocosGUI.h"
-
+#include "asio.hpp"
+#include"chat_message.hpp"
+#include"chat_server.h"
+#include"chat_client.h"
 using namespace ui;
 USING_NS_CC;
 
@@ -138,19 +145,22 @@ bool ServerMenu::init() {
 }
 
 void ServerMenu::menuStartServerCallback(cocos2d::Ref * pSender) {
-	/*if (!socket_server_){
-		socket_server_ = SocketServer::create();
-		socket_client_ = SocketClient::create();
-		log("create server and client on 8008");
-		schedule(schedule_selector(ServerMenu::connectionUpdate), 0.1);
-	}*/
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+
+	server_side = chat_server::create();
+	client_side = chat_client::create();
+
 }
 
 void ServerMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
-	auto scene = CombatScene::createScene();
+	server_side->button_start();
+
+	auto scene = CombatScene::createScene(server_side, client_side);
 	Director::getInstance()->replaceScene(TransitionSplitCols::create(0.5, scene));
 }
-
 void ServerMenu::menuBackCallback(cocos2d::Ref * pSender) {
 	auto scene = StartScene::createScene();
 	Director::getInstance()->replaceScene(TransitionSplitCols::create(0.5, scene));
@@ -225,11 +235,57 @@ bool ClientMenu::init() {
 }
 
 void ClientMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
-	auto scene = CombatScene::createScene();
-	Director::getInstance()->replaceScene(TransitionSplitCols::create(0.5, scene));
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+	log("client ok");
+	client_side = chat_client::create();
+	schedule(schedule_selector(ClientMenu::startSchedule), 0.1);
 }
 
 void ClientMenu::menuBackCallback(cocos2d::Ref * pSender) {
 	auto scene = StartScene::createScene();
+	Director::getInstance()->replaceScene(TransitionSplitCols::create(0.5, scene));
+}
+
+void ClientMenu::startSchedule(float f)
+{
+	/*
+	static int timer = 0;
+	static cocos2d::Label* connection_msg_;
+	if (client_side->error())
+	{
+	unscheduleAllCallbacks();
+	client_side->close();
+	delete client_side;
+	client_side = nullptr;
+	connection_msg_->setString("Cannot connect to the server, please try again");
+	return;
+	}
+
+	switch ((timer++ % 32) / 4)
+	{
+	case 0: connection_msg_->setString("Connected, wait for server"); break;
+	case 1: connection_msg_->setString("Connected, wait for server."); break;
+	case 2: connection_msg_->setString("Connected, wait for server.."); break;
+	case 3: connection_msg_->setString("Connected, wait for server..."); break;
+	default: break;
+	}
+	*/
+	if (client_side->started())
+	{
+		wait_start();
+	}
+}
+
+void ClientMenu::wait_start()
+{
+	//socket_client_->camp();
+	unscheduleAllCallbacks();
+	log("get the camp");
+	log("start game");
+	auto scene = CombatScene::createScene(nullptr, client_side);
+	//	auto scene = BattleScene::createScene(socket_client_);
 	Director::getInstance()->replaceScene(TransitionSplitCols::create(0.5, scene));
 }
