@@ -1,7 +1,7 @@
 #include "CombatScene.h"
 #include "ui\CocosGUI.h"
 #include "Unit.h"
-
+#include "chat_client.h"
 #define DEBUG
 USING_NS_CC;
 using namespace ui;
@@ -35,21 +35,35 @@ void CombatScene::getLayerUnit(Point p1, Point p2) {
 Scene * CombatScene::createScene(chat_server * server_context_, chat_client * client_context_) {
 
 	auto scene = Scene::create();
-	auto layer = CombatScene::create();
+	auto layer = CombatScene::create(server_context_, client_context_);
 	scene->addChild(layer);
-	layer->server_side = server_context_;
-	layer->client_side = client_context_;
+
 	return scene;
 }
+CombatScene * CombatScene::create(chat_server * server_context_, chat_client * client_context_)
+{
 
-bool CombatScene::init() {
+	CombatScene *combat_scene = new (std::nothrow) CombatScene();
+	if (combat_scene && combat_scene->init(server_context_, client_context_))
+	{
+		combat_scene->autorelease();
+		return combat_scene;
+	}
+	CC_SAFE_DELETE(combat_scene);
+
+	return nullptr;
+
+}
+bool CombatScene::init(chat_server * server_context_, chat_client * client_context_) {
 	if (!Layer::init()) {
 		return false;
 	}
 
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
+	/*加载客户端和服务端*/
+	server_side = server_context_;
+	client_side = client_context_;
 	/* 加载地图 */
 	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
@@ -95,7 +109,7 @@ bool CombatScene::init() {
 	unit_manager->setCombatScene(this);
 	unit_manager->money = money;
 	unit_manager->power = power;
-
+	unit_manager->setSocketClient(client_side);
 #ifdef DEBUG//测试
 	auto farmer_sprite = Unit::create("MagentaSquare.png");
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));

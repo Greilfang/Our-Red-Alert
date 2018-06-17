@@ -240,6 +240,11 @@ void UnitManager::setCombatScene(CombatScene * _combat_scene)
 	combat_scene = _combat_scene;
 }
 
+void UnitManager::setSocketClient(chat_client * _socket_client)
+{
+	socket_client = _socket_client;
+}
+
 /*
 GridPoint UnitManager::getUnitPosition(int _unit_id)
 {
@@ -281,6 +286,12 @@ EventListenerTouchOneByOne * UnitManager::getSpriteTouchListener()
 
 void UnitManager::updateUnitsState()
 {
+	auto sent_msg_str = msgs->SerializeAsString();
+	socket_client->write_data(sent_msg_str);
+
+	auto msg_str = socket_client->read_data();
+	msgs->ParseFromString(msg_str);
+
 	for (int i = 0; i < msgs->game_message_size(); i++)
 	{
 		const GameMessage&  msg = msgs->game_message(i);

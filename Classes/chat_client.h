@@ -46,26 +46,38 @@ public:
 		do_connect();
 	}
 
-	/*
-	void write(const chat_message& msg)
+	void write_data(std::string s)
 	{
-		asio::post(io_context_,
-			[this, msg]()
+		if (error_flag_)
+			return;
+		chat_message msg;
+		if (s.size() == 0)
 		{
-			bool write_in_progress = !_msgs_.empty();
-			write_msgs_.push_back(msg);
-			if (!write_in_progress)
-			{
-				do_write();
-			}
-		});
+			s = std::string("\0");
+			msg.body_length(1);
+		}
+		else
+			msg.body_length(s.size());
+		memcpy(msg.body(), &s[0u], msg.body_length());
+		msg.encode_header();
+		asio::write(socket_, asio::buffer(msg.data(), msg.length()));
+		std::cout << "client write success\n";
 	}
-
-	void close()
+	std::string read_data()
 	{
-		asio::post(io_context_, [this]() { socket_.close(); });
+		if (error_flag_)
+			return "";
+		std::unique_lock<std::mutex> lk{ mut };
+		while (read_msg_deque_.empty())
+			data_cond_.wait(lk);
+
+		auto read_msg = read_msg_deque_.front();
+		read_msg_deque_.pop_front();
+		lk.unlock();
+		auto ret = std::string(read_msg.body(), read_msg.body_length());
+		std::cout << "client read success\n";
+		return ret;
 	}
-	*/
 private:
 	void do_connect()
 	{
@@ -77,7 +89,7 @@ private:
 				if (!ec)
 				{
 					std::cout << "the connection has been constructed" << std::endl;
-					/* 以下是 fudancraft 的 骚操作  */
+					
 					char data[30] = { 0 };
 					asio::error_code err;
 					//同步读取,是阻塞的

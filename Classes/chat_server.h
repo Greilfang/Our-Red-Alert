@@ -19,7 +19,7 @@
 #include <utility>
 #include "asio.hpp"
 #include "chat_message.hpp"
-
+#include "GameMessageWrap.h"
 using asio::ip::tcp;
 
 //----------------------------------------------------------------------
@@ -36,9 +36,9 @@ public:
 	//	~TcpConnection();
 	static pointer create(asio::io_service& io_service, chat_server* parent);
 	tcp::socket& socket();
-	
+
 	void get_socket(tcp::socket);
-	
+
 	void start();
 
 	void write_data(std::string s);
@@ -53,15 +53,18 @@ private:
 	void handle_read_header(const asio::error_code& error);
 
 	void handle_read_body(const asio::error_code& error);
-	
+
+	//TcpConnection(tcp::socket socket) :socket_(std::move(socket)) { ; };
+
+
 	TcpConnection(asio::io_service& io_service, chat_server * parent);;
 
 	//void check_timer();
 	//void delete_from_parent();
 
-	
+
 	tcp::socket socket_;//把建立连接的套接字记录下来
-	
+
 	chat_server* parent;
 
 	bool error_flag_{ false };
@@ -78,7 +81,7 @@ class chat_server
 {
 public:
 	chat_server(int port) :
-		acceptor_(*io_service_, tcp::endpoint(tcp::v4(), port)) 
+		acceptor_(*io_service_, tcp::endpoint(tcp::v4(), port))
 	{
 		do_accept();
 	}
@@ -90,34 +93,42 @@ public:
 				io_service_));
 		return s;
 	}
-
 	void button_start()
 	{
 		acceptor_.close();
 		using namespace std; // For sprintf and memcpy.
-		char total[4 + 1] = "";//+1是给空字符
+		char total[4 + 1] = "";
 		sprintf(total, "%4d", static_cast<int>(connections_.size()));
 
 		for (auto i = 0; i < connections_.size(); i++)
-		{
 			connections_[i]->write_data("PLAYER" + std::string(total) + std::to_string(i + 1));
-			//cout<<"write content:"<<connections_[i]->read
-		}
-
-		connection_num_ = connections_.size();
 		this->button_thread_ = new std::thread(std::bind(&chat_server::loop_process, this));
 		button_thread_->detach();
 	}
 
+private:
+	void do_accept()
+	{
+		acceptor_.async_accept(
+			[this](std::error_code ec, tcp::socket socket)
+		{
+			if (!ec)
+			{
+				TcpConnection::pointer new_connection = TcpConnection::create(acceptor_.get_io_context(), this);
+				connections_.push_back(new_connection);
+				auto ep_ = socket.remote_endpoint();
+				new_connection->get_socket(std::move(socket));
+				std::cout << "client : " << ep_.port() << " enter this room" << std::endl;
+				new_connection->start();
+				//std::make_shared<TcpConnection>(std::move(socket))->start();
+			}
+			do_accept();
+		});
+	}
 	void loop_process()
 	{
 		while (true)
 		{
-			if (connections_.size() != connection_num_)
-			{
-				error_flag_ = true;
-				break;
-			}
 			std::unique_lock<std::mutex> lock(delete_mutex_);
 			std::vector<std::string> ret;
 			for (auto r : connections_)
@@ -127,49 +138,22 @@ public:
 					error_flag_ |= r->error();
 				ret.push_back(r->read_data());
 			}
-			//包装消息,可以先不用
-			//auto game_msg = GameMessageWrap::combine_message(ret);
-			/*
+			auto game_msg = GameMessageWrap::combine_message(ret);
+
 			for (auto r : connections_)
 				r->write_data(game_msg);
-				*/
 		}
-	}
-
-
-private:
-	void do_accept()
-	{
-		acceptor_.async_accept(
-			[this](std::error_code ec, tcp::socket socket)
-			//一次拷贝构造函数,所以调用了两次
-		{
-			if (!ec)
-			{
-				TcpConnection::pointer new_connection = TcpConnection::create(acceptor_.get_io_context(), this);
-				//std::cout << "after definition" << new_connection.use_count() << std::endl;
-				connections_.push_back(new_connection);
-				//std::cout << "after push_back" << new_connection.use_count() << std::endl;
-				auto ep_ = socket.remote_endpoint();
-				new_connection->get_socket(std::move(socket));
-				std::cout << "client : " << ep_.port() << " enter this room" << std::endl;
-				new_connection->start();
-				//std::make_shared<TcpConnection>(std::move(socket))->start();
-			}
-			do_accept();
-		});
-
 	}
 	std::vector<TcpConnection::pointer> connections_;
 	static asio::io_service * io_service_;
 	tcp::acceptor acceptor_;
 	std::thread *thread_, *button_thread_{ nullptr };
-	//目前表示的连接数
-	int connection_num_;
-	/*锁和错误标识符*/
+
+	/*先加上*/
 	std::mutex delete_mutex_;
 	bool error_flag_{ false };
 	std::condition_variable data_cond_;
+	//chat_room room_;
 };
 #endif
 //----------------------------------------------------------------------

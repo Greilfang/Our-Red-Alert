@@ -3,10 +3,11 @@
 #define _UNIT_H_
 
 #include <iostream>
-#include "cocos2d.h"
+#include <cocos2d.h>
 #include "GameMessage.pb.h"
 #include "ui/CocosGUI.h"
 #include "GridMap.h"
+#include"chat_client.h"
 
 USING_NS_CC;
 using namespace ui;
@@ -69,6 +70,7 @@ public:
 	void setGridMap(GridMap *);
 	void setPlayerID(int _player_id);
 	void setCombatScene(CombatScene* _combat_scene);
+	void setSocketClient(chat_client* _socket_client);
 	void setBuilding(Building * _building);
 	//获取运动的时间
 	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed);
@@ -111,7 +113,7 @@ private:
 
 	cocos2d::TMXTiledMap* tiled_map = nullptr;
 	CombatScene* combat_scene = nullptr;
-
+	chat_client * socket_client = nullptr;
 	int next_id = 1;
 	int base_id = 1;
 
