@@ -13,6 +13,9 @@ struct GridPoint {
 	bool operator==(const GridPoint& gp2) const;
 	friend GridPoint operator+(const GridPoint& gp1, const GridPoint& gp2);
 	friend GridPoint operator-(const GridPoint& gp1, const GridPoint& gp2);
+
+	GridPoint getDirectionVec();
+
 };
 
 typedef GridPoint GridVec;
@@ -43,18 +46,27 @@ public:
 	cocos2d::Point getPoint(const GridPoint& great_point);
 	GridPoint getGridPoint(const cocos2d::Point& point);
 
-	void occupyPosition(const GridPoint& pos);
+	GridPoint getGridPointWithOffset(const cocos2d::Point& p);
+	cocos2d::Point getPointWithOffset(const GridPoint& gp);
+	bool hasApproached(const cocos2d::Point& cur_fp, const GridPoint& dest_gp);
+	bool occupyPosition(const GridPoint& pos);
 	void occupyPosition(const GridRect& grec);
-	void occupyPosition(const cocos2d::Point& pos);
+	bool occupyPosition(const cocos2d::Point& pos);
 
 	bool checkPosition(const GridPoint & gp);
 	bool checkPosition(const GridRect & grec);
+
+	void leavePosition(const GridPoint & pos);
+
 	GridPoint findFreePositionNear(const GridPoint& origin_gp);
 	const dyadic_array& getLogicalGridMap();
 private:
 	dyadic_array _gmap;
 	int _map_width, _map_height;
 	int _tile_width, _tile_height;
+
+	//Æ«ÒÆÏòÁ¿
+	cocos2d::Vec2 _offset_vec;
 };
 
 #endif

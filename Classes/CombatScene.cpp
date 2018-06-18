@@ -1,7 +1,7 @@
 #include "CombatScene.h"
 #include "ui\CocosGUI.h"
 #include "Unit.h"
-#include "chat_client.h"
+
 #define DEBUG
 USING_NS_CC;
 using namespace ui;
@@ -54,6 +54,7 @@ CombatScene * CombatScene::create(chat_server * server_context_, chat_client * c
 	return nullptr;
 
 }
+
 bool CombatScene::init(chat_server * server_context_, chat_client * client_context_) {
 	if (!Layer::init()) {
 		return false;

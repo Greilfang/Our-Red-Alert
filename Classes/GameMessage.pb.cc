@@ -1492,3 +1492,15 @@ void GameMessageSet::InternalSwap(GameMessageSet* other) {
 // @@protoc_insertion_point(namespace_scope)
 
 // @@protoc_insertion_point(global_scope)
+
+void GameMessage::genSetGridPath(const GridPath & _grid_path)
+{
+	MsgGridPath* msg_grid_path = mutable_msg_grid_path();
+	for (const auto & gp : _grid_path)
+	{
+		MsgGridPoint* msg_grid_point = msg_grid_path->add_msg_grid_point();
+		msg_grid_point->set_x(gp._x);
+		msg_grid_point->set_y(gp._y);
+	}
+}
+

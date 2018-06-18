@@ -87,9 +87,123 @@ void Unit::hideHP()
 	}
 }
 
+void Unit::move()
+{
+	//esp为当前格点指向当前终点的单位向量
+	auto esp = (grid_map->getPointWithOffset(_cur_dest) - getPosition()).getNormalized();
+	Point next_position = esp * speed + getPosition();
+	GridPoint next_gpos = grid_map->getGridPoint(next_position);
+	
+	if (!(_cur_dest == next_gpos))
+	{
+		if (_cur_pos == next_gpos)
+		{
+			setPosition(next_position);
+			log("%f,%f", getPosition().x, getPosition().y);
+		}
+		else if (grid_map->occupyPosition(next_position)) {
+			setPosition(next_position);
+			log("%f,%f", getPosition().x, getPosition().y);
+			grid_map->leavePosition(_cur_pos);
+			_cur_pos = next_gpos;
+		}
+		else {
+			_cur_dest = _cur_pos;
+			Point final_dest = grid_map->getPointWithOffset(_final_dest);
+			if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 150.F) {
+				if (!is_delaying)
+					tryToSearchForPath();
+			}
+		}
+		if (hasArrivedFinalDest())
+			if (_grid_path.size())
+			{
+				_cur_dest = _grid_path.back();
+				_grid_path.pop_back();
+			}
+			else
+			{
+				goToFinalPosition();
+				is_moving = false;
+			}
+	}
+}
+
+bool Unit::hasArrivedFinalDest()
+{
+	return(grid_map->hasApproached(getPosition(), _cur_dest) && getGridPosition() == _cur_dest);
+}
+
+GridPath Unit::findPath(const GridPoint & dest) const
+{
+	auto& gmap = grid_map->getLogicalGridMap();
+	GridPoint start = getGridPosition();
+
+	PathFinding path_finding(gmap, start, dest);
+	path_finding.searchForPath();
+	path_finding.generatePath();
+	GridPath grid_path = path_finding.getPath();
+
+	//GridPath optimized_path = optimizePath(grid_path);
+	//return optimized_path;
+	return grid_path;
+}
+
+GridPath Unit::optimizePath(const GridPath & origin_path) const
+{
+	auto path_length = origin_path.size();
+	if (path_length < 3)
+		return origin_path;
+
+	GridPath optimized_path;
+	GridPoint pre_point = origin_path[0];
+	GridVec pre_dir = { 2,2 };
+	for (int i = 1; i < path_length - 1; i++) {
+		const auto & point = origin_path[i];
+		const auto & dir = (point - pre_point).getDirectionVec();
+
+		if (!(dir == pre_dir)) {
+			optimized_path.push_back(pre_dir);
+			pre_dir = dir;
+		}
+		pre_point = point;
+	}
+	optimized_path.push_back(origin_path[path_length - 1]);
+	return optimized_path;
+}
+
+void Unit::tryToSearchForPath()
+{
+	if (camp != unit_manager->player_id)
+		return;
+
+	if (!grid_map->checkPosition(_final_dest))
+		_final_dest = grid_map->findFreePositionNear(_final_dest);
+
+	GridPath grid_path = findPath(_final_dest);
+	if (grid_path.size()) {
+		del_cnt = -1;
+		is_delaying = false;
+		auto new_msg = unit_manager->msgs->add_game_message();
+		new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_MOV);
+		new_msg->set_unit_type(type);
+		new_msg->set_unit_0(id);
+		new_msg->set_camp(camp);
+		new_msg->genSetGridPath(grid_path);
+	}
+	else {
+
+	}
+}
+
 void Unit::setGridMap(GridMap * _grid_map)
 {
 	grid_map = _grid_map;
+}
+
+void Unit::setCurPos(const GridPoint _cur)
+{
+	_cur_pos = _cur;
 }
 
 void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap,Layer* _combat_scene, EventListenerTouchOneByOne * _listener)
@@ -133,6 +247,38 @@ bool Unit::isMobile()
 	return mobile;
 }
 
+GridPoint Unit::getGridPosition() const
+{
+	if (grid_map)
+		return grid_map->getGridPoint(getPosition());
+	else return GridPoint(0, 0);
+}
+
+void Unit::setGridPath(const MsgGridPath & msg_grid_path)
+{
+	int grid_point_size = msg_grid_path.msg_grid_point_size();
+	_grid_path = GridPath(grid_point_size);
+	for (int i = 0; i < grid_point_size; i++)
+		_grid_path[i] = GridPoint{ msg_grid_path.msg_grid_point(i).x(), msg_grid_path.msg_grid_point(i).y() };
+	_final_dest = _grid_path[0];
+	_cur_dest = _grid_path.back();
+	//_grid_path.pop_back();
+}
+
+void Unit::setDestination(const GridPoint & grid_dest, const Point& point)
+{
+	_final_dest = grid_dest;
+	_final_position = point;
+}
+
+void Unit::goToFinalPosition()
+{
+	setPosition(_final_position);
+	/*auto esp = (grid_map->getPointWithOffset(_final_dest) - getPosition()).getNormalized();
+	Point next_position = esp * speed + getPosition();
+	setPosition(next_position);*/
+}
+
 void Unit::setCamp(int _camp)
 {
 	camp = _camp;
@@ -167,6 +313,10 @@ bool Unit::is_in(Point p1, Point p2) {
 void Unit::update(float f) 
 {
 	timer++;
+	if (is_moving)
+	{
+		move();
+	}
 	if (camp == unit_manager->player_id && timer % attack_freq == 0)
 	{
 		if (is_attack) {
@@ -207,6 +357,8 @@ bool Unit::underAttack(int damage)
 
 bool UnitManager::init()
 {
+	std::random_device rd;						//采用非确定性随机数发生器产生随机数种子
+	gen = std::default_random_engine(rd());		//采用默认随机数引擎产生随机数
 	return true;
 }
 
@@ -304,21 +456,29 @@ void UnitManager::updateUnitsState()
 			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
 			id_map.insert(id, new_unit);
 		}
-		else 
-			if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
+		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
+		{
+			int unitid_0 = msg.unit_0();
+			int unitid_1 = msg.unit_1();
+			int damage = msg.damage();
+			//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
+			Unit * unit_1 = id_map.at(unitid_1);
+			if (unit_1)
 			{
-				int unitid_0 = msg.unit_0();
-				int unitid_1 = msg.unit_1();
-				int damage = msg.damage();
-				//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
-				Unit * unit_1 = id_map.at(unitid_1);
-				if (unit_1)
-				{
-					genAttackEffect(unitid_0, unitid_1);
-					unit_1->underAttack(damage);
-
-				}
+				genAttackEffect(unitid_0, unitid_1);
+				unit_1->underAttack(damage);
 			}
+		}
+		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_MOV)
+		{
+			Unit * unit_0 = id_map.at(msg.unit_0());
+			const MsgGridPath& path = msg.msg_grid_path();
+			if (path.msg_grid_point_size())
+			{
+				unit_0->setGridPath(msg.msg_grid_path());
+				unit_0->is_moving = true;
+			}
+		}
 	}
 	msgs->clear_game_message();
 }
@@ -450,7 +610,6 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 		{
 			nu->setPosition(getUnitCreateCenter().x, getUnitCreateCenter().y - nu->getContentSize().height);
 			playMover(Point(x, y), nu);
-			//nu->setPosition(x, y);
 		}
 		else
 		{
@@ -462,6 +621,7 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 		nu->setPosition(x, y);
 	}
 	nu->addToGmap(Point(x,y));
+	nu->setCurPos(getGridPoint(Point(x, y)));
 	//刷新电力条
 	power->updatePowerDisplay();
 	nu->schedule(schedule_selector(Unit::update));
@@ -498,20 +658,35 @@ void UnitManager::playMover(Point position, Unit * _sprite) {
 	auto moveTo = MoveTo::create(duration, position);
 	auto sequence = Sequence::create(moveTo, nullptr);
 	_sprite->runAction(sequence);
-};
+}
+int UnitManager::genRandom(int start, int end)
+{
+	std::uniform_int_distribution<> rd(start, end);
+	return(rd(gen));
+}
+;
 
 void UnitManager::selectEmpty(Point position)
 {
 	for (auto& id : selected_ids)
 	{
-		if (id_map.at(id)->getNumberOfRunningActions() != 0)
+		Unit * unit = id_map.at(id);
+
+		if (!unit || !unit->isMobile())
+			continue;
+
+		GridPoint grid_dest = grid_map->getGridPoint(position);
+		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
+		unit->setDestination(grid_dest,position);
+		unit->tryToSearchForPath();
+		/*if (id_map.at(id)->getNumberOfRunningActions() != 0)
 		{
 			id_map.at(id)->stopAllActions();
 		}
 		if (id_map.at(id)->isMobile())
 		{
 			playMover(position, id_map.at(id));
-		}
+		}*/
 	}
 }
 

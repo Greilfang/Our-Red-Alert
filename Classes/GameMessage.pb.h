@@ -5,7 +5,7 @@
 #define PROTOBUF_GameMessage_2eproto__INCLUDED
 
 #include <string>
-
+#include <GridMap.h>
 #include <google/protobuf/stubs/common.h>
 
 #if GOOGLE_PROTOBUF_VERSION < 3005000
@@ -133,6 +133,7 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
     0;
 
   void Swap(GameMessage* other);
+  void genSetGridPath(const GridPath& _grid_path);
   friend void swap(GameMessage& a, GameMessage& b) {
     a.Swap(&b);
   }
@@ -205,6 +206,7 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
  // void genGameMessage(CmdCode _cmd_code, int _unit_0, int _unit_1, int _damage, int _camp, int _unit_type, const MsgGridPath& _grid_path);
+  //void genSetGridPath(const GridPath& _grid_path);
 
   // .MsgGridPath msg_grid_path = 5;
   bool has_msg_grid_path() const;

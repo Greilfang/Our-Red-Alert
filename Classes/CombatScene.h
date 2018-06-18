@@ -14,7 +14,6 @@
 #include"Const.h"
 USING_NS_CC;
 
-
 class MouseRect : public cocos2d::DrawNode
 {
 public:
@@ -88,15 +87,15 @@ public:
 	/*用于滚动地图后的刷新*/
 	virtual void update(float f);
 	/*用于返回selected_box*/
-	//std::vector<Unit *> & getSelected_box();
+	
 	static Scene* createScene(chat_server * server_context_, chat_client * client_context_);
 	virtual bool init(chat_server * server_context_, chat_client * client_context_);
 	
 	/* 视野中心为基地 */
 	void focusOnBase();
 	
-	
 	static CombatScene* create(chat_server * server_context_, chat_client * client_context_);
+	
 private:
 	chat_client * client_side = nullptr;//服务端指针
 	chat_server * server_side = nullptr;//服务端指针

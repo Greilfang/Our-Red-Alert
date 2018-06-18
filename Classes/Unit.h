@@ -3,10 +3,11 @@
 #define _UNIT_H_
 
 #include <iostream>
-#include <cocos2d.h>
+#include "cocos2d.h"
 #include "GameMessage.pb.h"
 #include "ui/CocosGUI.h"
 #include "GridMap.h"
+#include "AStarPathFinding.h"
 #include"chat_client.h"
 
 USING_NS_CC;
@@ -71,11 +72,12 @@ public:
 	void setPlayerID(int _player_id);
 	void setCombatScene(CombatScene* _combat_scene);
 	void setSocketClient(chat_client* _socket_client);
-	void setBuilding(Building * _building);
 	//获取运动的时间
 	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed);
 	//执行运动的操作
 	void playMover(Point position, Unit * _sprite);
+	//获取随机数
+	int genRandom(int start, int end);
 
 	CombatScene * getCombatScene();
 	TMXTiledMap * getTiledMap();
@@ -114,6 +116,7 @@ private:
 	cocos2d::TMXTiledMap* tiled_map = nullptr;
 	CombatScene* combat_scene = nullptr;
 	chat_client * socket_client = nullptr;
+
 	int next_id = 1;
 	int base_id = 1;
 
@@ -122,6 +125,7 @@ private:
 	Unit* createNewUnit(int id, int camp, int uint_type, float x, float y);
 
 	void genAttackEffect(int unit_id0, int unit_id1);
+	std::default_random_engine gen;
 };
 
 class Unit :public cocos2d::Sprite {
@@ -131,9 +135,25 @@ protected:
 	GridMap* grid_map = nullptr;
 	Layer* combat_scene = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener = nullptr;
+
+	GridPoint _cur_pos;
+	GridPoint _cur_dest;
+	GridPoint _final_dest;
+	GridPath _grid_path;
+	Point _final_position;
+	
+	//count of refinding path 重新寻路计数器
+	int rfp_cnt = 0;
+	//count of delay 延迟寻路计数器
+	int del_cnt = -1;
+
 	int type;
 	bool mobile;
+
 	bool is_attack;
+	bool is_moving = false;
+	bool is_delaying = false; //延迟寻路标志
+
 	bool selected = false;//是否被选中当前位置和当前目标
 	int current_life=100;
 	int max_life=100;
@@ -142,9 +162,21 @@ protected:
 	double attack_range ;
 	int speed ;
 	Bar* hp_bar = nullptr;//用来给单位创建血条
+
+	//移动单位
+	virtual void move();
+	bool hasArrivedFinalDest();
+	//寻路算法
+	virtual GridPath findPath(const GridPoint& dest)const;
+
+	//优化寻路(若连续几个格点在同一条路径上则把原先的几条GridPath合成为一条)
+	GridPath optimizePath(const GridPath & origin_path) const;
+
+	
 public:
 	void setGridMap(GridMap *);
 	//将单位绑定监听器，并加到地图上
+	void setCurPos(const GridPoint _cur);
 	void set(TMXTiledMap *, GridMap * _gridMap,Layer * _combat_scene, EventListenerTouchOneByOne *);
 	virtual void addToGmap(Point p);
 	virtual void setListener();
@@ -163,6 +195,12 @@ public:
 	void initBar();
 	virtual void setProperties();
 	//void removeFromMaps();
+
+	void tryToSearchForPath();
+	GridPoint getGridPosition() const;
+	void setGridPath(const MsgGridPath & msg_grid_path);
+	void setDestination(const GridPoint& grid_dest,const Point& point);
+	void goToFinalPosition();
 
 	virtual void setCamp(int _camp);
 	void setMobile(bool can);

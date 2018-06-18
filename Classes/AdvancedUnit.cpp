@@ -26,7 +26,7 @@ void Fighter::setProperties()
 	type = 1;
 
 
-	speed = 100.0f;
+	speed = 4.5f;
 
 	mobile = true;
 
@@ -121,7 +121,7 @@ void Tank::setProperties()
 {
 	type = 2;
 
-	speed = 200.0f;
+	speed = 1.5f;
 
 
 	z_index = 10;
@@ -147,7 +147,7 @@ void Soldier::setProperties()
 {
 	type = 3;
 
-	speed = 150.0f;
+	speed = 1.5f;
 
 	z_index = 10;
 

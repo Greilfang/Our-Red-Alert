@@ -26,16 +26,38 @@ bool GridMap::initWithTiledMap(const cocos2d::TMXTiledMap * tiled_map) {
 	return true;
 }
 
-Point GridMap::getPoint(const GridPoint & great_point){
+Point GridMap::getPoint(const GridPoint & great_point) {
 	return Point(great_point._x * _tile_width, great_point._y * _tile_height);
 }
 
-GridPoint GridMap::getGridPoint(const cocos2d::Point & point){
+GridPoint GridMap::getGridPoint(const Point & point) {
 	return GridPoint(static_cast<int>(point.x) / _tile_width, static_cast<int>(point.y) / _tile_height);
 }
 
-void GridMap::occupyPosition(const GridPoint & pos){
-	_gmap[pos._x][pos._y] = 1;
+GridPoint GridMap::getGridPointWithOffset(const Point & p)
+{
+	return getGridPoint(p + _offset_vec);
+}
+
+cocos2d::Point GridMap::getPointWithOffset(const GridPoint & gp)
+{
+	return getPoint(gp) + _offset_vec;
+}
+
+bool GridMap::hasApproached(const cocos2d::Point & cur_fp, const GridPoint & dest_gp)
+{
+	cocos2d::Point dest_fp = getPointWithOffset(dest_gp);
+	if ((dest_fp - cur_fp).length() < 5)
+		return true;
+	return false;
+}
+
+bool GridMap::occupyPosition(const GridPoint & pos) {
+	if (checkPosition(pos)) {
+		_gmap[pos._x][pos._y] = 1;
+		return true;
+	}
+	return false;
 }
 
 void GridMap::occupyPosition(const GridRect& grec)
@@ -50,8 +72,8 @@ void GridMap::occupyPosition(const GridRect& grec)
 	}
 }
 
-void GridMap::occupyPosition(const cocos2d::Point & pos){
-	occupyPosition(getGridPoint(pos));
+bool GridMap::occupyPosition(const cocos2d::Point & pos) {
+	return occupyPosition(getGridPoint(pos));
 }
 
 bool GridMap::checkPosition(const GridPoint & gp)
@@ -72,6 +94,11 @@ bool GridMap::checkPosition(const GridRect& grec)
 		}
 	}
 	return(true);
+}
+
+void GridMap::leavePosition(const GridPoint & pos)
+{
+	_gmap[pos._x][pos._y] = 0;
 }
 
 GridPoint GridMap::findFreePositionNear(const GridPoint & origin_gp)
@@ -95,13 +122,19 @@ GridPoint GridMap::findFreePositionNear(const GridPoint & origin_gp)
 	return GridPoint(-1, -1);
 }
 
-const dyadic_array & GridMap::getLogicalGridMap(){
+const dyadic_array & GridMap::getLogicalGridMap() {
 	return _gmap;
 }
 
 bool GridPoint::operator==(const GridPoint & gp2) const
 {
 	return(_x == gp2._x && _y == gp2._y);
+}
+
+GridPoint GridPoint::getDirectionVec()
+{
+	auto sgn = [](int x)->int { return x ? (x > 0 ? (1) : (-1)) : 0; };
+	return GridPoint(sgn(_x), sgn(_y));
 }
 
 GridPoint operator+(const GridPoint & gp1, const GridPoint & gp2)
@@ -118,6 +151,6 @@ GridRect::GridRect(GridPoint _center, GridSize _size)
 {
 	center = _center;
 	size = _size;
-	lower_left = GridPoint(_center._x - size.width/2, _center._y - size.height / 2);
+	lower_left = GridPoint(_center._x - size.width / 2, _center._y - size.height / 2);
 }
 
