@@ -114,7 +114,7 @@ void Unit::move()
 		_cur_dest = _cur_pos;
 		setCurDestPoint(_cur_dest);
 		Point final_dest = grid_map->getPointWithOffset(_final_dest);
-		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 150.F) {
+		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 30.F) {
 			if (!is_delaying)
 				tryToSearchForPath();
 		}
