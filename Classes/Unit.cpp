@@ -6,13 +6,15 @@
 #include "CombatScene.h"
 #include<string>
 #include<random>
-//#define DEBUG
+#include "iostream"
+#define DEBUG
 
 const int MAX_PLAYER_NUM = 4;
 USING_NS_CC;
+
 /*血条更新*/
 void Bar::updateBarDisplay(float rate) {
-	
+
 	setVisible(true);
 	clear();
 	auto tg = static_cast<Unit*>(this->getParent());
@@ -21,7 +23,7 @@ void Bar::updateBarDisplay(float rate) {
 #endif // DEBUG
 
 	auto s = tg->getContentSize();
-	
+
 	drawRect(Point((s.width - length) / 2, s.height + 5), Point((s.width + length) / 2, s.height + 5 + width), color);
 	Point endpoint{ s.width / 2 - length / 2 + length * rate,s.height + 5 + width };
 	drawSolidRect(Point((s.width - length) / 2, s.height + 5), endpoint, color);
@@ -67,20 +69,20 @@ void Unit::initBar()
 
 void Unit::setProperties()
 {
-	
+
 	type = -1;
 	camp = 0;
 	selected = 0;
 
 }
 
-void Unit::displayHP() 
+void Unit::displayHP()
 {
 	if (hp_bar) {
 		hp_bar->keepVisible();
 	}
 }
-void Unit::hideHP() 
+void Unit::hideHP()
 {
 	if (hp_bar) {
 		hp_bar->stopKeepingVisible();
@@ -89,44 +91,51 @@ void Unit::hideHP()
 
 void Unit::move()
 {
-	//esp为当前格点指向当前终点的单位向量
-	auto esp = (grid_map->getPointWithOffset(_cur_dest) - getPosition()).getNormalized();
+	//esp为当前格点指向当前终点的单位向量(这步可以优化）
+	auto esp = (_cur_dest_point - getPosition()).getNormalized();
 	Point next_position = esp * speed + getPosition();
 	GridPoint next_gpos = grid_map->getGridPoint(next_position);
-	
-	if (!(_cur_dest == next_gpos))
+
+	if (_cur_pos == next_gpos)
 	{
-		if (_cur_pos == next_gpos)
-		{
-			setPosition(next_position);
-			log("%f,%f", getPosition().x, getPosition().y);
-		}
-		else if (grid_map->occupyPosition(next_position)) {
-			setPosition(next_position);
-			log("%f,%f", getPosition().x, getPosition().y);
-			grid_map->leavePosition(_cur_pos);
-			_cur_pos = next_gpos;
-		}
-		else {
-			_cur_dest = _cur_pos;
-			Point final_dest = grid_map->getPointWithOffset(_final_dest);
-			if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 150.F) {
-				if (!is_delaying)
-					tryToSearchForPath();
-			}
-		}
-		if (hasArrivedFinalDest())
-			if (_grid_path.size())
-			{
-				_cur_dest = _grid_path.back();
-				_grid_path.pop_back();
-			}
-			else
-			{
-				goToFinalPosition();
-				is_moving = false;
-			}
+		setPosition(next_position);
 	}
+	else if (grid_map->occupyPosition(next_gpos))
+	{
+		setPosition(next_position);
+		grid_map->leavePosition(_cur_pos);
+		_cur_pos = next_gpos;
+	}
+	else
+	{
+#ifdef DEBUG
+		std::cout << "failed:try to occupyPosition " << next_gpos._x << "," << next_gpos._y << std::endl;
+#endif // DEBUG
+		_cur_dest = _cur_pos;
+		setCurDestPoint(_cur_dest);
+		Point final_dest = grid_map->getPointWithOffset(_final_dest);
+		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 150.F) {
+			if (!is_delaying)
+				tryToSearchForPath();
+		}
+	}
+	if (hasArrivedFinalDest()) {
+		if (_grid_path.size()) {
+			_cur_dest = _grid_path.back();
+			setCurDestPoint(_cur_dest);
+			_grid_path.pop_back();
+		}
+		else
+			is_moving = false;
+	}
+}
+
+void Unit::delay()
+{
+	if (del_cnt > 0)
+		--del_cnt;
+	else if (camp == unit_manager->player_id)
+		tryToSearchForPath();
 }
 
 bool Unit::hasArrivedFinalDest()
@@ -144,9 +153,8 @@ GridPath Unit::findPath(const GridPoint & dest) const
 	path_finding.generatePath();
 	GridPath grid_path = path_finding.getPath();
 
-	//GridPath optimized_path = optimizePath(grid_path);
-	//return optimized_path;
-	return grid_path;
+	GridPath optimized_path = optimizePath(grid_path);
+	return optimized_path;
 }
 
 GridPath Unit::optimizePath(const GridPath & origin_path) const
@@ -163,7 +171,7 @@ GridPath Unit::optimizePath(const GridPath & origin_path) const
 		const auto & dir = (point - pre_point).getDirectionVec();
 
 		if (!(dir == pre_dir)) {
-			optimized_path.push_back(pre_dir);
+			optimized_path.push_back(pre_point);
 			pre_dir = dir;
 		}
 		pre_point = point;
@@ -192,7 +200,8 @@ void Unit::tryToSearchForPath()
 		new_msg->genSetGridPath(grid_path);
 	}
 	else {
-
+		del_cnt = unit_manager->genRandom(16, 32);
+		is_delaying = true;
 	}
 }
 
@@ -206,7 +215,7 @@ void Unit::setCurPos(const GridPoint _cur)
 	_cur_pos = _cur;
 }
 
-void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap,Layer* _combat_scene, EventListenerTouchOneByOne * _listener)
+void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap, Layer* _combat_scene, EventListenerTouchOneByOne * _listener)
 {
 	tiled_map = _tiledMap;
 	tiled_map->addChild(this, z_index);
@@ -218,6 +227,9 @@ void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap,Layer* _combat_scene,
 
 void Unit::addToGmap(Point p)
 {
+#ifdef DEBUG
+	std::cout << "Unit type: " << this->type << std::endl;
+#endif // DEBUG
 	grid_map->occupyPosition(p);
 }
 
@@ -258,25 +270,24 @@ void Unit::setGridPath(const MsgGridPath & msg_grid_path)
 {
 	int grid_point_size = msg_grid_path.msg_grid_point_size();
 	_grid_path = GridPath(grid_point_size);
+
 	for (int i = 0; i < grid_point_size; i++)
 		_grid_path[i] = GridPoint{ msg_grid_path.msg_grid_point(i).x(), msg_grid_path.msg_grid_point(i).y() };
+
 	_final_dest = _grid_path[0];
 	_cur_dest = _grid_path.back();
-	//_grid_path.pop_back();
+	setCurDestPoint(_cur_dest);
+	_grid_path.pop_back();
 }
 
-void Unit::setDestination(const GridPoint & grid_dest, const Point& point)
+void Unit::setDestination(const GridPoint & grid_dest)
 {
 	_final_dest = grid_dest;
-	_final_position = point;
 }
 
-void Unit::goToFinalPosition()
+void Unit::setCurDestPoint(const GridPoint & grid_dest)
 {
-	setPosition(_final_position);
-	/*auto esp = (grid_map->getPointWithOffset(_final_dest) - getPosition()).getNormalized();
-	Point next_position = esp * speed + getPosition();
-	setPosition(next_position);*/
+	_cur_dest_point = grid_map->getPointWithOffset(_cur_dest);
 }
 
 void Unit::setCamp(int _camp)
@@ -304,31 +315,28 @@ bool Unit::is_in(Point p1, Point p2) {
 	if (abs(unitPoint.x - p1.x) + abs(unitPoint.x - p2.x) != abs(p1.x - p2.x)) {
 		return false;
 	}
-	else if(abs(unitPoint.y - p1.y) + abs(unitPoint.y - p2.y) != abs(p1.y - p2.y)) {
+	else if (abs(unitPoint.y - p1.y) + abs(unitPoint.y - p2.y) != abs(p1.y - p2.y)) {
 		return false;
 	}
 	return true;
 }
 
-void Unit::update(float f) 
+void Unit::update(float f)
 {
 	timer++;
 	if (is_moving)
-	{
 		move();
-	}
-	if (camp == unit_manager->player_id && timer % attack_freq == 0)
-	{
-		if (is_attack) {
+	if (is_delaying)
+		delay();
+
+	if (camp == unit_manager->player_id && timer % attack_freq == 0) {
+		if (is_attack)
 			attack();
-		}
-		else {
-			searchEnemy();
-		}
+		else searchEnemy();
 	}
 }
 
-void Unit::searchEnemy() 
+void Unit::searchEnemy()
 {
 	is_attack = 1;
 	attack_id = 5;
@@ -453,7 +461,7 @@ void UnitManager::updateUnitsState()
 			int camp = msg.camp();
 			int unit_type = msg.unit_type();
 			auto grid_point = msg.msg_grid_path().msg_grid_point(0);
-			Unit* new_unit = createNewUnit(id, camp, unit_type,grid_point.x(),grid_point.y());
+			Unit* new_unit = createNewUnit(id, camp, unit_type, grid_point.x(), grid_point.y());
 			id_map.insert(id, new_unit);
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
@@ -465,7 +473,7 @@ void UnitManager::updateUnitsState()
 			Unit * unit_1 = id_map.at(unitid_1);
 			if (unit_1)
 			{
-				genAttackEffect(unitid_0, unitid_1);
+				//genAttackEffect(unitid_0, unitid_1);
 				unit_1->underAttack(damage);
 			}
 		}
@@ -483,7 +491,7 @@ void UnitManager::updateUnitsState()
 	msgs->clear_game_message();
 }
 
-void UnitManager::initializeUnitGroup(){
+void UnitManager::initializeUnitGroup() {
 	/* 加载初始化对象 */
 	auto* obj_group = tiled_map->getObjectGroup("InitialUnits");
 	auto& objs = obj_group->getObjects();
@@ -496,7 +504,7 @@ void UnitManager::initializeUnitGroup(){
 		int type = dict["type"].asInt();
 
 		if (camp == player_id) {
-			genCreateMessage(type,camp, x, y);
+			genCreateMessage(type, camp, x, y);
 		}
 	}
 }
@@ -535,12 +543,12 @@ Point UnitManager::getUnitCreateCenter()
 GridSize UnitManager::getGridSize(Size _size)
 {
 	auto size = getGridPoint(_size);
-	return GridSize(size._x,size._y);
+	return GridSize(size._x, size._y);
 }
 
 GridRect UnitManager::getGridRect(Point _p, Size _size)
 {
-	return GridRect(getGridPoint(_p),getGridSize(_size));
+	return GridRect(getGridPoint(_p), getGridSize(_size));
 }
 
 GridPoint UnitManager::getGridPoint(Point p)
@@ -554,7 +562,7 @@ Point UnitManager::getPoint(GridPoint gp)
 }
 
 
-Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y)
+Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float y)
 {
 	Unit* nu;
 	Base* tmp_base;
@@ -596,32 +604,48 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 	default:
 		break;
 	}
-	
+
 	nu->unit_manager = this;
 	nu->setProperties();
 	nu->id = id;
 	nu->camp = camp;
-	nu->set(tiled_map, grid_map, (Layer*)combat_scene,spriteTouchListener);
+	nu->set(tiled_map, grid_map, (Layer*)combat_scene, spriteTouchListener);
 	nu->initBar();
 	nu->setAnchorPoint(Vec2(0.5, 0.5));
 	if (nu->isMobile())
 	{
 		if (getUnitCreateCenter() != Point(0, 0))
 		{
-			nu->setPosition(getUnitCreateCenter().x, getUnitCreateCenter().y - nu->getContentSize().height);
-			playMover(Point(x, y), nu);
+			auto centerGP = getGridPoint(Point(getUnitCreateCenter().x, getUnitCreateCenter().y));
+			for (int i = 1; i < 10; i++)
+			{
+				auto freeGP = GridPoint(centerGP._x, centerGP._y - i);
+				if (grid_map->checkPosition(freeGP))
+				{
+					nu->setPosition(grid_map->getPointWithOffset(freeGP));
+					grid_map->occupyPosition(freeGP);
+					nu->setCurPos(freeGP);
+					break;
+				}
+			}
+			nu->setDestination(getGridPoint(Point(x, y)));
+			nu->tryToSearchForPath();
 		}
 		else
 		{
 			nu->setPosition(x, y);
+			nu->addToGmap(Point(x, y));
+			nu->setCurPos(getGridPoint(Point(x, y)));
 		}
 	}
 	else
 	{
 		nu->setPosition(x, y);
+		nu->addToGmap(Point(x, y));
+		nu->setCurPos(getGridPoint(Point(x, y)));
 	}
-	nu->addToGmap(Point(x,y));
-	nu->setCurPos(getGridPoint(Point(x, y)));
+
+
 	//刷新电力条
 	power->updatePowerDisplay();
 	nu->schedule(schedule_selector(Unit::update));
@@ -629,7 +653,7 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type,float x,float y
 }
 
 //生成新单位测试程序
-void UnitManager::genCreateMessage(int _unit_type,int camp, float x,float y)
+void UnitManager::genCreateMessage(int _unit_type, int camp, float x, float y)
 {
 	auto new_msg = msgs->add_game_message();
 	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CRT);
@@ -644,16 +668,16 @@ void UnitManager::genCreateMessage(int _unit_type,int camp, float x,float y)
 	next_id += MAX_PLAYER_NUM;
 }
 
-float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed) 
+float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed)
 {
-	float duration =sqrtf((end_pos.x - start_pos.x)*(end_pos.x - start_pos.x) +
-		(end_pos.y - start_pos.y)*(end_pos.y - start_pos.y))/ _speed;
+	float duration = sqrtf((end_pos.x - start_pos.x)*(end_pos.x - start_pos.x) +
+		(end_pos.y - start_pos.y)*(end_pos.y - start_pos.y)) / _speed;
 	return duration;
 }
 
 void UnitManager::playMover(Point position, Unit * _sprite) {
 	//获得精灵移动的时间
-	float duration = getPlayerMoveTime(_sprite->getPosition(), position,_sprite->getSpeed());
+	float duration = getPlayerMoveTime(_sprite->getPosition(), position, _sprite->getSpeed());
 	log("%f,%f", _sprite->getPositionX(), _sprite->getPositionY());
 	auto moveTo = MoveTo::create(duration, position);
 	auto sequence = Sequence::create(moveTo, nullptr);
@@ -677,7 +701,7 @@ void UnitManager::selectEmpty(Point position)
 
 		GridPoint grid_dest = grid_map->getGridPoint(position);
 		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
-		unit->setDestination(grid_dest,position);
+		unit->setDestination(grid_dest);
 		unit->tryToSearchForPath();
 		/*if (id_map.at(id)->getNumberOfRunningActions() != 0)
 		{
@@ -700,7 +724,7 @@ void UnitManager::selectPointUnits(Unit * _unit)
 	}
 }
 
-void UnitManager::getClickedUnit() 
+void UnitManager::getClickedUnit()
 {
 	for (auto& id : selected_ids)
 	{
@@ -709,7 +733,7 @@ void UnitManager::getClickedUnit()
 	}
 }
 
-void UnitManager::cancellClickedUnit() 
+void UnitManager::cancellClickedUnit()
 {
 	for (auto& id : selected_ids)
 	{
@@ -752,81 +776,14 @@ void TrajectoryEffect::setPath(cocos2d::Vec2 from, cocos2d::Vec2 to)
 
 void TrajectoryEffect::updatefire(float)
 {
-	if (((abs(getPosition().x - to_.x)<speed_) && (abs(getPosition().y - to_.y)<speed_)))
+	if (((abs(getPosition().x - to_.x) < speed_) && (abs(getPosition().y - to_.y) < speed_)))
 		removeFromParent();
 	else
 		setPosition(getPosition() + move_);
 }
 
-/*
-void UnitManager::selectUnits(Point select_point)
-{
-	
-	if (selected_ids.size())
-	{
-		
-		for (auto & id_unit : id_map)
-			if (id_unit.second->camp != player_id && id_unit.second->getBoundingBox().containsPoint(select_point))
-			{
-
-				for (auto & id : selected_ids)
-				{
-					//log("Unit ID: %d, tracing enemy id: %d", id, id_unit.second->id);
-					Unit* unit = id_map.at(id);
-					if (!unit || !unit->isMobile())
-						continue;
-					GridPoint target_pos = getUnitPosition(id_unit.first);
-					unit->setTarget(id_unit.second->id);
-					unit->setDestination(target_pos);
-					log("Unit %d, start tracing FP", id);
-					unit->tryToFindPath();
-				}
-				return;
-			}
-		for (auto & id_unit : id_map)
-			if (id_unit.second->camp == player_id && id_unit.second->getBoundingBox().containsPoint(select_point))
-			{
-				deselectAllUnits();
-				selected_ids.push_back(id_unit.first);
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/selecttarget.wav");
-				id_unit.second->displayHPBar();
-				return;
-			}
-		for (auto & id : selected_ids)
-		{
-			Unit* unit = id_map.at(id);
-
-			if (!unit || !unit->isMobile())
-				continue;
-
-			GridPoint grid_dest = grid_map->getGridPoint(select_point);
-			log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
-
-			unit->setDestination(grid_dest);
-			log("Unit %d, start moving FP", id);
-			unit->abandonTracing();
-			unit->tryToFindPath();
-
-		}
-		return;
-	}
-	else
-		for (auto & id_unit : id_map)
-			if (id_unit.second->camp == player_id && id_unit.second->getBoundingBox().containsPoint(select_point))
-			{
-				deselectAllUnits();
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/selecttarget.wav");
-				selected_ids.push_back(id_unit.first);
-				id_unit.second->displayHPBar();
-				return;
-			}
-	
-	return;
-}
-*/
-
-void ConstructRange::drawRange(Point p,float r)
+void ConstructRange::drawRange(Point p, float r)
 {
 
-		drawDot(p, r, color);
+	drawDot(p, r, color);
 }

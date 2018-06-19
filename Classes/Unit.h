@@ -6,9 +6,10 @@
 #include "cocos2d.h"
 #include "GameMessage.pb.h"
 #include "ui/CocosGUI.h"
+#include <vector>
 #include "GridMap.h"
 #include "AStarPathFinding.h"
-#include"chat_client.h"
+#include "chat_client.h"
 
 USING_NS_CC;
 using namespace ui;
@@ -53,6 +54,7 @@ public:
 class UnitManager : public cocos2d::Ref
 {
 public:
+	Vector<Layer*> createLayer;
 	int player_id = 0;
 	Base * base = nullptr;
 	Money * money = nullptr;
@@ -138,12 +140,10 @@ protected:
 
 	GridPoint _cur_pos;
 	GridPoint _cur_dest;
+	Point _cur_dest_point;
 	GridPoint _final_dest;
 	GridPath _grid_path;
-	Point _final_position;
 	
-	//count of refinding path 重新寻路计数器
-	int rfp_cnt = 0;
 	//count of delay 延迟寻路计数器
 	int del_cnt = -1;
 
@@ -165,6 +165,8 @@ protected:
 
 	//移动单位
 	virtual void move();
+	//单位延迟寻路
+	void delay();
 	bool hasArrivedFinalDest();
 	//寻路算法
 	virtual GridPath findPath(const GridPoint& dest)const;
@@ -199,8 +201,8 @@ public:
 	void tryToSearchForPath();
 	GridPoint getGridPosition() const;
 	void setGridPath(const MsgGridPath & msg_grid_path);
-	void setDestination(const GridPoint& grid_dest,const Point& point);
-	void goToFinalPosition();
+	void setDestination(const GridPoint& grid_dest);
+	void setCurDestPoint(const GridPoint& grid_dest);
 
 	virtual void setCamp(int _camp);
 	void setMobile(bool can);
@@ -236,7 +238,6 @@ private:
 	void updatefire(float);
 	cocos2d::Vec2 from_, to_, move_;
 	int speed_ = 3;
-
 };
 
 #endif

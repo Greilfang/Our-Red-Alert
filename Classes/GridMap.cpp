@@ -1,5 +1,6 @@
 #include "GridMap.h"
-
+#include "iostream"
+#define DEBUG
 USING_NS_CC;
 
 GridMap * GridMap::create(const cocos2d::TMXTiledMap * tiled_map) {
@@ -22,7 +23,7 @@ bool GridMap::initWithTiledMap(const cocos2d::TMXTiledMap * tiled_map) {
 	_tile_height = static_cast<int>(tiled_map->getTileSize().height);
 	_tile_width = static_cast<int>(tiled_map->getTileSize().width);
 	_gmap = dyadic_array(_map_width, std::vector<int>(_map_height, 0));
-
+	_offset_vec = Vec2(_tile_width / 2, _tile_height / 2);
 	return true;
 }
 
@@ -54,6 +55,9 @@ bool GridMap::hasApproached(const cocos2d::Point & cur_fp, const GridPoint & des
 
 bool GridMap::occupyPosition(const GridPoint & pos) {
 	if (checkPosition(pos)) {
+#ifdef DEBUG
+		std::cout << "GridPoint:" << pos._x << "," << pos._y << std::endl;
+#endif // DEBUG
 		_gmap[pos._x][pos._y] = 1;
 		return true;
 	}
@@ -62,12 +66,15 @@ bool GridMap::occupyPosition(const GridPoint & pos) {
 
 void GridMap::occupyPosition(const GridRect& grec)
 {
-
-	for (int x = grec.lower_left._x; x <= grec.lower_left._x + grec.size.width; x++)
+	
+	for (int x = grec.lower_left._x; x < grec.lower_left._x + grec.size.width; x++)
 	{
-		for (int y = grec.lower_left._y; y <= grec.lower_left._y + grec.size.height; y++)
+		for (int y = grec.lower_left._y; y < grec.lower_left._y + grec.size.height; y++)
 		{
 			_gmap[x][y] = 1;
+#ifdef DEBUG
+			std::cout << "GridPoint:" << x << "," << y << std::endl;
+#endif // DEBUG
 		}
 	}
 }
@@ -85,9 +92,9 @@ bool GridMap::checkPosition(const GridPoint & gp)
 
 bool GridMap::checkPosition(const GridRect& grec)
 {
-	for (int x = grec.lower_left._x; x <= grec.lower_left._x + grec.size.width; x++)
+	for (int x = grec.lower_left._x; x < grec.lower_left._x + grec.size.width; x++)
 	{
-		for (int y = grec.lower_left._y; y <= grec.lower_left._y + grec.size.height; y++)
+		for (int y = grec.lower_left._y; y < grec.lower_left._y + grec.size.height; y++)
 		{
 			if (x < 0 || x >= _map_width || y < 0 || y >= _map_height || _gmap[x][y] == 1)
 				return(false);

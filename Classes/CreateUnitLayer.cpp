@@ -53,8 +53,9 @@ bool BaseLayer::init()
 				this->setVisible(false);
 				onBuilding(11,MilitaryCamp::size);
 			}				
-		}				
+		}		
 	});
+	militaryCamp->setSwallowTouches(true);
 	//添加一个创建mine的Button对象，设置在layout的右上角
 	Button* mine = Button::create("/Picture/ui/gold.png",
 		"/Picture/ui/gold.png");
@@ -78,7 +79,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-
+	mine->setSwallowTouches(true);
 	//添加一个创建powerPlant的Button对象，设置在layout的左中部
 	powerPlant = Button::create("power.png",
 		"power.png");
@@ -102,7 +103,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-
+	powerPlant->setSwallowTouches(true);
 	//添加一个创建TankFactary的Button对象，设置在layout的右部
 	tankFactary = Button::create("basebutton.png",
 		"basebutton.png");
@@ -126,7 +127,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-
+	tankFactary->setSwallowTouches(true);
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -143,6 +144,7 @@ bool BaseLayer::init()
 			this->setVisible(false);
 		}
 	});
+	exit->setSwallowTouches(true);
 	return true;
 }
 
@@ -201,7 +203,7 @@ bool MilitaryCampLayer::init()
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");	
 		}
 	});
-
+	airplane->setSwallowTouches(true);
 	// 创建一个创建soldier的Button对象，设置在Layout的中左部
 	soldier = Button::create("/Picture/menu/soldier-menu-up.png",
 		"/Picture/menu/soldier-menu-down.png");
@@ -225,7 +227,7 @@ bool MilitaryCampLayer::init()
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
-
+	soldier->setSwallowTouches(true);
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -242,6 +244,7 @@ bool MilitaryCampLayer::init()
 			this->setVisible(false);
 		}
 	});
+	exit->setSwallowTouches(true);
 	return true;
 }
 
@@ -285,6 +288,7 @@ bool TankFactaryLayer::init()
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
+	tank->setSwallowTouches(true);
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -301,6 +305,7 @@ bool TankFactaryLayer::init()
 			this->setVisible(false);
 		}
 	});
+	exit->setSwallowTouches(true);
 	return true;
 }
 

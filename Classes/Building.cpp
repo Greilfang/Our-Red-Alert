@@ -1,6 +1,7 @@
 #include "Building.h"
 #include "Const.h"
-
+#define DEBUG
+#include "iostream"
 USING_NS_CC;
 
 Size Base::size = Size(20, 20);
@@ -85,13 +86,13 @@ void Base::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 			baselayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			baselayer->setCenterPosition(this->getPosition());
 			baselayer->unit_manager = unit_manager;
+			baselayer->setSwallowsTouches(true);
 			combat_scene->addChild(baselayer, 15);
+			unit_manager->createLayer.pushBack(baselayer);
 			layer_is_created = true;
 		}
-		else
-		{
-			baselayer->setVisible(true);
-		}
+		setLayerVisible(baselayer);
+
 	}
 }
 
@@ -166,13 +167,12 @@ void MilitaryCamp::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 			militaryCampLayer->setCenterPosition(this->getPosition());
 			militaryCampLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			militaryCampLayer->unit_manager = unit_manager;
+			militaryCampLayer->setSwallowsTouches(true);
 			combat_scene->addChild(militaryCampLayer, 15);
+			unit_manager->createLayer.pushBack(militaryCampLayer);
 			layer_is_created = true;
 		}
-		else
-		{
-			militaryCampLayer->setVisible(true);
-		}
+		setLayerVisible(militaryCampLayer);
 	}
 }
 
@@ -247,13 +247,13 @@ void TankFactary::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 			tankFactaryLayer->setCenterPosition(this->getPosition());
 			tankFactaryLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			tankFactaryLayer->unit_manager = unit_manager;
+			tankFactaryLayer->setSwallowsTouches(true);
 			combat_scene->addChild(tankFactaryLayer, 15);
+			unit_manager->createLayer.pushBack(tankFactaryLayer);
 			layer_is_created = true;
 		}
-		else
-		{
-			tankFactaryLayer->setVisible(true);
-		}
+		setLayerVisible(tankFactaryLayer);
+
 	}
 }
 
@@ -308,6 +308,9 @@ PowerPlant * PowerPlant::create(const std::string & filename)
 
 void Building::addToGmap(Point p)
 {
+#ifdef DEBUG
+	std::cout << "Unit type: " << this->type<<std::endl;
+#endif // DEBUG
 	rec = unit_manager->getGridRect(p, this->getContentSize());
 	unit_manager->grid_map->occupyPosition(rec);
 }
@@ -315,6 +318,15 @@ void Building::addToGmap(Point p)
 void Building::setListener()
 {
 	Unit::setListener();
+}
+
+void Building::setLayerVisible(Layer * myLayer)
+{
+	for (auto cl : unit_manager->createLayer)
+	{
+		cl->setVisible(false);
+	}
+	myLayer->setVisible(true);
 }
 
 

@@ -97,7 +97,7 @@ void PathFinding::checkSurroundedGrid(Grid & grid)
 
 bool PathFinding::isInMapRange(Point & grid)
 {
-	if (grid.x >= 0 && grid.x <= _width && grid.y >= 0 && grid.y <= _height)
+	if (grid.x >= 0 && grid.x < _width && grid.y >= 0 && grid.y < _height)
 		return true;
 	return false;
 }
@@ -106,7 +106,7 @@ bool PathFinding::isCorner(Grid & g1, Grid & g2)
 {
 	if (g1.getX() == g2.getX() || g1.getY() == g2.getY())
 		return false;
-	else if (_map[g1.getX()][g2.getY()].getFlag() == OCCUPIED || _map[g1.getY()][g2.getX()].getFlag() == OCCUPIED)
+	else if (_map[g1.getX()][g2.getY()].getFlag() == OCCUPIED || _map[g2.getX()][g1.getY()].getFlag() == OCCUPIED)
 		return true;
 	else return false;
 }

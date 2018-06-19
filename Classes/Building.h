@@ -21,7 +21,7 @@ public:
 	void addToGmap(Point p) override;
 	bool layer_is_created = false;
 	void setListener();
-	
+	void setLayerVisible(Layer *);
 };
 
 class Base : public Building
