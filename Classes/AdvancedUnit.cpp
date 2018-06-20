@@ -29,7 +29,7 @@ void Fighter::setProperties()
 	speed = 4.5f;
 
 	mobile = true;
-
+	attack_range = GridSize(5, 5);
 	z_index = 15;
 
 }
@@ -125,7 +125,7 @@ void Tank::setProperties()
 
 
 	z_index = 10;
-
+	attack_range = GridSize(5, 5);
 	mobile = true;
 }
 
@@ -150,6 +150,6 @@ void Soldier::setProperties()
 	speed = 1.5f;
 
 	z_index = 10;
-
+	attack_range = GridSize(5, 5);
 	mobile = true;
 }

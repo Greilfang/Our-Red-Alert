@@ -9,8 +9,7 @@
 #include <vector>
 #include "GridMap.h"
 #include "AStarPathFinding.h"
-#include "chat_client.h"
-
+#include"chat_client.h"
 USING_NS_CC;
 using namespace ui;
 
@@ -64,7 +63,7 @@ public:
 	GridMap* grid_map = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener;
 	std::vector<int> selected_ids;
-
+	chat_client * socket_client = nullptr;
 	CREATE_FUNC(UnitManager);
 	bool init();
 	void setMessageSet(GameMessageSet* _msgs);
@@ -73,6 +72,7 @@ public:
 	void setGridMap(GridMap *);
 	void setPlayerID(int _player_id);
 	void setCombatScene(CombatScene* _combat_scene);
+	void setBuilding(Building * _building);
 	void setSocketClient(chat_client* _socket_client);
 	//获取运动的时间
 	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed);
@@ -98,7 +98,7 @@ public:
 	void setBasePosition(Point base_pos);
 	Point getBasePosition()const;
 	Point getUnitCreateCenter();
-
+	void deleteUnit(int id);
 	GridSize getGridSize(Size);
 	GridRect getGridRect(Point, Size);
 	GridPoint getGridPoint(Point);
@@ -117,10 +117,9 @@ private:
 
 	cocos2d::TMXTiledMap* tiled_map = nullptr;
 	CombatScene* combat_scene = nullptr;
-	chat_client * socket_client = nullptr;
 
-	int next_id = 1;
-	int base_id = 1;
+	int next_id;
+
 
 	Point _base_pos{ 0,0 };
 	Point unit_create_center{ 0,0 };
@@ -137,7 +136,7 @@ protected:
 	GridMap* grid_map = nullptr;
 	Layer* combat_scene = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener = nullptr;
-
+	
 	GridPoint _cur_pos;
 	GridPoint _cur_dest;
 	Point _cur_dest_point;
@@ -150,7 +149,7 @@ protected:
 	int type;
 	bool mobile;
 
-	bool is_attack;
+	bool is_attack = false;
 	bool is_moving = false;
 	bool is_delaying = false; //延迟寻路标志
 
@@ -159,7 +158,7 @@ protected:
 	int max_life=100;
 	int ATK = 0;
 	int attack_frequency ;
-	double attack_range ;
+	GridSize attack_range ;
 	int speed ;
 	Bar* hp_bar = nullptr;//用来给单位创建血条
 
@@ -170,7 +169,7 @@ protected:
 	bool hasArrivedFinalDest();
 	//寻路算法
 	virtual GridPath findPath(const GridPoint& dest)const;
-
+	
 	//优化寻路(若连续几个格点在同一条路径上则把原先的几条GridPath合成为一条)
 	GridPath optimizePath(const GridPath & origin_path) const;
 
@@ -196,7 +195,7 @@ public:
 
 	void initBar();
 	virtual void setProperties();
-	//void removeFromMaps();
+	void removeFromMaps();
 
 	void tryToSearchForPath();
 	GridPoint getGridPosition() const;
@@ -214,7 +213,7 @@ public:
 	Unit(int _max_life, int _atk_freq, double _atk_range, int _speed) 
 		:max_life(_max_life), attack_frequency(_atk_freq), attack_range(_atk_range), speed(_speed) 
 	{ ; };
-	Unit() :max_life(100), attack_frequency(1), attack_range(30), speed(10) { ; };
+	Unit() :max_life(100), attack_frequency(1),speed(10) { ; };
 	//判断单位是不是在某个范围内
 	bool is_in(Point p1, Point p2);
 	//对血条的显示和隐藏操作

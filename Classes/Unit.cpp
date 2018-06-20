@@ -76,6 +76,12 @@ void Unit::setProperties()
 
 }
 
+void Unit::removeFromMaps()
+{
+	grid_map->leavePosition(_cur_pos);
+	tiled_map->removeChild(this, 1);
+}
+
 void Unit::displayHP()
 {
 	if (hp_bar) {
@@ -100,7 +106,7 @@ void Unit::move()
 	{
 		setPosition(next_position);
 	}
-	else if (grid_map->occupyPosition(next_gpos))
+	else if (grid_map->occupyPosition(id,next_gpos))
 	{
 		setPosition(next_position);
 		grid_map->leavePosition(_cur_pos);
@@ -230,7 +236,7 @@ void Unit::addToGmap(Point p)
 #ifdef DEBUG
 	std::cout << "Unit type: " << this->type << std::endl;
 #endif // DEBUG
-	grid_map->occupyPosition(p);
+	grid_map->occupyPosition(id,p);
 }
 
 void Unit::setListener()
@@ -329,17 +335,30 @@ void Unit::update(float f)
 	if (is_delaying)
 		delay();
 
-	if (camp == unit_manager->player_id && timer % attack_freq == 0) {
-		if (is_attack)
+	if (camp == unit_manager->player_id && timer % attack_freq == 0) {	
+		searchEnemy();
+		if(is_attack) {
 			attack();
-		else searchEnemy();
+		} 
 	}
 }
 
 void Unit::searchEnemy()
 {
-	is_attack = 1;
-	attack_id = 5;
+	const auto & auto_atk_rect = GridRect(_cur_pos - attack_range / 2, attack_range);
+	const auto & unit_ids = grid_map->getUnitIDAt(auto_atk_rect);
+	for (auto its_id : unit_ids)
+	{
+		int its_camp = unit_manager->getUnitCamp(its_id);
+		if (its_camp != camp)
+		{
+			log("its_camp:%d   camp:%d", its_camp, camp);
+			attack_id = its_id;
+			is_attack = true;
+			return;
+		}
+	}
+	return;
 }
 
 void Unit::attack()
@@ -350,16 +369,20 @@ void Unit::attack()
 	new_msg->set_unit_1(attack_id);
 	new_msg->set_damage(5);
 	new_msg->set_camp(camp);
+	is_attack = false;
 }
 
 bool Unit::underAttack(int damage)
 {
-	if (current_life > 0) {
+	
 		current_life -= damage;
 		hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
-		log("life:%d", current_life);
+	
+	if (current_life < 0) {
+		return true;
+	} else {
+		return false;
 	}
-	return true;
 
 }
 
@@ -393,6 +416,7 @@ void UnitManager::setGridMap(GridMap * _grid_map)
 void UnitManager::setPlayerID(int _player_id)
 {
 	player_id = _player_id;
+	next_id = _player_id;
 }
 
 void UnitManager::setCombatScene(CombatScene * _combat_scene)
@@ -463,18 +487,24 @@ void UnitManager::updateUnitsState()
 			auto grid_point = msg.msg_grid_path().msg_grid_point(0);
 			Unit* new_unit = createNewUnit(id, camp, unit_type, grid_point.x(), grid_point.y());
 			id_map.insert(id, new_unit);
+			log("create camp:%d\n", camp);
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
 		{
 			int unitid_0 = msg.unit_0();
 			int unitid_1 = msg.unit_1();
 			int damage = msg.damage();
-			//log("attack! unit %d -> unit %d, damage %d", unitid_0, unitid_1, damage);
+			
 			Unit * unit_1 = id_map.at(unitid_1);
-			if (unit_1)
-			{
+			Unit * unit_0 = id_map.at(unitid_0);
+			
+			if (unit_1) {
+				log("attack! unitcamp %d -> unitcamp %d, damage %d\n", unit_0->camp, unit_1->camp, damage);
 				genAttackEffect(unitid_0, unitid_1);
-				unit_1->underAttack(damage);
+				if (unit_1->underAttack(damage))
+				{
+					deleteUnit(unitid_1);
+				}
 			}
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_MOV)
@@ -538,6 +568,21 @@ Point UnitManager::getBasePosition() const
 Point UnitManager::getUnitCreateCenter()
 {
 	return unit_create_center;
+}
+
+void UnitManager::deleteUnit(int id)
+{
+	Unit* unit = id_map.at(id);
+	if (unit)
+	{
+		auto itor = std::find(selected_ids.begin(), selected_ids.end(), id);
+		if (itor != selected_ids.end())
+			selected_ids.erase(itor);
+
+		unit->removeFromMaps();
+
+		id_map.erase(id);
+	}
 }
 
 GridSize UnitManager::getGridSize(Size _size)
@@ -623,7 +668,7 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 				if (grid_map->checkPosition(freeGP))
 				{
 					nu->setPosition(grid_map->getPointWithOffset(freeGP));
-					grid_map->occupyPosition(freeGP);
+					grid_map->occupyPosition(id,freeGP);
 					nu->setCurPos(freeGP);
 					break;
 				}
@@ -688,7 +733,7 @@ int UnitManager::genRandom(int start, int end)
 	std::uniform_int_distribution<> rd(start, end);
 	return(rd(gen));
 }
-;
+
 
 void UnitManager::selectEmpty(Point position)
 {

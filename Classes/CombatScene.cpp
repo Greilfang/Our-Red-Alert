@@ -129,9 +129,10 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithFixedPriority(mouse_event, 1);
 
 	//得到初始化单位
-	unit_manager->setPlayerID(1);
+	unit_manager->setPlayerID(client_side->camp());
+	//unit_manager->setPlayerID(2);
 	unit_manager->initializeUnitGroup();
-
+	
 
 	/*加载精灵监听器事件*/
 	auto spriteListener = EventListenerTouchOneByOne::create();
@@ -157,7 +158,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(spriteListener, farmer_sprite);
 #endif
-	/*加载层监听器事件*/
+	/*加载层监听器时间*/
 	destListener = EventListenerTouchOneByOne::create();
 
 	destListener->onTouchBegan = [this](Touch* touch, Event* event) {
@@ -193,17 +194,6 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 			unit_manager->getClickedUnit();
 		}
 	};
-	/*加载按键监听器事件*/
-	letterListener = EventListenerKeyboard::create();
-	letterListener->onKeyPressed = [this](EventKeyboard::KeyCode keycode, Event * event) {
-		keys[keycode] = true;
-	};
-	letterListener->onKeyReleased = [this](EventKeyboard::KeyCode keycode, Event * event) {
-		keys[keycode] = false;
-	};
-	Director::getInstance()->getEventDispatcher()
-		->addEventListenerWithSceneGraphPriority(letterListener, this->_combat_map);
-
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(destListener, this->_combat_map);
 	return true;
@@ -251,22 +241,6 @@ void CombatScene::scrollMap(){
 	Vec2 scroll(0, 0);
 	scroll += Vec2(-SCROLL_LENGTH, 0)*horizontal_state;
 	scroll += Vec2(0, -SCROLL_LENGTH)*vertical_state;
-	
-	
-	for (auto iter = keys.begin(); iter != keys.end(); iter++) {
-		if (iter->second == true) {
-			switch (iter->first) {
-			case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
-				scroll -= Vec2(-SCROLL_LENGTH, 0); break;
-			case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
-				scroll += Vec2(-SCROLL_LENGTH, 0); break;
-			case EventKeyboard::KeyCode::KEY_UP_ARROW:
-				scroll += Vec2(0, -SCROLL_LENGTH); break;
-			case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
-				scroll -= Vec2(0, -SCROLL_LENGTH); break;
-			}
-		}
-	}
 	map_center += scroll;
 	//move_amount -= scroll;
 	if (_combat_map->getBoundingBox().containsPoint((-scroll) + Director::getInstance()->getVisibleSize())

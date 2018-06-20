@@ -24,9 +24,9 @@ Base* Base::create(const std::string & filename)
 void Base::setProperties()
 {
 	type = 0;
-	max_life = 800;
+	current_life = max_life = 800;
 	speed = 0.0f;
-	attack_range = 0;
+	attack_range = GridSize(5,5);
 	ATK = 0;
 	z_index = 5;
 	mobile = false;
@@ -312,7 +312,7 @@ void Building::addToGmap(Point p)
 	std::cout << "Unit type: " << this->type<<std::endl;
 #endif // DEBUG
 	rec = unit_manager->getGridRect(p, this->getContentSize());
-	unit_manager->grid_map->occupyPosition(rec);
+	unit_manager->grid_map->occupyPosition(id,rec);
 }
 
 void Building::setListener()
