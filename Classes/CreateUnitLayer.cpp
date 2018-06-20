@@ -53,9 +53,8 @@ bool BaseLayer::init()
 				this->setVisible(false);
 				onBuilding(11,MilitaryCamp::size);
 			}				
-		}		
+		}				
 	});
-	militaryCamp->setSwallowTouches(true);
 	//添加一个创建mine的Button对象，设置在layout的右上角
 	Button* mine = Button::create("/Picture/ui/gold.png",
 		"/Picture/ui/gold.png");
@@ -79,7 +78,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-	mine->setSwallowTouches(true);
+
 	//添加一个创建powerPlant的Button对象，设置在layout的左中部
 	powerPlant = Button::create("power.png",
 		"power.png");
@@ -103,7 +102,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-	powerPlant->setSwallowTouches(true);
+
 	//添加一个创建TankFactary的Button对象，设置在layout的右部
 	tankFactary = Button::create("basebutton.png",
 		"basebutton.png");
@@ -127,7 +126,7 @@ bool BaseLayer::init()
 			}
 		}
 	});
-	tankFactary->setSwallowTouches(true);
+
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -144,7 +143,6 @@ bool BaseLayer::init()
 			this->setVisible(false);
 		}
 	});
-	exit->setSwallowTouches(true);
 	return true;
 }
 
@@ -195,15 +193,14 @@ bool MilitaryCampLayer::init()
 		{
 			if (unit_manager->money->checkMoney(2000))
 			{
-				auto position = findFreePosition();
-				unit_manager->genCreateMessage(1, 1, position.x, position.y);
+				center->startProduce(1);
 				unit_manager->money->spendMoney(2000);
 			}
 			else
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");	
 		}
 	});
-	airplane->setSwallowTouches(true);
+
 	// 创建一个创建soldier的Button对象，设置在Layout的中左部
 	soldier = Button::create("/Picture/menu/soldier-menu-up.png",
 		"/Picture/menu/soldier-menu-down.png");
@@ -219,15 +216,14 @@ bool MilitaryCampLayer::init()
 		{
 			if (unit_manager->money->checkMoney(2000))
 			{
-				auto position = findFreePosition();
-				unit_manager->genCreateMessage(3, 1, position.x, position.y);
+				center->startProduce(3);
 				unit_manager->money->spendMoney(2000);
 			}
 			else
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
-	soldier->setSwallowTouches(true);
+
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -244,7 +240,6 @@ bool MilitaryCampLayer::init()
 			this->setVisible(false);
 		}
 	});
-	exit->setSwallowTouches(true);
 	return true;
 }
 
@@ -280,15 +275,13 @@ bool TankFactaryLayer::init()
 		{
 			if (unit_manager->money->checkMoney(2000))
 			{
-				auto position = findFreePosition();
-				unit_manager->genCreateMessage(2, 1, position.x, position.y);
+				center->startProduce(2);
 				unit_manager->money->spendMoney(2000);
 			}
 			else
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
-	tank->setSwallowTouches(true);
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -305,7 +298,6 @@ bool TankFactaryLayer::init()
 			this->setVisible(false);
 		}
 	});
-	exit->setSwallowTouches(true);
 	return true;
 }
 
@@ -324,20 +316,6 @@ TankFactaryLayer * TankFactaryLayer::create()
 	}
 }
 
-Point CreateUnitLayer::findFreePosition()
-{
-	GridPoint create_center = unit_manager->getGridPoint(center_position);
-	GridPoint a = unit_manager->grid_map->findFreePositionNear(create_center);
-	unit_manager->setUnitCreateCenter(center_position);
-	Point p = unit_manager->getPoint(a);
-	return p;
-}
-
-void CreateUnitLayer::setCenterPosition(Point p)
-{
-	center_position = p;
-}
-
 void CreateUnitLayer::addListenerToRect(int type)
 {
 	auto spriteListener = EventListenerTouchOneByOne::create();
@@ -351,7 +329,8 @@ void CreateUnitLayer::addListenerToRect(int type)
 			if (can_build)
 			{
 				rec->setVisible(false);
-				unit_manager->genCreateMessage(type,1,rec_abs_center.x,rec_abs_center.y);
+				center->startProduce(type, rec_abs_center);
+				//unit_manager->genCreateMessage(type,1,rec_abs_center.x,rec_abs_center.y);
 				building = false;
 				//显示菜单
 				this->setVisible(true);

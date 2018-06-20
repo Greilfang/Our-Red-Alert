@@ -1,7 +1,7 @@
 #include "Building.h"
 #include "Const.h"
-#define DEBUG
-#include "iostream"
+#include "SimpleAudioEngine.h"
+
 USING_NS_CC;
 
 Size Base::size = Size(20, 20);
@@ -26,10 +26,18 @@ void Base::setProperties()
 	type = 0;
 	current_life = max_life = 800;
 	speed = 0.0f;
-	attack_range = GridSize(5,5);
+	attack_range = GridSize(5, 5);
 	ATK = 0;
 	z_index = 5;
 	mobile = false;
+	//militaryCamp
+	period_map[11] = MILITARY_PERIOD;
+	//mine
+	period_map[12] = MINE_PERIOD;
+	//PowerPlant
+	period_map[13] = POWERPLANT_PERIOD;
+	//TankFactary
+	period_map[14] = TANKFACTARY_PERIOD;
 }
 void Base::setListener()
 {
@@ -84,15 +92,13 @@ void Base::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 		{
 			baselayer = BaseLayer::create();
 			baselayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
-			baselayer->setCenterPosition(this->getPosition());
 			baselayer->unit_manager = unit_manager;
-			baselayer->setSwallowsTouches(true);
+			baselayer->center = this;
 			combat_scene->addChild(baselayer, 15);
 			unit_manager->createLayer.pushBack(baselayer);
 			layer_is_created = true;
 		}
 		setLayerVisible(baselayer);
-
 	}
 }
 
@@ -112,7 +118,50 @@ void MilitaryCamp::setProperties()
 	type = 11;
 	z_index = 5;
 	mobile = false;
+	current_life = max_life = 200;
+	//Fighter
+	period_map[1] = FIGHTER_PERIOD;
+	//Soldier
+	period_map[3] = SOLDIER_PERIOD;
 }
+
+void Building::update(float f)
+{
+	//状态为1表示正在生产，状态为2表示生产结束，状态为0表示没有生产的单位
+	if (state == 1)
+	{
+		if (++prod_process >= prod_period)
+		{
+			state = 2;
+			prod_process = 0;
+			Point point;
+			createPosition == Point(0, 0) ? point = findFreePosition() : point = createPosition;		
+			unit_manager->setUnitCreateCenter(this->getPosition());
+			unit_manager->genCreateMessage(cur_prod, camp, point.x, point.y);
+			prod_bar->setVisible(false);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/unitready.wav");
+		}
+		else
+		{
+			float rate = static_cast<float>(float(prod_process) / float(prod_period));
+			prod_bar->updateBarDisplay(rate);
+		}
+	}
+
+	if (state == 2)
+		if (prod_list.size())
+		{
+			state = 1;
+			prod_process = 0;
+			cur_prod = prod_list.back();
+			prod_list.pop_back();
+			prod_period = period_map.at(cur_prod);
+		}
+	else
+		state = 0;
+
+}
+
 void MilitaryCamp::setListener()
 {
 	// Register Touch Event
@@ -164,10 +213,9 @@ void MilitaryCamp::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 		if (layer_is_created == false)
 		{
 			militaryCampLayer = MilitaryCampLayer::create();
-			militaryCampLayer->setCenterPosition(this->getPosition());
+			militaryCampLayer->center = this;
 			militaryCampLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
 			militaryCampLayer->unit_manager = unit_manager;
-			militaryCampLayer->setSwallowsTouches(true);
 			combat_scene->addChild(militaryCampLayer, 15);
 			unit_manager->createLayer.pushBack(militaryCampLayer);
 			layer_is_created = true;
@@ -182,6 +230,7 @@ void TankFactary::setProperties()
 	type = 14;
 	z_index = 5;
 	mobile = false;
+	period_map[2] = TANK_PERIOD;
 }
 
 TankFactary * TankFactary::create(const std::string & filename)
@@ -244,16 +293,14 @@ void TankFactary::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 		if (layer_is_created == false)
 		{
 			tankFactaryLayer = TankFactaryLayer::create();
-			tankFactaryLayer->setCenterPosition(this->getPosition());
 			tankFactaryLayer->setPosition(Vec2(visibleSize.width, visibleSize.height / 2));
+			tankFactaryLayer->center = this;
 			tankFactaryLayer->unit_manager = unit_manager;
-			tankFactaryLayer->setSwallowsTouches(true);
 			combat_scene->addChild(tankFactaryLayer, 15);
 			unit_manager->createLayer.pushBack(tankFactaryLayer);
 			layer_is_created = true;
 		}
 		setLayerVisible(tankFactaryLayer);
-
 	}
 }
 
@@ -308,9 +355,6 @@ PowerPlant * PowerPlant::create(const std::string & filename)
 
 void Building::addToGmap(Point p)
 {
-#ifdef DEBUG
-	std::cout << "Unit type: " << this->type<<std::endl;
-#endif // DEBUG
 	rec = unit_manager->getGridRect(p, this->getContentSize());
 	unit_manager->grid_map->occupyPosition(id,rec);
 }
@@ -329,4 +373,42 @@ void Building::setLayerVisible(Layer * myLayer)
 	myLayer->setVisible(true);
 }
 
+void Building::initBar()
+{
+	//hp_bar
+	if (current_life) {
+		hp_bar = Bar::create();
+		float rate = static_cast<float>(current_life) / static_cast<float>(max_life);
+		addChild(hp_bar, 10);
+		hp_bar->updateBarDisplay(rate);
+		hp_bar->stopKeepingVisible();
+	}
+	//prod_bar
+	prod_bar = Bar::create();
+	prod_bar->setColor(Color4F(0, 0, 0.8, 0.8));
+	prod_bar->setHeight(12);
+	
+	addChild(prod_bar, 20);
+	hp_bar->stopKeepingVisible();
+}
+
+void Building::startProduce(int _unit_type)
+{
+	prod_list.push_back(_unit_type);
+	if (state != 1)
+		state = 2;
+}
+
+void Building::startProduce(int _unit_type, Point _point)
+{
+	startProduce(_unit_type);
+	createPosition = _point;
+}
+
+Point Building::findFreePosition()
+{
+	GridPoint a = unit_manager->grid_map->findFreePositionNear(_cur_pos);
+	Point p = unit_manager->getPoint(a);
+	return p;
+}
 

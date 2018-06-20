@@ -10,6 +10,7 @@
 #include "GridMap.h"
 #include "AStarPathFinding.h"
 #include"chat_client.h"
+
 USING_NS_CC;
 using namespace ui;
 
@@ -21,6 +22,8 @@ class Money;
 class Power;
 class Base;
 class CombatScene;
+class MilitaryCamp;
+class TankFactary;
 
 class Bar :public DrawNode {
 private:
@@ -28,12 +31,14 @@ private:
 	int display_time = 0;//设置展示时间
 	float length = 36;//血条长
 	float width = 4;//血条宽
+	float height = 5;
 	bool is_visible = false;//是否显示
 	cocos2d::Color4F color{ 0.8, 0, 0, 0.8 };
 public:
 	//void updateHide(float f);
 	void updateBarDisplay(float rate);
 	void setLength(float _length) { length = _length; };
+	void setHeight(float _height) { height = _height; };
 	void setColor(const cocos2d::Color4F& _color) { color = _color; };
 	void keepVisible();
 	void stopKeepingVisible();
@@ -59,11 +64,12 @@ public:
 	Money * money = nullptr;
 	Power * power = nullptr;
 	ConstructRange * constructRange = nullptr;
+	chat_client * socket_client = nullptr;
 	GameMessageSet* msgs = nullptr;
 	GridMap* grid_map = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener;
 	std::vector<int> selected_ids;
-	chat_client * socket_client = nullptr;
+
 	CREATE_FUNC(UnitManager);
 	bool init();
 	void setMessageSet(GameMessageSet* _msgs);
@@ -72,7 +78,6 @@ public:
 	void setGridMap(GridMap *);
 	void setPlayerID(int _player_id);
 	void setCombatScene(CombatScene* _combat_scene);
-	void setBuilding(Building * _building);
 	void setSocketClient(chat_client* _socket_client);
 	//获取运动的时间
 	float getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed);
@@ -98,6 +103,7 @@ public:
 	void setBasePosition(Point base_pos);
 	Point getBasePosition()const;
 	Point getUnitCreateCenter();
+
 	void deleteUnit(int id);
 	GridSize getGridSize(Size);
 	GridRect getGridRect(Point, Size);
@@ -120,7 +126,6 @@ private:
 
 	int next_id;
 
-
 	Point _base_pos{ 0,0 };
 	Point unit_create_center{ 0,0 };
 	Unit* createNewUnit(int id, int camp, int uint_type, float x, float y);
@@ -136,7 +141,7 @@ protected:
 	GridMap* grid_map = nullptr;
 	Layer* combat_scene = nullptr;
 	EventListenerTouchOneByOne * spriteTouchListener = nullptr;
-	
+
 	GridPoint _cur_pos;
 	GridPoint _cur_dest;
 	Point _cur_dest_point;
@@ -169,7 +174,7 @@ protected:
 	bool hasArrivedFinalDest();
 	//寻路算法
 	virtual GridPath findPath(const GridPoint& dest)const;
-	
+
 	//优化寻路(若连续几个格点在同一条路径上则把原先的几条GridPath合成为一条)
 	GridPath optimizePath(const GridPath & origin_path) const;
 
@@ -193,10 +198,13 @@ public:
 	
 	static Unit* create(const std::string & filename);
 
-	void initBar();
-	virtual void setProperties();
-	void removeFromMaps();
+	//设置延迟寻路
+	void setDelayPathFinding(int cnt);
 
+	virtual void initBar();
+	virtual void setProperties();
+
+	void removeFromMaps();
 	void tryToSearchForPath();
 	GridPoint getGridPosition() const;
 	void setGridPath(const MsgGridPath & msg_grid_path);
@@ -213,7 +221,7 @@ public:
 	Unit(int _max_life, int _atk_freq, double _atk_range, int _speed) 
 		:max_life(_max_life), attack_frequency(_atk_freq), attack_range(_atk_range), speed(_speed) 
 	{ ; };
-	Unit() :max_life(100), attack_frequency(1),speed(10) { ; };
+	Unit() :max_life(100), attack_frequency(1), speed(10) { ; };
 	//判断单位是不是在某个范围内
 	bool is_in(Point p1, Point p2);
 	//对血条的显示和隐藏操作

@@ -5,6 +5,8 @@
 #include "Unit.h"
 USING_NS_CC;
 
+class Building;
+
 class CreateUnitLayer :public cocos2d::Layer
 {
 private:
@@ -14,14 +16,14 @@ public:
 	Size rec_size;
 	Point rec_center;
 	Point rec_abs_center;
+	Building* center = nullptr;
 	bool building = false;
 	bool can_build = true;
 	bool is_rec_created = false;
 	Layout * layout;
 	UnitManager * unit_manager;
 	virtual bool init() = 0;	
-	Point findFreePosition();
-	void setCenterPosition(Point p);
+
 	void addListenerToRect(int type);
 	//检查金钱、电力是否足够建造
 	bool checkBuilding(int money, int power);

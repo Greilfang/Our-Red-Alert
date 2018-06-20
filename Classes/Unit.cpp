@@ -6,6 +6,7 @@
 #include "CombatScene.h"
 #include<string>
 #include<random>
+#include "SimpleAudioEngine.h"
 #include "iostream"
 #define DEBUG
 
@@ -24,9 +25,9 @@ void Bar::updateBarDisplay(float rate) {
 
 	auto s = tg->getContentSize();
 
-	drawRect(Point((s.width - length) / 2, s.height + 5), Point((s.width + length) / 2, s.height + 5 + width), color);
-	Point endpoint{ s.width / 2 - length / 2 + length * rate,s.height + 5 + width };
-	drawSolidRect(Point((s.width - length) / 2, s.height + 5), endpoint, color);
+	drawRect(Point((s.width - length) / 2, s.height + height), Point((s.width + length) / 2, s.height + height + width), color);
+	Point endpoint{ s.width / 2 - length / 2 + length * rate,s.height + height + width };
+	drawSolidRect(Point((s.width - length) / 2, s.height + height), endpoint, color);
 }
 
 void Bar::stopKeepingVisible() {
@@ -106,7 +107,7 @@ void Unit::move()
 	{
 		setPosition(next_position);
 	}
-	else if (grid_map->occupyPosition(id,next_gpos))
+	else if (grid_map->occupyPosition(id, next_gpos))
 	{
 		setPosition(next_position);
 		grid_map->leavePosition(_cur_pos);
@@ -120,7 +121,7 @@ void Unit::move()
 		_cur_dest = _cur_pos;
 		setCurDestPoint(_cur_dest);
 		Point final_dest = grid_map->getPointWithOffset(_final_dest);
-		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > 30.F) {
+		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > REFIND_PATH_MAX_RANGE) {
 			if (!is_delaying)
 				tryToSearchForPath();
 		}
@@ -161,6 +162,12 @@ GridPath Unit::findPath(const GridPoint & dest) const
 
 	GridPath optimized_path = optimizePath(grid_path);
 	return optimized_path;
+}
+
+void Unit::setDelayPathFinding(int cnt)
+{
+	is_delaying = true;
+	del_cnt = cnt;
 }
 
 GridPath Unit::optimizePath(const GridPath & origin_path) const
@@ -236,7 +243,7 @@ void Unit::addToGmap(Point p)
 #ifdef DEBUG
 	std::cout << "Unit type: " << this->type << std::endl;
 #endif // DEBUG
-	grid_map->occupyPosition(id,p);
+	grid_map->occupyPosition(this->id, p);
 }
 
 void Unit::setListener()
@@ -335,11 +342,11 @@ void Unit::update(float f)
 	if (is_delaying)
 		delay();
 
-	if (camp == unit_manager->player_id && timer % attack_freq == 0) {	
+	if (camp == unit_manager->player_id && timer % attack_freq == 0) {
 		searchEnemy();
-		if(is_attack) {
+		if (is_attack) {
 			attack();
-		} 
+		}
 	}
 }
 
@@ -374,13 +381,14 @@ void Unit::attack()
 
 bool Unit::underAttack(int damage)
 {
-	
-		current_life -= damage;
-		hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
-	
+
+	current_life -= damage;
+	hp_bar->updateBarDisplay(static_cast<float>(current_life) / static_cast<float>(max_life));
+
 	if (current_life < 0) {
 		return true;
-	} else {
+	}
+	else {
 		return false;
 	}
 
@@ -429,16 +437,6 @@ void UnitManager::setSocketClient(chat_client * _socket_client)
 	socket_client = _socket_client;
 }
 
-/*
-GridPoint UnitManager::getUnitPosition(int _unit_id)
-{
-	Unit* unit = id_map.at(_unit_id);
-	if (unit)
-		return(unit->getGridPosition());
-	else
-		return{ -1, -1 };
-}
-*/
 int UnitManager::getUnitCamp(int unit_id)
 {
 	Unit* unit = id_map.at(unit_id);
@@ -487,17 +485,16 @@ void UnitManager::updateUnitsState()
 			auto grid_point = msg.msg_grid_path().msg_grid_point(0);
 			Unit* new_unit = createNewUnit(id, camp, unit_type, grid_point.x(), grid_point.y());
 			id_map.insert(id, new_unit);
-			log("create camp:%d\n", camp);
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_ATK)
 		{
 			int unitid_0 = msg.unit_0();
 			int unitid_1 = msg.unit_1();
 			int damage = msg.damage();
-			
+
 			Unit * unit_1 = id_map.at(unitid_1);
 			Unit * unit_0 = id_map.at(unitid_0);
-			
+
 			if (unit_1) {
 				log("attack! unitcamp %d -> unitcamp %d, damage %d\n", unit_0->camp, unit_1->camp, damage);
 				genAttackEffect(unitid_0, unitid_1);
@@ -532,9 +529,11 @@ void UnitManager::initializeUnitGroup() {
 		float y = dict["y"].asFloat();
 		int camp = dict["camp"].asInt();
 		int type = dict["type"].asInt();
-
 		if (camp == player_id) {
 			genCreateMessage(type, camp, x, y);
+#ifdef DEBUG
+			std::cout << "type: " << type << "camp: " << camp << "pos: " << x << "," << y << std::endl;
+#endif // DEBUG
 		}
 	}
 }
@@ -554,6 +553,21 @@ void UnitManager::setUnitCreateCenter(Point center)
 	unit_create_center = center;
 }
 
+void UnitManager::deleteUnit(int id)
+{
+	Unit* unit = id_map.at(id);
+	if (unit)
+	{
+		auto itor = std::find(selected_ids.begin(), selected_ids.end(), id);
+		if (itor != selected_ids.end())
+			selected_ids.erase(itor);
+
+		unit->removeFromMaps();
+
+		id_map.erase(id);
+	}
+}
+
 void UnitManager::setBasePosition(Point base_pos)
 {
 	_base_pos = base_pos;
@@ -568,21 +582,6 @@ Point UnitManager::getBasePosition() const
 Point UnitManager::getUnitCreateCenter()
 {
 	return unit_create_center;
-}
-
-void UnitManager::deleteUnit(int id)
-{
-	Unit* unit = id_map.at(id);
-	if (unit)
-	{
-		auto itor = std::find(selected_ids.begin(), selected_ids.end(), id);
-		if (itor != selected_ids.end())
-			selected_ids.erase(itor);
-
-		unit->removeFromMaps();
-
-		id_map.erase(id);
-	}
 }
 
 GridSize UnitManager::getGridSize(Size _size)
@@ -611,20 +610,27 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 {
 	Unit* nu;
 	Base* tmp_base;
+	std::vector<std::string > pic_paths = {
+		 "Picture/units/base_", "Picture/units/airplane_", "Picture/units/footman_front_",
+		"Picture/units/robot_front_0_"
+	};
+
+	int pic_num = camp % 4;
+	std::string pic_file = pic_paths[unit_type] + std::to_string(pic_num) + ".png";
 
 	switch (unit_type)
 	{
 	case 1:
-		nu = Fighter::create("Picture/units/fighter.png");
+		nu = Fighter::create(pic_file);
 		break;
 	case 2:
-		nu = Tank::create("Picture/units/tank.png");
+		nu = Tank::create(pic_file);
 		break;
 	case 3:
-		nu = Soldier::create("Picture/units/soldier.png");
+		nu = Soldier::create(pic_file);
 		break;
 	case 0:
-		tmp_base = Base::create("Picture/units/base_0.png");
+		tmp_base = Base::create(pic_file);
 		base = tmp_base;
 		base_map[id] = camp;
 		nu = tmp_base;
@@ -668,7 +674,7 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 				if (grid_map->checkPosition(freeGP))
 				{
 					nu->setPosition(grid_map->getPointWithOffset(freeGP));
-					grid_map->occupyPosition(id,freeGP);
+					grid_map->occupyPosition(nu->id, freeGP);
 					nu->setCurPos(freeGP);
 					break;
 				}
@@ -733,12 +739,12 @@ int UnitManager::genRandom(int start, int end)
 	std::uniform_int_distribution<> rd(start, end);
 	return(rd(gen));
 }
-
+;
 
 void UnitManager::selectEmpty(Point position)
 {
-	for (auto& id : selected_ids)
-	{
+	float order = 1.f;
+	for (auto& id : selected_ids){
 		Unit * unit = id_map.at(id);
 
 		if (!unit || !unit->isMobile())
@@ -747,15 +753,9 @@ void UnitManager::selectEmpty(Point position)
 		GridPoint grid_dest = grid_map->getGridPoint(position);
 		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
 		unit->setDestination(grid_dest);
-		unit->tryToSearchForPath();
-		/*if (id_map.at(id)->getNumberOfRunningActions() != 0)
-		{
-			id_map.at(id)->stopAllActions();
-		}
-		if (id_map.at(id)->isMobile())
-		{
-			playMover(position, id_map.at(id));
-		}*/
+		unit->setDelayPathFinding(PATH_FINDING_TERMINAL * static_cast<int>(order/5));
+		order += 1.f;
+		//unit->tryToSearchForPath();
 	}
 }
 
