@@ -616,7 +616,9 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 	};
 
 	int pic_num = camp % 4;
-	std::string pic_file = pic_paths[unit_type] + std::to_string(pic_num) + ".png";
+	std::string pic_file;
+	if(unit_type<4)
+		pic_file = pic_paths[unit_type] + std::to_string(pic_num) + ".png";
 
 	switch (unit_type)
 	{
