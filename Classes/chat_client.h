@@ -61,7 +61,7 @@ public:
 		memcpy(msg.body(), &s[0u], msg.body_length());
 		msg.encode_header();
 		asio::write(socket_, asio::buffer(msg.data(), msg.length()));
-		std::cout << "client write success\n";
+		//std::cout << "client write success\n";
 	}
 	std::string read_data()
 	{
@@ -75,7 +75,7 @@ public:
 		read_msg_deque_.pop_front();
 		lk.unlock();
 		auto ret = std::string(read_msg.body(), read_msg.body_length());
-		std::cout << "client read success\n";
+		//std::cout << "client read success\n";
 		return ret;
 	}
 private:
@@ -148,7 +148,7 @@ private:
 				std::lock_guard<std::mutex>lk{ mut };
 				read_msg_deque_.push_back(read_msg_);
 				data_cond_.notify_one();
-				std::cout << "read completed\n";
+				//std::cout << "hi completed\n";
 				//std::cout.write(read_msg_.body(), read_msg_.body_length());
 				//std::cout << "\n";
 				do_read_header();

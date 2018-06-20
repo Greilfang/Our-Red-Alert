@@ -74,6 +74,7 @@ private:
 class CombatScene :public Layer{
 public:
 	EventListenerTouchOneByOne * destListener = nullptr;
+	EventListenerKeyboard * letterListener = nullptr;
 	Point delta = { 0,0 };
 	GameMessageSet * msgs;
 	Power * power = nullptr;
@@ -97,6 +98,7 @@ public:
 	static CombatScene* create(chat_server * server_context_, chat_client * client_context_);
 	
 private:
+	std::map<cocos2d::EventKeyboard::KeyCode, bool> keys;
 	chat_client * client_side = nullptr;//服务端指针
 	chat_server * server_side = nullptr;//服务端指针
 	bool is_clicked = false;

@@ -473,7 +473,7 @@ void UnitManager::updateUnitsState()
 			Unit * unit_1 = id_map.at(unitid_1);
 			if (unit_1)
 			{
-				//genAttackEffect(unitid_0, unitid_1);
+				genAttackEffect(unitid_0, unitid_1);
 				unit_1->underAttack(damage);
 			}
 		}

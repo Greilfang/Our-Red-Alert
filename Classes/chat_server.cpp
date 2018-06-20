@@ -51,7 +51,7 @@ void TcpConnection::write_data(std::string s)
 	memcpy(msg.body(), &s[0u], msg.body_length());
 	msg.encode_header();
 
-	std::cout << "example :" << msg.data() << std::endl;
+	//std::cout << "example :" << msg.data() << std::endl;
 
 	asio::write(socket_,
 		asio::buffer(msg.data(), msg.length()));
@@ -100,7 +100,7 @@ void TcpConnection::handle_read_header(const asio::error_code& error)
 	if (!error && read_msg_.decode_header())
 	{
 		//		steady_timer_.expires_from_now(std::chrono::seconds(10));
-		std::cout << "here\n";
+		//std::cout << "here\n";
 		asio::async_read(socket_,
 			asio::buffer(read_msg_.body(), read_msg_.body_length()),
 			std::bind(&TcpConnection::handle_read_body, this,
