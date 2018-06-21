@@ -111,6 +111,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	unit_manager->money = money;
 	unit_manager->power = power;
 	unit_manager->setSocketClient(client_side);
+	unit_manager->setPlayerNum(client_side);
 #ifdef DEBUG//²âÊÔ
 	auto farmer_sprite = Unit::create("MagentaSquare.png");
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));

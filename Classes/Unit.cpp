@@ -500,6 +500,10 @@ void UnitManager::updateUnitsState()
 				genAttackEffect(unitid_0, unitid_1);
 				if (unit_1->underAttack(damage))
 				{
+					if (unit_1->getType() == 0) {
+						player_num--;
+						checkWinOrLose(unitid_1);
+					}
 					deleteUnit(unitid_1);
 				}
 			}
@@ -616,9 +620,6 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 	};
 
 	int pic_num = camp % 4;
-	std::string pic_file;
-	if(unit_type<4)
-		pic_file = pic_paths[unit_type] + std::to_string(pic_num) + ".png";
 
 	switch (unit_type)
 	{
@@ -789,6 +790,36 @@ void UnitManager::cancellClickedUnit()
 	}
 	selected_ids.clear();
 	selected_ids.shrink_to_fit();
+}
+
+void UnitManager::checkWinOrLose(int base_id)
+{
+	Unit* base = id_map.at(base_id);
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	if (base->getCamp() == player_id) {
+		auto lose_label = Label::createWithTTF("You Lose!", "/fonts/arial.ttf", 88);
+		lose_label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height / 2));
+		combat_scene->addChild(lose_label, 40);
+		Director::getInstance()->getEventDispatcher()
+			->removeAllEventListeners();
+
+	}
+	if (base->getCamp() != player_id && player_num == 1) {
+		auto win_label = Label::createWithTTF("You Win!", "/fonts/arial.ttf", 88);
+		win_label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+			origin.y + visibleSize.height / 2));
+		combat_scene->addChild(win_label, 40);
+		Director::getInstance()->getEventDispatcher()
+			->removeAllEventListeners();
+	}
+
+}
+
+void UnitManager::setPlayerNum(chat_client * _socket_client)
+{
+	player_num = _socket_client->total();
 }
 
 void UnitManager::genAttackEffect(int unit_id0, int unit_id1)

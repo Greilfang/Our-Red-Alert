@@ -60,6 +60,7 @@ class UnitManager : public cocos2d::Ref
 public:
 	Vector<Layer*> createLayer;
 	int player_id = 0;
+	int player_num;
 	Base * base = nullptr;
 	Money * money = nullptr;
 	Power * power = nullptr;
@@ -117,6 +118,8 @@ public:
 	void getClickedUnit();
 	//Çå¿Õselected_ids
 	void cancellClickedUnit();
+	void checkWinOrLose(int base_id);
+	void setPlayerNum(chat_client* _socket_client);
 private:
 	cocos2d::Map<int, Unit*> id_map;
 	std::map<int, int> base_map;

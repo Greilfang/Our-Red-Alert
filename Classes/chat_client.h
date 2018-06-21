@@ -33,8 +33,17 @@ public:
 	{
 		while (!start_flag_);
 		return camp_;
+	int camp() const
+	{
+		while (!start_flag_);
+		return camp_;
 	}
 
+	int total() const
+	{
+		while (!start_flag_);
+		return total_;
+	}
 	static chat_client * create(std::string ip = "127.0.0.1", int port=1024)
 	{
 		auto s = new chat_client(ip, port);
