@@ -193,7 +193,7 @@ bool ClientMenu::init() {
 	addChild(back_ground, 0);
 
 	/* IpBox */
-	auto ip_box = EditBox::create(Size(150, 60), Scale9Sprite::create("button.png"));
+	auto ip_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"));
 	ip_box->setPosition(Vec2(origin.x + visibleSize.width * 0.35, origin.y + visibleSize.height * 0.7));
 	ip_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	ip_box->setFontName("/fonts/Marker Felt.ttf");
@@ -235,13 +235,21 @@ bool ClientMenu::init() {
 }
 
 void ClientMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
-	log("client ok");
-	client_side = chat_client::create();
-	schedule(schedule_selector(ClientMenu::startSchedule), 0.1);
+	if (!client_side)
+	{
+		AllocConsole();
+		freopen("CONIN$", "r", stdin);
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+		log("client ok");
+		auto ip_box = static_cast<ui::EditBox*>(getChildByTag(1));
+		std::string ip = ip_box->getText();
+		//auto port_box = static_cast<ui::EditBox*>(getChildByTag(2));
+		client_side = chat_client::create();
+		client_side = chat_client::create(ip, 1024);
+
+		schedule(schedule_selector(ClientMenu::startSchedule), 0.1);
+	}
 }
 
 void ClientMenu::menuBackCallback(cocos2d::Ref * pSender) {
