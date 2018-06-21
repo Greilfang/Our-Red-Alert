@@ -219,9 +219,12 @@ void CombatScene::focusOnBase(){
 }
 
 void CombatScene::update(float f){
-	unit_manager->updateUnitsState();
+	message_update++;
 	scrollMap();
 	delta = _combat_map->getPosition();
+	if (message_update % 10 == 0) {
+		unit_manager->updateUnitsState();
+	}
 }
 void CombatScene::scrollMap(){
 	auto map_center = _combat_map->getPosition();

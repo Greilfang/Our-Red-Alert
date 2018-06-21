@@ -33,10 +33,6 @@ public:
 	{
 		while (!start_flag_);
 		return camp_;
-	int camp() const
-	{
-		while (!start_flag_);
-		return camp_;
 	}
 
 	int total() const

@@ -24,9 +24,8 @@ Base* Base::create(const std::string & filename)
 void Base::setProperties()
 {
 	type = 0;
-	current_life = max_life = 800;
-	current_life = 2;
-		max_life = 800;
+	current_life = 800;
+	max_life = 800;
 	speed = 0.0f;
 	attack_range = GridSize(5, 5);
 	ATK = 0;

@@ -106,6 +106,7 @@ private:
 	GridMap * _grid_map = nullptr;
 	Point _cursor_position{ 0,0 };
 	UnitManager * unit_manager;
+	int message_update = 0;
 };
 
 inline float Tri_Dsitance(Point t1, Point t2) {
