@@ -26,7 +26,7 @@ void CombatScene::getLayerUnit(Point p1, Point p2) {
 	const auto&arrayNode = this->_combat_map->getChildren();
 	for (auto&child : arrayNode) {
 		Unit * pnode = static_cast<Unit *>(child);
-		if (pnode && pnode->is_in(p1-delta, p2-delta) && (pnode->camp == unit_manager->player_id)) {
+		if (pnode && pnode->is_in(p1-cdelta, p2-cdelta) && (pnode->camp == unit_manager->player_id)) {
 			unit_manager->selected_ids.push_back(pnode->id);
 			log("%d", pnode->id);
 		}
@@ -84,7 +84,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	money = Money::create();
 	addChild(money, 40);
 	money->setScale(2);
-	money->setPosition(visibleSize.width - 130, visibleSize.height-30);
+	money->setPosition(visibleSize.width - 130, visibleSize.height - 30);
 	money->schedule(schedule_selector(Money::update));
 	/*加载电力条power*/
 	auto powerSprite = Sprite::create("powerDisplay.png");
@@ -93,7 +93,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	powerSprite->setPosition(visibleSize.width - 150, visibleSize.height - 80);
 	power = Power::create();
 	addChild(power, 40);
-	power->setPosition(visibleSize.width -190, visibleSize.height -95);
+	power->setPosition(visibleSize.width - 190, visibleSize.height - 95);
 	PowerDisplay* powerDisplay = PowerDisplay::create();
 	powerDisplay->setScale(2);
 	powerDisplay->setPosition(visibleSize.width - 120, visibleSize.height - 80);
@@ -115,15 +115,15 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 #ifdef DEBUG//测试
 	auto farmer_sprite = Unit::create("MagentaSquare.png");
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));
-	this->_combat_map->addChild(farmer_sprite,10);
+	this->_combat_map->addChild(farmer_sprite, 10);
 #endif
 	/*刷新接受滚轮响应*/
 	schedule(schedule_selector(CombatScene::update));
-	
+
 	/* 得到鼠标每一帧的位置 */
 	auto mouse_event = EventListenerMouse::create();
 	mouse_event->onMouseMove = [&](Event *event) {
-		
+
 		EventMouse* pem = static_cast<EventMouse*>(event);
 		_cursor_position = Vec2(pem->getCursorX(), pem->getCursorY());
 	};
@@ -133,7 +133,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	unit_manager->setPlayerID(client_side->camp());
 	//unit_manager->setPlayerID(2);
 	unit_manager->initializeUnitGroup();
-	
+
 
 	/*加载精灵监听器事件*/
 	auto spriteListener = EventListenerTouchOneByOne::create();
@@ -176,7 +176,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	destListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
 			mouse_rect->unschedule(schedule_selector(MouseRect::update));
-		mouse_rect->touch_end = touch->getLocation();			
+		mouse_rect->touch_end = touch->getLocation();
 		mouse_rect->setVisible(false);
 		//如果是框选而非点选则清空selecetd_ids
 		if (Tri_Dsitance(mouse_rect->touch_start, mouse_rect->touch_end) > 8) {
@@ -184,10 +184,10 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 		}
 		//如果是点选，则执行selecctEmpty
 		if (unit_manager->selected_ids.size()) {
-			unit_manager->selectEmpty(mouse_rect->touch_end - delta);
+			unit_manager->selectEmpty(mouse_rect->touch_end - cdelta);
 		}
 		//如果是框选，就将框中所有的己方单位添加到selected_ids并执行操作
-		else {		
+		else {
 			if (mouse_rect->isScheduled(schedule_selector(MouseRect::update))) {
 				mouse_rect->unschedule(schedule_selector(MouseRect::update));
 			}
@@ -197,37 +197,59 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	};
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(destListener, this->_combat_map);
+	
+	
+	
+	/*加载按键监听器事件*/
+	letterListener = EventListenerKeyboard::create();
+	letterListener->onKeyPressed = [this](EventKeyboard::KeyCode keycode, Event * event) {
+		keys[keycode] = true;
+	};
+	letterListener->onKeyReleased = [this](EventKeyboard::KeyCode keycode, Event * event) {
+		keys[keycode] = false;
+	};
+	Director::getInstance()->getEventDispatcher()
+		->addEventListenerWithSceneGraphPriority(letterListener, this->_combat_map);
+	
+	
+	
 	return true;
 }
 
-void CombatScene::focusOnBase(){
+void CombatScene::focusOnBase() {
 	auto visibleSize = Director::getInstance()->getVisibleSize();
-	auto base_point = unit_manager->getBasePosition();
-	Vec2 base_vec = base_point - visibleSize / 2;
-
+	auto base_point = unit_manager->getBasePosition() + cdelta;
+	Vec2 base_vec = Point(0, 0) + visibleSize / 2 - base_point;
+	cdelta += base_vec;
 	/* 如果以基地为中心的视野超出了TiledMap的大小 */
-	if(_combat_map->getBoundingBox().size.height<base_vec.y+visibleSize.height)
-		base_vec.y = _combat_map->getBoundingBox().size.height - visibleSize.height;
-	if (_combat_map->getBoundingBox().size.width < base_vec.x + visibleSize.width)
-		base_vec.x = _combat_map->getBoundingBox().size.width - visibleSize.width;
-	if (base_vec.x < 0)
-		base_vec.x = 0;
-	if (base_vec.y < 0)
-		base_vec.y = 0;
+	if (cdelta.x >0) {
+		cdelta.x = 0;
+	}
+	else if (cdelta.x + _combat_map->getBoundingBox().size.width < visibleSize.width) {
+		cdelta.x = visibleSize.width - _combat_map->getBoundingBox().size.width;
+	}
 
-	_combat_map->setPosition(Point(0, 0) - base_vec);
+	if (cdelta.y > 0) {
+		cdelta.y = 0;
+	}
+	else if (cdelta.y + _combat_map->getBoundingBox().size.height < visibleSize.height) {
+		cdelta.y = visibleSize.height - _combat_map->getBoundingBox().size.height;
+	}
+
+	_combat_map->setPosition(cdelta);
 }
 
 void CombatScene::update(float f){
 	message_update++;
 	scrollMap();
-	delta = _combat_map->getPosition();
+	cdelta = _combat_map->getPosition();
 	if (message_update % 10 == 0) {
 		unit_manager->updateUnitsState();
 	}
 }
-void CombatScene::scrollMap(){
+void CombatScene::scrollMap() {
 	auto map_center = _combat_map->getPosition();
+	//std::cout << map_center.x << " " << map_center.y;
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -245,13 +267,32 @@ void CombatScene::scrollMap(){
 	Vec2 scroll(0, 0);
 	scroll += Vec2(-SCROLL_LENGTH, 0)*horizontal_state;
 	scroll += Vec2(0, -SCROLL_LENGTH)*vertical_state;
+
+
+	for (auto iter = keys.begin(); iter != keys.end(); iter++) {
+		if (iter->second == true) {
+			switch (iter->first) {
+			case EventKeyboard::KeyCode::KEY_SPACE:
+				focusOnBase(); break;
+			case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
+				scroll -= Vec2(-SCROLL_LENGTH, 0); break;
+			case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
+				scroll += Vec2(-SCROLL_LENGTH, 0); break;
+			case EventKeyboard::KeyCode::KEY_UP_ARROW:
+				scroll += Vec2(0, -SCROLL_LENGTH); break;
+			case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
+				scroll -= Vec2(0, -SCROLL_LENGTH); break;
+			}
+		}
+	}
 	map_center += scroll;
 	//move_amount -= scroll;
-	if (_combat_map->getBoundingBox().containsPoint((-scroll) + Director::getInstance()->getVisibleSize())
+	if (keys[EventKeyboard::KeyCode::KEY_SPACE] == false
+		&& _combat_map->getBoundingBox().containsPoint((-scroll) + Director::getInstance()->getVisibleSize())
 		&& _combat_map->getBoundingBox().containsPoint(-scroll)) {
 		_combat_map->setPosition(map_center);
 	}
-	
+
 
 }
 
