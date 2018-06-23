@@ -4,11 +4,20 @@
 <dict>
 	<key>Sounds</key>
 	<array>
-		<string>s3.wav</string>
+		<string>unitready.wav</string>
+		<string>insufficientfound.wav</string>
+		<string>traning.wav</string>
 	</array>
 	<key>SpriteSheets</key>
 	<array>
-		<string>airfightSheet.png</string>
+	</array>
+	<key>Animotions</key>
+	<array>
+		<string>Mine.plist</string>
+		<string>Base.plist</string>
+		<string>PowerPlant.plist</string>		
+		<string>TankFactory.plist</string>
+		<string>MilitaryCamp.plist</string>
 	</array>
 	<key>Musics</key>
 	<array>

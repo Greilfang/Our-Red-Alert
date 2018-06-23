@@ -16,6 +16,7 @@ private:
 	GridRect rec;
 	void setProperties() = 0;
 public:
+	Sprite * building;
 	int state = 0;
 	int cur_prod;
 	int prod_process;
@@ -40,13 +41,15 @@ public:
 class Base : public Building
 {
 private:
-	void setProperties() override;	
-public:
-	float construct_range = 300;
+	void setProperties() override;
+public:	
+	float construct_range = 500;
 	static Size size;	
 	BaseLayer * baselayer = nullptr;
+	void setMenuEnable(bool able);
 	static Base* create(const std::string & filename);
 	void setListener();
+	void update(float f);
 	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchMoved(cocos2d::Touch* touch, cocos2d::Event* event);
 	void onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event);

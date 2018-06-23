@@ -10,11 +10,15 @@ class Fighter : public Unit
 public:
 	static Fighter* create(const std::string& filename);
 
+	GridPath findPath(const GridPoint& dest)const override;
+
 private:
 
 	void setProperties() override;
 
+	void move() override;
 };
+
 
 class Tank : public Unit
 {

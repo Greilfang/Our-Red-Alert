@@ -235,7 +235,13 @@ void Unit::set(TMXTiledMap * _tiledMap, GridMap * _gridMap, Layer* _combat_scene
 	combat_scene = _combat_scene;
 	grid_map = _gridMap;
 	spriteTouchListener = _listener;
-	setListener();
+	if (camp == unit_manager->player_id)
+	{
+		setListener();
+	}
+	else
+		Unit::setListener();
+
 }
 
 void Unit::addToGmap(Point p)
@@ -301,6 +307,11 @@ void Unit::setDestination(const GridPoint & grid_dest)
 void Unit::setCurDestPoint(const GridPoint & grid_dest)
 {
 	_cur_dest_point = grid_map->getPointWithOffset(_cur_dest);
+}
+
+void Unit::setListenerEnable(bool enable)
+{
+	spriteTouchListener->setEnabled(enable);
 }
 
 void Unit::setCamp(int _camp)
@@ -496,7 +507,7 @@ void UnitManager::updateUnitsState()
 			Unit * unit_0 = id_map.at(unitid_0);
 
 			if (unit_1) {
-				log("attack! unitcamp %d -> unitcamp %d, damage %d\n", unit_0->camp, unit_1->camp, damage);
+				
 				genAttackEffect(unitid_0, unitid_1);
 				if (unit_1->underAttack(damage))
 				{
@@ -535,11 +546,15 @@ void UnitManager::initializeUnitGroup() {
 		int type = dict["type"].asInt();
 		if (camp == player_id) {
 			genCreateMessage(type, camp, x, y);
-#ifdef DEBUG
-			std::cout << "type: " << type << "camp: " << camp << "pos: " << x << "," << y << std::endl;
-#endif // DEBUG
+
 		}
 	}
+}
+
+void UnitManager::playBaseCreateAnimation(Base * s)
+{
+	auto built = AnimationCache::getInstance()->getAnimation("BaseCreate");
+	s->runAction(Animate::create(built));
 }
 
 void UnitManager::setMax_power(int delta)
@@ -614,15 +629,36 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 {
 	Unit* nu;
 	Base* tmp_base;
-	std::vector<std::string > pic_paths = {
-		 "Picture/units/base_", "Picture/units/airplane_", "Picture/units/footman_front_",
-		"Picture/units/robot_front_0_"
-	};
+	std::string file;
 
-	int pic_num = camp % 4;
-	std::string pic_file;
-	if (unit_type<4)
-		 pic_file = pic_paths[unit_type] + std::to_string(pic_num) + ".png";
+	switch (unit_type)
+	{
+	case 0:
+		file = "Base_";
+		break;
+	case 1:
+		file = "airplane_";
+		break;
+	case 2:
+		file = "footman_front_";
+		break;
+	case 3:
+		file = "robot_front_";
+		break;
+	case 11:
+		file = "MilitaryCamp_";
+		break;
+	case 12:
+		file = "Mine_";
+		break;
+	case 13:
+		file = "PowerPlant_";
+		break;
+	case 14:
+		file = "TankFactory_";
+		break;
+	}
+	std::string pic_file = "Picture/units/" + file + std::to_string(camp) + ".png";
 
 	switch (unit_type)
 	{
@@ -637,27 +673,36 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 		break;
 	case 0:
 		tmp_base = Base::create(pic_file);
+		playBaseCreateAnimation(tmp_base);
 		base = tmp_base;
 		base_map[id] = camp;
 		nu = tmp_base;
+		nu->setAnchorPoint(Point(0, 0));
 		if (camp == player_id)
+		{
+			playBaseCreateAnimation(tmp_base);
 			setBasePosition(Point(x, y));
-		constructRange = ConstructRange::create();
-		constructRange->drawRange(Point(x, y), tmp_base->construct_range);
-		constructRange->setVisible(false);
-		getTiledMap()->addChild(constructRange, 4);
+			constructRange = ConstructRange::create();
+			constructRange->drawRange(Point(x, y), tmp_base->construct_range);
+			constructRange->setVisible(false);
+			getTiledMap()->addChild(constructRange, 4);
+		}
 		break;
 	case 11:
-		nu = MilitaryCamp::create("Picture/units/military.png");
+		nu = MilitaryCamp::create(pic_file);
+		nu->setAnchorPoint(Point(0.5, 0));
 		break;
 	case 12:
-		nu = Mine::create("Picture/units/mine_0.png");
+		nu = Mine::create(pic_file);
+		nu->setAnchorPoint(Vec2(0.238, 0.437));
 		break;
 	case 13:
-		nu = PowerPlant::create("Picture/units/power_0.png");
+		nu = PowerPlant::create(pic_file);
+		nu->setAnchorPoint(Vec2(0, 0));
 		break;
 	case 14:
-		nu = TankFactary::create("Picture/units/base_3.png");
+		nu = TankFactary::create(pic_file);
+		nu->setAnchorPoint(Point(0.2, 0.2));
 	default:
 		break;
 	}
@@ -667,8 +712,14 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 	nu->id = id;
 	nu->camp = camp;
 	nu->set(tiled_map, grid_map, (Layer*)combat_scene, spriteTouchListener);
+	if (nu->getType() == 0 && nu->camp == player_id)
+	{
+		nu->setListenerEnable(false);
+	}
+
 	nu->initBar();
-	nu->setAnchorPoint(Vec2(0.5, 0.5));
+	
+
 	if (nu->isMobile())
 	{
 		if (getUnitCreateCenter() != Point(0, 0))
@@ -680,7 +731,10 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 				if (grid_map->checkPosition(freeGP))
 				{
 					nu->setPosition(grid_map->getPointWithOffset(freeGP));
-					grid_map->occupyPosition(nu->id, freeGP);
+					if (nu->getType() != 1)
+					{
+						grid_map->occupyPosition(nu->id, freeGP);
+					}
 					nu->setCurPos(freeGP);
 					break;
 				}
@@ -732,69 +786,6 @@ float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed)
 	return duration;
 }
 
-void UnitManager::playMover(Point position, Unit * _sprite) {
-	//获得精灵移动的时间
-	float duration = getPlayerMoveTime(_sprite->getPosition(), position, _sprite->getSpeed());
-	log("%f,%f", _sprite->getPositionX(), _sprite->getPositionY());
-	auto moveTo = MoveTo::create(duration, position);
-	auto sequence = Sequence::create(moveTo, nullptr);
-	_sprite->runAction(sequence);
-}
-int UnitManager::genRandom(int start, int end)
-{
-	std::uniform_int_distribution<> rd(start, end);
-	return(rd(gen));
-}
-;
-
-void UnitManager::selectEmpty(Point position)
-{
-	float order = 1.f;
-	for (auto& id : selected_ids){
-		Unit * unit = id_map.at(id);
-
-		if (!unit || !unit->isMobile())
-			continue;
-
-		GridPoint grid_dest = grid_map->getGridPoint(position);
-		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
-		unit->setDestination(grid_dest);
-		unit->setDelayPathFinding(PATH_FINDING_TERMINAL * static_cast<int>(order/5));
-		order += 1.f;
-		//unit->tryToSearchForPath();
-	}
-}
-
-void UnitManager::selectPointUnits(Unit * _unit)
-{
-	if (_unit->camp == player_id)
-	{
-		cancellClickedUnit();
-		selected_ids.push_back(_unit->id);
-		getClickedUnit();
-	}
-}
-
-void UnitManager::getClickedUnit()
-{
-	for (auto& id : selected_ids)
-	{
-		id_map.at(id)->displayHP();
-		id_map.at(id)->setOpacity(180);
-	}
-}
-
-void UnitManager::cancellClickedUnit()
-{
-	for (auto& id : selected_ids)
-	{
-		id_map.at(id)->hideHP();
-		id_map.at(id)->setOpacity(255);
-	}
-	selected_ids.clear();
-	selected_ids.shrink_to_fit();
-}
-
 void UnitManager::checkWinOrLose(int base_id)
 {
 	Unit* base = id_map.at(base_id);
@@ -823,6 +814,83 @@ void UnitManager::checkWinOrLose(int base_id)
 void UnitManager::setPlayerNum(chat_client * _socket_client)
 {
 	player_num = _socket_client->total();
+}
+
+void UnitManager::playMover(Point position, Unit * _sprite) {
+	//获得精灵移动的时间
+	float duration = getPlayerMoveTime(_sprite->getPosition(), position, _sprite->getSpeed());
+	log("%f,%f", _sprite->getPositionX(), _sprite->getPositionY());
+	auto moveTo = MoveTo::create(duration, position);
+	auto sequence = Sequence::create(moveTo, nullptr);
+	_sprite->runAction(sequence);
+}
+int UnitManager::genRandom(int start, int end)
+{
+	std::uniform_int_distribution<> rd(start, end);
+	return(rd(gen));
+}
+
+void UnitManager::selectEmpty(Point position)
+{
+	float order = 1.f;
+	for (auto& id : selected_ids){
+		Unit * unit = id_map.at(id);
+
+		if (!unit || !unit->isMobile())
+			continue;
+
+		GridPoint grid_dest = grid_map->getGridPoint(position);
+		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
+		unit->setDestination(grid_dest);
+		unit->setDelayPathFinding(PATH_FINDING_TERMINAL * static_cast<int>(order/5));
+		order += 1.f;
+		//unit->tryToSearchForPath();
+	}
+}
+
+void UnitManager::selectPointUnits(Unit * _unit)
+{
+	if (_unit->camp == player_id)
+	{
+		cancellClickedUnit();
+		selected_ids.push_back(_unit->id);
+		getClickedUnit();
+	}
+	else
+		for (auto & id : selected_ids)
+		{
+			//log("Unit ID: %d, tracing enemy id: %d", id, id_unit.second->id);
+			Unit* unit = id_map.at(id);
+			if (!unit || !unit->isMobile())
+				continue;
+			GridPoint target_pos = getGridPoint(_unit->getPosition());
+			unit->attack_id = _unit->id;
+			unit->setDestination(target_pos);
+			log("Unit %d, start tracing FP", id);
+			unit->tryToSearchForPath();
+		}
+	return;
+}
+
+void UnitManager::getClickedUnit()
+{
+	for (auto& id : selected_ids)
+	{
+		id_map.at(id)->displayHP();
+		id_map.at(id)->setOpacity(180);
+	}
+	
+}
+
+void UnitManager::cancellClickedUnit()
+{
+	for (auto& id : selected_ids)
+	{
+		id_map.at(id)->hideHP();
+		id_map.at(id)->setOpacity(255);
+	}
+	selected_ids.clear();
+	selected_ids.shrink_to_fit();
 }
 
 void UnitManager::genAttackEffect(int unit_id0, int unit_id1)

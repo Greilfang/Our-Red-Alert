@@ -43,12 +43,12 @@ private:
 public:
 	virtual bool init();
 	static BaseLayer * create();
+	void setEnable(bool able);
 };
 
 class MilitaryCampLayer : public CreateUnitLayer
 {
 private:
-	cocos2d::ui::Button *airplane;
 	cocos2d::ui::Button *soldier;
 	cocos2d::ui::Button *exit;
 public:
@@ -60,6 +60,7 @@ public:
 class TankFactaryLayer : public CreateUnitLayer
 {
 private:
+	cocos2d::ui::Button *airplane;
 	cocos2d::ui::Button *tank;
 	cocos2d::ui::Button *exit;
 public:

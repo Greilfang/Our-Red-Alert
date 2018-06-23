@@ -97,7 +97,7 @@ public:
 	void updateUnitsState();
 
 	void initializeUnitGroup();
-
+	void playBaseCreateAnimation(Base * s);
 	void setMax_power(int delta);
 	void setIncreasingAmount(int amount);
 	void setUnitCreateCenter(Point center);
@@ -213,7 +213,7 @@ public:
 	void setGridPath(const MsgGridPath & msg_grid_path);
 	void setDestination(const GridPoint& grid_dest);
 	void setCurDestPoint(const GridPoint& grid_dest);
-
+	void setListenerEnable(bool enable);
 	virtual void setCamp(int _camp);
 	void setMobile(bool can);
 	int getCamp() const;

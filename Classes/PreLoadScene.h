@@ -26,6 +26,7 @@ public:
 	void loadMusic(ValueVector musicFiles);
 	void loadEffect(ValueVector effectFiles);
 	void loadSpriteSheets(ValueVector spriteSheets);
+	void loadAnimations(ValueVector animations);
 	void progressUpdate();
 
 	CREATE_FUNC(PreLoad);

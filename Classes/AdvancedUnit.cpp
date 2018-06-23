@@ -33,56 +33,45 @@ void Fighter::setProperties()
 	z_index = 15;
 
 }
-/*
+
 void Fighter::move()
 {
-	auto esp = (grid_map->getPointWithOffset(cur_dest) - getPosition()).getNormalized();
-	Point next_pos = getPosition() + esp * move_speed;
+	auto esp = (grid_map->getPointWithOffset(_cur_dest) - getPosition()).getNormalized();
+	Point next_pos = getPosition() + esp * speed;
 	GridPoint next_gp = grid_map->getGridPoint(next_pos);
 
-	if (cur_pos == next_gp)
-	{
+	if (_cur_pos == next_gp)
 		setPosition(next_pos);
-	}
-	else
-	{
+	else {
 		grid_map->occupyPosition(id, next_gp, false);
-		roc_cnt = 0;
 		setPosition(next_pos);
-		grid_map->leavePosition(cur_pos, false);
-		cur_pos = next_gp;
-		if (camp == unit_manager->player_id)
-			grid_map->clearFog(GridRect(cur_pos, vision_range, true));
+		grid_map->leavePosition(_cur_pos, false);
+		_cur_pos = next_gp;
 	}
 
-	if (hasArrivedAtDest())
-		if (grid_path.size())
-		{
-			cur_dest = grid_path.back();
-			grid_path.pop_back();
+	if (hasArrivedFinalDest()) {
+		if (_grid_path.size()) {
+			_cur_dest = _grid_path.back();
+			_grid_path.pop_back();
 		}
-		else
-		{
-			if (grid_map->checkPosition(cur_dest))
-			{
-				log("Unit ID: %d, fighter landing", id);
+		else {
+			if (grid_map->checkPosition(_cur_dest)) {
 				grid_map->occupyPosition(id, next_gp, true);
-				moving = false;
+				is_moving = false;
 			}
-			else
-			{
-				log("Unit ID: %d, fighter failed to land", id);
-				cur_dest = grid_map->findFreePositionNear(cur_dest);
-				final_dest = cur_dest;
+			else {
+				_cur_dest = grid_map->findFreePositionNear(_cur_dest);
+				_final_dest = _cur_dest;
 			}
 		}
+	}
 }
 
 GridPath Fighter::findPath(const GridPoint & dest) const
 {
 	return GridPath{ dest };
 }
-*/
+
 Tank* Tank::create(const std::string& filename)
 {
 	Tank *ret = new (std::nothrow) Tank();

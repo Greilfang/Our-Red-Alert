@@ -21,6 +21,14 @@ BaseLayer* BaseLayer::create()
 	}
 }
 
+void BaseLayer::setEnable(bool able)
+{
+	militaryCamp->setEnabled(able);
+	powerPlant->setEnabled(able);
+	mine->setEnabled(able);
+	tankFactary->setEnabled(able);
+}
+
 bool BaseLayer::init()
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -28,14 +36,15 @@ bool BaseLayer::init()
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
-	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
+	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
 	layout->setBackGroundImage("bc.png");
 	this->addChild(layout);
 	//添加创建建筑的按钮
 	// 创建一个创建militaryCamp的Button对象，设置在Layout的左上角
-	militaryCamp = Button::create("/Picture/units/base_3.png",
-		"/Picture/units/base_3.png");
+	militaryCamp = Button::create("/Picture/menu/MilitaryCampMenu.png",
+		"/Picture/menu/MilitaryCampMenu.png");
+	militaryCamp->setScale(0.8);
 	layout->addChild(militaryCamp);
 	RelativeLayoutParameter* rp_LeftCenter = RelativeLayoutParameter::create();
 	rp_LeftCenter->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_LEFT);
@@ -44,21 +53,21 @@ bool BaseLayer::init()
 	militaryCamp->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
 	{
 		if (type == Widget::TouchEventType::BEGAN)
-		{			
+		{
 			if (checkBuilding(MILITARY_CAMP_MONEY, BUILDING_CONSUME_POWER))
-			{				
+			{
 				//禁用层监听器
 				unit_manager->getCombatScene()->destListener->setEnabled(false);
 				//隐藏菜单
 				this->setVisible(false);
-				onBuilding(11,MilitaryCamp::size);
-			}				
-		}				
+				onBuilding(11, MilitaryCamp::size);
+			}
+		}
 	});
 	//添加一个创建mine的Button对象，设置在layout的右上角
-	Button* mine = Button::create("/Picture/ui/gold.png",
-		"/Picture/ui/gold.png");
-	mine->setScale(0.1);
+	mine = Button::create("/Picture/menu/MineMenu.png",
+		"/Picture/menu/MineMenu.png");
+	mine->setScale(0.8);
 	layout->addChild(mine);
 	RelativeLayoutParameter* rp_top_right = RelativeLayoutParameter::create();
 	rp_top_right->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_RIGHT);
@@ -67,22 +76,22 @@ bool BaseLayer::init()
 	mine->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
 	{
 		if (type == Widget::TouchEventType::BEGAN)
-		{			
+		{
 			if (checkBuilding(MINE_MONEY, BUILDING_CONSUME_POWER))
 			{
 				//禁用层监听器
 				unit_manager->getCombatScene()->destListener->setEnabled(false);
 				//隐藏菜单
 				this->setVisible(false);
-				onBuilding(12,Mine::size);
+				onBuilding(12, Mine::size);
 			}
 		}
 	});
 
 	//添加一个创建powerPlant的Button对象，设置在layout的左中部
-	powerPlant = Button::create("power.png",
-		"power.png");
-	powerPlant->setScale(0.15);
+	powerPlant = Button::create("/Picture/menu/PowerPlantMenu.png",
+		"/Picture/menu/PowerPlantMenu.png");
+	powerPlant->setScale(0.8);
 	layout->addChild(powerPlant);
 	RelativeLayoutParameter* rp_left_center = RelativeLayoutParameter::create();
 	rp_left_center->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_LEFT_CENTER_VERTICAL);
@@ -104,8 +113,8 @@ bool BaseLayer::init()
 	});
 
 	//添加一个创建TankFactary的Button对象，设置在layout的右部
-	tankFactary = Button::create("basebutton.png",
-		"basebutton.png");
+	tankFactary = Button::create("/Picture/menu/TankFactaryMenu.png",
+		"/Picture/menu/TankFactaryMenu.png");
 	tankFactary->setScale(0.8);
 	layout->addChild(tankFactary);
 	RelativeLayoutParameter* rp_right_center = RelativeLayoutParameter::create();
@@ -122,7 +131,7 @@ bool BaseLayer::init()
 				unit_manager->getCombatScene()->destListener->setEnabled(false);
 				//隐藏菜单
 				this->setVisible(false);
-				onBuilding(14,TankFactary::size);
+				onBuilding(14, TankFactary::size);
 			}
 		}
 	});
@@ -145,7 +154,6 @@ bool BaseLayer::init()
 	});
 	return true;
 }
-
 
 MilitaryCampLayer* MilitaryCampLayer::create()
 {
@@ -173,42 +181,19 @@ bool MilitaryCampLayer::init()
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
-	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
+	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
 	layout->setBackGroundImage("bc.png");
 	this->addChild(layout);
 
-	// 创建一个创建ariplain的Button对象，设置在Layout的左上角
-	airplane = Button::create("/Picture/menu/airplane-menu-up.png",
-		"/Picture/menu/airplane-menu-down.png");
-	layout->addChild(airplane);
+	// 创建一个创建soldier的Button对象，设置在Layout的中左部
+	soldier = Button::create("/Picture/menu/SoldierMenu.png",
+		"/Picture/menu/SoldierMenu.png");
+	layout->addChild(soldier);
 	RelativeLayoutParameter* rp_TopLeft = RelativeLayoutParameter::create();
 	rp_TopLeft->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_LEFT);
-	airplane->setLayoutParameter(rp_TopLeft);
-	airplane->setScale(0.65);
-	//给airplane添加监听器
-	airplane->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
-	{		
-		if (type == Widget::TouchEventType::BEGAN)
-		{
-			if (unit_manager->money->checkMoney(2000))
-			{
-				center->startProduce(1);
-				unit_manager->money->spendMoney(2000);
-			}
-			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");	
-		}
-	});
-
-	// 创建一个创建soldier的Button对象，设置在Layout的中左部
-	soldier = Button::create("/Picture/menu/soldier-menu-up.png",
-		"/Picture/menu/soldier-menu-down.png");
-	layout->addChild(soldier);
-	RelativeLayoutParameter* rp_LeftCenter = RelativeLayoutParameter::create();
-	rp_LeftCenter->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_LEFT_CENTER_VERTICAL);
-	soldier->setLayoutParameter(rp_LeftCenter);
-	soldier->setScale(0.65);
+	soldier->setLayoutParameter(rp_TopLeft);
+	soldier->setScale(0.8);
 	//给soldier添加监听器
 	soldier->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
 	{
@@ -255,19 +240,19 @@ bool TankFactaryLayer::init()
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
-	layout->setContentSize(Size(bc->getContentSize().width*0.9, bc->getContentSize().height*0.8));
+	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
 	layout->setBackGroundImage("bc.png");
 	this->addChild(layout);
 
 	// 创建一个创建天启坦克的Button对象，设置在Layout的左上角
-	tank = Button::create("/Picture/menu/tianqi.png",
-		"/Picture/menu/tianqi.png");
+	tank = Button::create("/Picture/menu/TankMenu.png",
+		"/Picture/menu/TankMenu.png");
 	layout->addChild(tank);
 	RelativeLayoutParameter* rp_TopLeft = RelativeLayoutParameter::create();
 	rp_TopLeft->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_LEFT);
 	tank->setLayoutParameter(rp_TopLeft);
-	tank->setScale(0.33);
+	tank->setScale(0.8);
 	//给天启坦克添加监听器
 	tank->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
 	{
@@ -282,6 +267,30 @@ bool TankFactaryLayer::init()
 				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
 		}
 	});
+
+	// 创建一个创建ariplain的Button对象，设置在Layout的右上角
+	airplane = Button::create("/Picture/menu/AirplaneMenu.png",
+		"/Picture/menu/AirplaneMenu.png");
+	layout->addChild(airplane);
+	RelativeLayoutParameter* rp_TopRight = RelativeLayoutParameter::create();
+	rp_TopRight->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_RIGHT);
+	airplane->setLayoutParameter(rp_TopRight);
+	airplane->setScale(0.8);
+	//给airplane添加监听器
+	airplane->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			if (unit_manager->money->checkMoney(2000))
+			{
+				center->startProduce(1);
+				unit_manager->money->spendMoney(2000);
+			}
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+		}
+	});
+
 	// 创建一个退出该layer的Button对象
 	exit = Button::create("backNormal.png",
 		"backNormal.png");
@@ -386,7 +395,7 @@ void CreateUnitLayer::onBuilding(int type,Size size)
 		if (building)
 		{
 			EventMouse* pem = static_cast<EventMouse*>(event);
-			Point delta = unit_manager->getCombatScene()->delta;
+			Point delta = unit_manager->getCombatScene()->cdelta;
 			rec_center = Vec2(pem->getCursorX(), pem->getCursorY());
 			rec->setPosition(rec_center);
 			rec_abs_center = rec_center - delta;

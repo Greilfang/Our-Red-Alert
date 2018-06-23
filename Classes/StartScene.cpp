@@ -244,8 +244,7 @@ void ClientMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
 		log("client ok");
 		auto ip_box = static_cast<ui::EditBox*>(getChildByTag(1));
 		std::string ip = ip_box->getText();
-		//auto port_box = static_cast<ui::EditBox*>(getChildByTag(2));
-		client_side = chat_client::create();
+
 		client_side = chat_client::create(ip, 1024);
 
 		schedule(schedule_selector(ClientMenu::startSchedule), 0.1);

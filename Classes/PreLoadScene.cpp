@@ -62,14 +62,16 @@ void PreLoad::onEnterTransitionDidFinish() {
 	ValueVector spriteSheets = map.at("SpriteSheets").asValueVector();
 	ValueVector effects = map.at("Sounds").asValueVector();
 	ValueVector musics = map.at("Musics").asValueVector();
+	ValueVector animation = map.at("Animotions").asValueVector();
 
-	_sourceCount = spriteSheets.size() + effects.size() + musics.size();
+	_sourceCount = spriteSheets.size() + effects.size() + musics.size() + animation.size();
 	// 设置进度条更新间隔=100/需要加载的资源数量
 	_progressInterval = 100 / _sourceCount;
 
 	loadMusic(musics);
 	loadEffect(effects);
 	loadSpriteSheets(spriteSheets);
+	loadAnimations(animation);
 }
 
 void PreLoad::loadMusic(ValueVector musicFiles) {
@@ -92,6 +94,92 @@ void PreLoad::loadSpriteSheets(ValueVector spriteSheets) {
 	for (Value &v : spriteSheets) {
 		string str = v.asString();
 		SpriteFrameCache::getInstance()->addSpriteFramesWithFile(str.c_str());
+		progressUpdate();
+	}
+}
+
+void PreLoad::loadAnimations(ValueVector animations) {
+	for (Value &v : animations) {
+		int frame = 0;
+		string str = v.asString();
+		//SpriteFrameCache::getInstance()->addSpriteFramesWithFile(str.c_str());	
+		if (str == "Base.plist")
+		{
+			frame = 26;
+			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
+			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
+			auto animation = Animation::create();
+			for (int i = 1; i <= frame; i++)
+			{
+				std::string name = StringUtils::format("Base_1 (%d).png", i);
+				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				animation->addSpriteFrame(spriteFrame);
+			}
+			animation->setDelayPerUnit(3.0f / (float)frame);
+			animation->setRestoreOriginalFrame(true);
+			AnimationCache::getInstance()->addAnimation(animation, "BaseCreate");
+		}
+	
+		else if (str == "PowerPlant.plist")
+		{
+			frame = 25;
+			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
+			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
+			auto animation = Animation::create();
+			for (int i = 1; i <= frame; i++)
+			{
+				std::string name = StringUtils::format("PowerPlant_1 (%d).png", i);
+				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				animation->addSpriteFrame(spriteFrame);
+			}
+			animation->setDelayPerUnit(3.0f / (float)frame);
+			AnimationCache::getInstance()->addAnimation(animation, "PowerPlantCreate");
+		}
+		else if (str == "Mine.plist")
+		{
+			frame = 24;
+			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
+			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
+			auto animation = Animation::create();
+			for (int i = 1; i <= frame; i++)
+			{
+				std::string name = StringUtils::format("Mine_1 (%d).png", i);
+				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				animation->addSpriteFrame(spriteFrame);				
+			}
+			animation->setDelayPerUnit(3.0f / (float)frame);
+			AnimationCache::getInstance()->addAnimation(animation, "MineCreate");
+		}	
+		else if (str == "TankFactory.plist")
+		{
+			frame = 24;
+			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
+			SpriteFrameCacheInstance->addSpriteFramesWithFile(str.c_str());
+			auto animation = Animation::create();
+			for (int i = 1; i <= frame; i++)
+			{
+				std::string name = StringUtils::format("TankFactory_1 (%d).png", i);
+				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				animation->addSpriteFrame(spriteFrame);
+			}
+			animation->setDelayPerUnit(3.0f / (float)frame);
+			AnimationCache::getInstance()->addAnimation(animation, "TankFactoryCreate");
+		}
+		else if (str == "MilitaryCamp.plist")
+		{
+			frame = 24;
+			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
+			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
+			auto animation = Animation::create();
+			for (int i = 1; i <= frame; i++)
+			{
+				std::string name = StringUtils::format("MilitaryCamp_1 (%d).png", i);
+				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				animation->addSpriteFrame(spriteFrame);
+			}
+			animation->setDelayPerUnit(3.0f / (float)frame);
+			AnimationCache::getInstance()->addAnimation(animation, "MilitaryCampCreate");
+		}
 		progressUpdate();
 	}
 }

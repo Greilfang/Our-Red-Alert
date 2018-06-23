@@ -26,6 +26,13 @@ bool GridMap::initWithTiledMap(const cocos2d::TMXTiledMap * tiled_map) {
 	_umap = dyadic_array(_map_width, std::vector<int>(_map_height, 0));
 	_offset_vec = Vec2(_tile_width / 2, _tile_height / 2);
 
+	auto barrier_layer = tiled_map->getLayer("InfoLayer");
+	for (int x = 0; x < _map_width; x++)
+		for (int y = 0; y < _map_height; y++) {
+			int tile_gid = barrier_layer->getTileGIDAt(Vec2(x, _map_height - 1 - y));
+			if (tile_gid > 0)
+				_gmap[x][y] = 1;
+		}
 	return true;
 }
 

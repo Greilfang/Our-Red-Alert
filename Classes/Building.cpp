@@ -4,17 +4,22 @@
 
 USING_NS_CC;
 
-Size Base::size = Size(20, 20);
-Size MilitaryCamp::size = Size(90, 90);
-Size TankFactary::size = Size(64, 64);
-Size PowerPlant::size = Size(85, 90);
-Size Mine::size = Size(75, 91);
+Size Base::size = Size(150, 90);
+Size MilitaryCamp::size = Size(70, 120);
+Size TankFactary::size = Size(140, 110);
+Size PowerPlant::size = Size(130, 120);
+Size Mine::size = Size(130, 90);
+
+void Base::setMenuEnable(bool able)
+{
+	baselayer->setEnable(able);
+}
 
 Base* Base::create(const std::string & filename)
 {
 	Base *ret = new Base();
 	if (ret && ret->initWithFile(filename)) {
-		ret->autorelease();		
+		ret->autorelease();
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
@@ -88,7 +93,7 @@ void Base::onTouchEnded(cocos2d::Touch * touch, cocos2d::Event * event)
 	target->setOpacity(255);
 	std::string name;
 	if (target == this)
-	{	
+	{
 		if (layer_is_created == false)
 		{
 			baselayer = BaseLayer::create();
@@ -107,7 +112,7 @@ MilitaryCamp* MilitaryCamp::create(const std::string & filename)
 {
 	MilitaryCamp *ret = new MilitaryCamp();
 	if (ret && ret->initWithFile(filename)) {
-		ret->autorelease();	
+		ret->autorelease();
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
@@ -120,10 +125,89 @@ void MilitaryCamp::setProperties()
 	z_index = 5;
 	mobile = false;
 	current_life = max_life = 200;
-	//Fighter
-	period_map[1] = FIGHTER_PERIOD;
 	//Soldier
 	period_map[3] = SOLDIER_PERIOD;
+}
+
+void Base::update(float f)
+{
+	timer++;
+	if (timer == 180)
+		setListenerEnable(true);
+	//状态为1表示正在生产，状态为2表示生产结束，状态为0表示没有生产的单位
+	if (state == 1)
+	{
+		if (++prod_process >= prod_period)
+		{
+			state = 2;
+			setMenuEnable(false);
+			prod_process = 0;
+			unit_manager->getTiledMap()->removeChild(building);
+			unit_manager->setUnitCreateCenter(this->getPosition());
+			unit_manager->genCreateMessage(cur_prod, camp, createPosition.x, createPosition.y);
+			prod_bar->setVisible(false);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/unitready.wav");
+		}
+		else
+		{
+			float rate = static_cast<float>(float(prod_process) / float(prod_period));
+			prod_bar->updateBarDisplay(rate);
+		}
+	}
+
+	if (state == 2)
+		if (prod_list.size())
+		{
+			state = 1;
+			setMenuEnable(false);
+			prod_process = 0;
+			cur_prod = prod_list.back();
+			prod_list.pop_back();
+			prod_period = period_map.at(cur_prod);
+
+			std::string file, File;
+			Animation * built;
+			switch (cur_prod)
+			{
+			case 11: 
+				file = "MilitaryCamp_"; 
+				built = AnimationCache::getInstance()->getAnimation("MilitaryCampCreate"); 
+				break;
+			case 12: 
+				file = "Mine_";		
+				built = AnimationCache::getInstance()->getAnimation("MineCreate"); 
+				break;
+			case 13: 
+				file = "PowerPlant_"; 
+				built = AnimationCache::getInstance()->getAnimation("PowerPlantCreate"); 
+				break;
+			case 14: 
+				file = "TankFactory_"; 
+				built = AnimationCache::getInstance()->getAnimation("TankFactoryCreate"); 
+				break;
+			}
+
+			auto onbuild = Animate::create(built);
+			File = "Picture/units/" + file + std::to_string(camp) + ".png";
+			building = Sprite::create(File);
+			switch(cur_prod)
+			{
+			case 11:building->setAnchorPoint(Point(0.5, 0)); break;
+			case 12:building->setAnchorPoint(Vec2(0.238, 0.437));break;
+			case 13: building->setAnchorPoint(Point(0, 0)); break;
+			case 14:building->setAnchorPoint(Point(0.2, 0.2)); break;
+			}
+			unit_manager->getTiledMap()->addChild(building, 1000);
+			building->setPosition(createPosition);
+			building->runAction(onbuild);
+
+		}
+		else
+		{
+			state = 0;
+			setMenuEnable(true);
+		}
+
 }
 
 void Building::update(float f)
@@ -135,8 +219,7 @@ void Building::update(float f)
 		{
 			state = 2;
 			prod_process = 0;
-			Point point;
-			createPosition == Point(0, 0) ? point = findFreePosition() : point = createPosition;		
+			Point point = findFreePosition();
 			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, point.x, point.y);
 			prod_bar->setVisible(false);
@@ -158,8 +241,8 @@ void Building::update(float f)
 			prod_list.pop_back();
 			prod_period = period_map.at(cur_prod);
 		}
-	else
-		state = 0;
+		else
+			state = 0;
 
 }
 
@@ -231,6 +314,9 @@ void TankFactary::setProperties()
 	type = 14;
 	z_index = 5;
 	mobile = false;
+	//Fighter
+	period_map[1] = FIGHTER_PERIOD;
+
 	period_map[2] = TANK_PERIOD;
 }
 
@@ -238,7 +324,7 @@ TankFactary * TankFactary::create(const std::string & filename)
 {
 	TankFactary *ret = new TankFactary();
 	if (ret && ret->initWithFile(filename)) {
-		ret->autorelease();		
+		ret->autorelease();
 		return ret;
 	}
 	CC_SAFE_DELETE(ret);
@@ -357,7 +443,7 @@ PowerPlant * PowerPlant::create(const std::string & filename)
 void Building::addToGmap(Point p)
 {
 	rec = unit_manager->getGridRect(p, this->getContentSize());
-	unit_manager->grid_map->occupyPosition(id,rec);
+	unit_manager->grid_map->occupyPosition(id, rec);
 }
 
 void Building::setListener()
@@ -388,7 +474,7 @@ void Building::initBar()
 	prod_bar = Bar::create();
 	prod_bar->setColor(Color4F(0, 0, 0.8, 0.8));
 	prod_bar->setHeight(12);
-	
+
 	addChild(prod_bar, 20);
 	hp_bar->stopKeepingVisible();
 }
