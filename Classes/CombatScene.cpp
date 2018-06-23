@@ -72,6 +72,11 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	/* 加载格点地图 */
 	_grid_map = GridMap::create(_combat_map);
 	_grid_map->retain();
+	/*加载小地图*/
+	mini_map = Minimap::create("minimap.png");
+	mini_map->setAnchorPoint(Vec2(0, 0));
+	mini_map->setPosition(0, 0);
+	addChild(mini_map);
 	/*加载矩形选框对象*/
 	mouse_rect = MouseRect::create();
 	mouse_rect->setVisible(false);
@@ -161,18 +166,47 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 #endif
 	/*加载层监听器时间*/
 	destListener = EventListenerTouchOneByOne::create();
-
 	destListener->onTouchBegan = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_start = touch->getLocation();
-		mouse_rect->schedule(schedule_selector(MouseRect::update));
-		return true;
+		if (mouse_rect->touch_start.x > mini_map->mini_width
+			|| mouse_rect->touch_start.y > mini_map->mini_height) {
+			mouse_rect->schedule(schedule_selector(MouseRect::update));
+			return true;
+		}
+		else {
+			auto touch_point = touch->getLocation();
+			auto visibleSize = Director::getInstance()->getVisibleSize();
+			if (touch_point.x < mini_map->mini_width&&touch_point.y < mini_map->mini_height) {
+				float ratio_x = touch_point.x / mini_map->mini_width;
+				float ratio_y = touch_point.y / mini_map->mini_height;
+				Point practical_point = Point(_combat_map->getBoundingBox().size.width*ratio_x,
+					_combat_map->getBoundingBox().size.height*ratio_y);
+				Vec2 move_amount = Point(0, 0) + visibleSize / 2 - cdelta - practical_point;
+				cdelta = cdelta + move_amount;
+			}
+			if (cdelta.x >0) {
+				cdelta.x = 0;
+			}
+			else if (cdelta.x + _combat_map->getBoundingBox().size.width < visibleSize.width) {
+				cdelta.x = visibleSize.width - _combat_map->getBoundingBox().size.width;
+			}
+
+			if (cdelta.y > 0) {
+				cdelta.y = 0;
+			}
+			else if (cdelta.y + _combat_map->getBoundingBox().size.height < visibleSize.height) {
+				cdelta.y = visibleSize.height - _combat_map->getBoundingBox().size.height;
+			}
+			_combat_map->setPosition(cdelta);
+			return false;
+		}
 	};
 
 	destListener->onTouchMoved = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_end = touch->getLocation();//更新最后接触的点
 		mouse_rect->setVisible(true);
 	};
-
+	/*加载框选监听器时间*/
 	destListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
 			mouse_rect->unschedule(schedule_selector(MouseRect::update));
@@ -198,7 +232,16 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(destListener, this->_combat_map);
 	
-	
+	/*加载按键监听器事件*/
+	letterListener = EventListenerKeyboard::create();
+	letterListener->onKeyPressed = [this](EventKeyboard::KeyCode keycode, Event * event) {
+		keys[keycode] = true;
+	};
+	letterListener->onKeyReleased = [this](EventKeyboard::KeyCode keycode, Event * event) {
+		keys[keycode] = false;
+	};
+	Director::getInstance()->getEventDispatcher()
+		->addEventListenerWithSceneGraphPriority(letterListener, this->_combat_map);
 	
 	/*加载按键监听器事件*/
 	letterListener = EventListenerKeyboard::create();
@@ -211,7 +254,40 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(letterListener, this->_combat_map);
 	
-	
+	/*加载小地图监听器事件*/
+	/*
+	minimapListener = EventListenerTouchOneByOne::create();
+	minimapListener->setSwallowTouches(true);
+	minimapListener->onTouchBegan =[this](Touch* touch, Event* event) {
+	auto touch_point = touch->getLocation();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	if (touch_point.x < mini_map->mini_width&&touch_point.y < mini_map->mini_height) {
+	float ratio_x = touch_point.x / mini_map->mini_width;
+	float ratio_y = touch_point.y / mini_map->mini_height;
+	Point practical_point = Point(_combat_map->getBoundingBox().size.width*ratio_x,
+	_combat_map->getBoundingBox().size.height*ratio_y);
+	Vec2 move_amount = Point(0, 0) + visibleSize / 2 - cdelta - practical_point;
+	cdelta = cdelta + move_amount;
+	}
+	if (cdelta.x >0) {
+	cdelta.x = 0;
+	}
+	else if (cdelta.x + _combat_map->getBoundingBox().size.width < visibleSize.width) {
+	cdelta.x = visibleSize.width - _combat_map->getBoundingBox().size.width;
+	}
+
+	if (cdelta.y > 0) {
+	cdelta.y = 0;
+	}
+	else if (cdelta.y + _combat_map->getBoundingBox().size.height < visibleSize.height) {
+	cdelta.y = visibleSize.height - _combat_map->getBoundingBox().size.height;
+	}
+	_combat_map->setPosition(cdelta);
+	return true;
+	};
+	Director::getInstance()->getEventDispatcher()
+	->addEventListenerWithSceneGraphPriority(minimapListener, this->mini_map);
+	*/
 	
 	return true;
 }
@@ -239,12 +315,30 @@ void CombatScene::focusOnBase() {
 	_combat_map->setPosition(cdelta);
 }
 
+//更新位置
+void CombatScene::updateMircoLocation() {
+	mini_map->drawNode->clear();
+	const auto&arrayNode = this->_combat_map->getChildren();
+	for (auto&child : arrayNode) {
+		Unit * pnode = static_cast<Unit *>(child);
+		int combat_x = _combat_map->getBoundingBox().size.width;
+		int combat_y = _combat_map->getBoundingBox().size.height;
+		if (pnode) {
+			Point location = Point(pnode->getPosition().x / combat_x*mini_map->mini_width,
+				pnode->getPosition().y / combat_y*mini_map->mini_height);
+			mini_map->addpoint(pnode->camp, location);
+		}
+	}
+}
+
 void CombatScene::update(float f){
 	message_update++;
 	scrollMap();
 	cdelta = _combat_map->getPosition();
-	if (message_update % 10 == 0) {
+	if (message_update ==10) {
 		unit_manager->updateUnitsState();
+		updateMircoLocation();
+		message_update -= 10;
 	}
 }
 void CombatScene::scrollMap() {
@@ -265,8 +359,10 @@ void CombatScene::scrollMap() {
 		- (origin.y + BOX_EDGE_WITDH > _cursor_position.y);
 
 	Vec2 scroll(0, 0);
-	scroll += Vec2(-SCROLL_LENGTH, 0)*horizontal_state;
-	scroll += Vec2(0, -SCROLL_LENGTH)*vertical_state;
+	if (_cursor_position.x > mini_map->mini_width || _cursor_position.y > mini_map->mini_height) {
+		scroll += Vec2(-SCROLL_LENGTH, 0)*horizontal_state;
+		scroll += Vec2(0, -SCROLL_LENGTH)*vertical_state;
+	}
 
 
 	for (auto iter = keys.begin(); iter != keys.end(); iter++) {
@@ -397,4 +493,26 @@ void PowerDisplay::updateDisplay(Power * power)
 	char power_str[30];
 	sprintf(power_str, "%d/%d", power->used_power,power->max_power);
 	setString(power_str);
+}
+
+Minimap * Minimap::create(const std::string &filename) {
+	Minimap *ret = new Minimap();
+	if (ret && ret->initWithFile(filename)) {
+		ret->drawNode = DrawNode::create();
+		ret->addChild(ret->drawNode);
+		ret->mini_height = ret->getBoundingBox().size.height;
+		ret->mini_width = ret->getBoundingBox().size.height;
+		ret->autorelease();
+		return ret;
+	}
+	CC_SAFE_DELETE(ret);
+	return nullptr;
+}
+void Minimap::addpoint(int index, Point & target) {
+	if (index == 1) {
+		drawNode->drawDot(Vec2(target.x, target.y), 2, Color4F::RED);
+	}
+	else if (index == 2) {
+		drawNode->drawDot(Vec2(target.x, target.y), 2, Color4F::BLUE);
+	}
 }

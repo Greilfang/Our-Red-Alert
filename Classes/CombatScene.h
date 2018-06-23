@@ -71,9 +71,23 @@ private:
 	int increase_amount = 0;
 };
 
+/*小地图*/
+class Minimap :public Sprite {
+public:
+	static Minimap *create(const std::string &filename);
+	void addpoint(int index, Point & target);//单位标识
+	/*小地图尺寸*/
+	float mini_width;
+	float mini_height;
+	/*小地图标识工具*/
+	DrawNode* drawNode = nullptr;
+private:
+};
+
 class CombatScene :public Layer{
 public:
 	EventListenerTouchOneByOne * destListener = nullptr;
+	//EventListenerTouchOneByOne * minimapListener = nullptr;
 	EventListenerKeyboard * letterListener = nullptr;
 	Point cdelta = { 0,0 };
 	GameMessageSet * msgs;
@@ -85,6 +99,8 @@ public:
 	void getLayerUnit(Point p1, Point p2);
 	/*滚动地图*/
 	void scrollMap();
+	/*刷新小地图*/
+	void updateMircoLocation();
 	/*用于滚动地图后的刷新*/
 	virtual void update(float f);
 	/*用于返回selected_box*/
@@ -105,7 +121,8 @@ private:
 	cocos2d::Point last_touch{ 0, 0 };//鼠标最后一次碰到的点
 	MouseRect* mouse_rect = nullptr;//选框
 	TMXTiledMap* _combat_map = nullptr;//加载瓦片地图所用的指针
-	GridMap * _grid_map = nullptr;
+	GridMap * _grid_map = nullptr;//格点地图
+	Minimap * mini_map = nullptr;//小地图
 	Point _cursor_position{ 0,0 };
 	UnitManager * unit_manager;
 	int message_update = 0;
