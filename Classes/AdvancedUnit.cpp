@@ -29,7 +29,7 @@ void Fighter::setProperties()
 	speed = 4.5f;
 
 	mobile = true;
-	attack_range = GridSize(5, 5);
+	attack_range = GridSize(7, 7);
 	z_index = 15;
 
 }

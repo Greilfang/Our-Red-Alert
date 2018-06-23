@@ -157,7 +157,7 @@ protected:
 	int type;
 	bool mobile;
 
-	bool is_attack = false;
+	
 	bool is_moving = false;
 	bool is_delaying = false; //延迟寻路标志
 
@@ -166,7 +166,7 @@ protected:
 	int max_life=100;
 	int ATK = 0;
 	int attack_frequency ;
-	GridSize attack_range ;
+	
 	int speed ;
 	Bar* hp_bar = nullptr;//用来给单位创建血条
 
@@ -198,7 +198,9 @@ public:
 	int attack_freq = 50;
 	int timer = 0;
 	UnitManager* unit_manager = nullptr;
-	
+	bool is_attack = false;
+	GridSize attack_range;
+	bool is_in_attack = false;
 	static Unit* create(const std::string & filename);
 
 	//设置延迟寻路

@@ -354,7 +354,9 @@ void Unit::update(float f)
 		delay();
 
 	if (camp == unit_manager->player_id && timer % attack_freq == 0) {
-		searchEnemy();
+		if (!is_in_attack) {
+			searchEnemy();
+		}
 		if (is_attack) {
 			attack();
 		}
@@ -376,6 +378,7 @@ void Unit::searchEnemy()
 			return;
 		}
 	}
+	is_attack = false;
 	return;
 }
 
@@ -387,7 +390,7 @@ void Unit::attack()
 	new_msg->set_unit_1(attack_id);
 	new_msg->set_damage(5);
 	new_msg->set_camp(camp);
-	is_attack = false;
+	//is_attack = false;
 }
 
 bool Unit::underAttack(int damage)
@@ -507,7 +510,17 @@ void UnitManager::updateUnitsState()
 			Unit * unit_0 = id_map.at(unitid_0);
 
 			if (unit_1) {
-				
+				if (unit_0) {
+					/*如果两个都存在，标志正在攻击is_in_attack为true*/
+					unit_0->is_in_attack = true;
+					Vec2 distance = unit_1->getPosition() - unit_0->getPosition();
+					/*如果攻击者和被攻击者距离大于自动攻击的范围，标志攻击者是否攻击is_attack为false，标志正在攻击is_in_attack为false*/
+					if (distance.length() >= 1.414*unit_0->attack_range.height * 32)
+					{
+						unit_0->is_attack = false;
+						unit_0->is_in_attack = false;
+					}
+				}
 				genAttackEffect(unitid_0, unitid_1);
 				if (unit_1->underAttack(damage))
 				{
@@ -517,6 +530,11 @@ void UnitManager::updateUnitsState()
 					}
 					deleteUnit(unitid_1);
 				}
+
+			}
+			else if (unit_0) {
+				/*如果被攻击目标不存在，标志正在攻击is_in_attack为false,攻击者会重新搜索敌人*/
+				unit_0->is_in_attack = false;
 			}
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_MOV)
@@ -856,20 +874,20 @@ void UnitManager::selectPointUnits(Unit * _unit)
 		selected_ids.push_back(_unit->id);
 		getClickedUnit();
 	}
-	else
+	else {
 		for (auto & id : selected_ids)
 		{
 			//log("Unit ID: %d, tracing enemy id: %d", id, id_unit.second->id);
 			Unit* unit = id_map.at(id);
 			if (!unit || !unit->isMobile())
 				continue;
-			GridPoint target_pos = getGridPoint(_unit->getPosition());
-			unit->attack_id = _unit->id;
+			/*GridPoint target_pos = getGridPoint(_unit->getPosition());
 			unit->setDestination(target_pos);
-			log("Unit %d, start tracing FP", id);
-			unit->tryToSearchForPath();
+			unit->tryToSearchForPath();*/
+			unit->attack_id = _unit->id;
+			unit->is_attack = true;
 		}
-	return;
+	}
 }
 
 void UnitManager::getClickedUnit()
