@@ -14,7 +14,7 @@ void MouseRect::update(float f)
 {
 	clear();
 	Node* parent = getParent();
-	drawRect(touch_start, touch_end, Color4F(0, 1, 0, 1));
+	drawRect(touch_start_map, touch_end_map, Color4F(0, 1, 0, 1));
 }
 void CombatScene::DrawRectArea(Point p1, Point p2) {
 	DrawNode* drawNode = DrawNode::create();
@@ -22,11 +22,12 @@ void CombatScene::DrawRectArea(Point p1, Point p2) {
 	drawNode->drawRect(p1, p2, Color4F(0, 1, 0, 1));
 }
 //将框中的友方单位加入selectedd_ids
+//p1,p2是相对于地图的坐标
 void CombatScene::getLayerUnit(Point p1, Point p2) {
 	const auto&arrayNode = this->_combat_map->getChildren();
 	for (auto&child : arrayNode) {
 		Unit * pnode = static_cast<Unit *>(child);
-		if (pnode && pnode->is_in(p1-cdelta, p2-cdelta) && (pnode->camp == unit_manager->player_id)) {
+		if (pnode && pnode->is_in(p1, p2) && (pnode->camp == unit_manager->player_id)) {
 			unit_manager->selected_ids.push_back(pnode->id);
 			log("%d", pnode->id);
 		}
@@ -67,7 +68,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	client_side = client_context_;
 	/*聊天输入窗口*/
 	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"));
-	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.2));
+	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
 	//chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
 	chat_in_box->setFontSize(28);
@@ -76,7 +77,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	this->addChild(chat_in_box, 2);
 	/*聊天输出窗口*/
 	auto chat_out_box = Text::create("Input the chat message ", "Arial", 20);
-	chat_out_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
+	chat_out_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.2));
 	chat_out_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_out_box->setTag(2);
 	this->addChild(chat_out_box, 2);
@@ -96,6 +97,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	mini_map = Minimap::create("minimap2.png");
 	if (client_side->map() == 1) {
 		mini_map = Minimap::create("minimap1.png");
+		
 	}
 	else if (client_side->map() == 2) {
 		mini_map = Minimap::create("minimap2.png");
@@ -106,7 +108,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	/*加载矩形选框对象*/
 	mouse_rect = MouseRect::create();
 	mouse_rect->setVisible(false);
-	addChild(mouse_rect, 15);
+	_combat_map->addChild(mouse_rect, 15);
 	/*加载金钱layer*/
 	auto moneyDisplay = Sprite::create("MoneyDisplay.png");
 	addChild(moneyDisplay);
@@ -194,8 +196,15 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	destListener = EventListenerTouchOneByOne::create();
 	destListener->onTouchBegan = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_start = touch->getLocation();
+		mouse_rect->touch_start_map = mouse_rect->touch_start - cdelta;
+
 		if (mouse_rect->touch_start.x > mini_map->mini_width
 			|| mouse_rect->touch_start.y > mini_map->mini_height) {
+			/***************************/
+			/*转化成地图上的坐标*/
+			mouse_rect->touch_end = touch->getLocation();
+			mouse_rect->touch_end_map = mouse_rect->touch_end - cdelta;
+			/***************************/
 			mouse_rect->schedule(schedule_selector(MouseRect::update));
 			return true;
 		}
@@ -230,13 +239,16 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 
 	destListener->onTouchMoved = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_end = touch->getLocation();//更新最后接触的点
+		mouse_rect->touch_end_map = mouse_rect->touch_end - cdelta;
 		mouse_rect->setVisible(true);
 	};
 	/*加载框选监听器时间*/
 	destListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
 			mouse_rect->unschedule(schedule_selector(MouseRect::update));
+		/*更新点击位置*/
 		mouse_rect->touch_end = touch->getLocation();
+		mouse_rect->touch_end_map = mouse_rect->touch_end - cdelta;
 		mouse_rect->setVisible(false);
 		//如果是框选而非点选则清空selecetd_ids
 		if (Tri_Dsitance(mouse_rect->touch_start, mouse_rect->touch_end) > 8) {
@@ -251,12 +263,13 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 			if (mouse_rect->isScheduled(schedule_selector(MouseRect::update))) {
 				mouse_rect->unschedule(schedule_selector(MouseRect::update));
 			}
-			getLayerUnit(mouse_rect->touch_start, mouse_rect->touch_end);
+			getLayerUnit(mouse_rect->touch_start_map, mouse_rect->touch_end_map);
 			unit_manager->getClickedUnit();
 		}
 	};
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(destListener, this->_combat_map);
+
 	
 	/*加载按键监听器事件*/
 	letterListener = EventListenerKeyboard::create();

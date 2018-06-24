@@ -19,6 +19,7 @@ class MouseRect : public cocos2d::DrawNode
 public:
 	CREATE_FUNC(MouseRect);
 	cocos2d::Point touch_start, touch_end;
+	cocos2d::Point touch_start_map, touch_end_map;
 	void update(float f) override;
 };
 

@@ -80,7 +80,7 @@ private:
 class chat_server
 {
 public:
-	int map;
+	int map = 2;
 	chat_server(int port) :
 		acceptor_(*io_service_, tcp::endpoint(tcp::v4(), port))
 	{
