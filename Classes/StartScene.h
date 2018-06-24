@@ -35,6 +35,7 @@ public:
 
 	CREATE_FUNC(ServerMenu);
 private:
+	cocos2d::Label* connection_label;
 	chat_server * server_side = nullptr;
 	chat_client * client_side = nullptr;
 };

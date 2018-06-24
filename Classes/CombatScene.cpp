@@ -66,18 +66,16 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	server_side = server_context_;
 	client_side = client_context_;
 	/*聊天输入窗口*/
-	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"));
+	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"));
 	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.2));
-	chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
+	//chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
 	chat_in_box->setFontSize(28);
 	chat_in_box->setMaxLength(20);
-	chat_in_box->setFontColor(Color3B::WHITE);
-	chat_in_box->setText("127.0.0.1");
 	chat_in_box->setTag(1);
 	this->addChild(chat_in_box, 2);
 	/*聊天输出窗口*/
-	auto chat_out_box = Text::create("Hello", "Arial", 20);
+	auto chat_out_box = Text::create("Input the chat message ", "Arial", 20);
 	chat_out_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
 	chat_out_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_out_box->setTag(2);

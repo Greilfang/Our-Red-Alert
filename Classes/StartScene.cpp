@@ -136,23 +136,23 @@ bool ServerMenu::init() {
 	this->addChild(menu, 1);
 
 	/* ConnectionLabel */
-	auto connection_label = Label::createWithTTF("", "/fonts/arial.ttf", 18);
+	connection_label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 24);
 	connection_label->setAnchorPoint(Vec2(0.5, 0));
-	connection_label->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y));
-	this->addChild(connection_label,2);
+	connection_label->setPosition(Vec2(origin.x + visibleSize.width*0.7, origin.y + visibleSize.height*0.8));
+	this->addChild(connection_label,3);
 
 	return true;
 }
 
 void ServerMenu::menuStartServerCallback(cocos2d::Ref * pSender) {
-	AllocConsole();
-	freopen("CONIN$", "r", stdin);
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
+	//AllocConsole();
+	//freopen("CONIN$", "r", stdin);
+	//freopen("CONOUT$", "w", stdout);
+	//freopen("CONOUT$", "w", stderr);
 
 	server_side = chat_server::create();
 	client_side = chat_client::create();
-
+	schedule(schedule_selector(ServerMenu::connectionUpdate), 0.1);
 }
 
 void ServerMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
@@ -167,7 +167,10 @@ void ServerMenu::menuBackCallback(cocos2d::Ref * pSender) {
 }
 
 void ServerMenu::connectionUpdate(float f) {
-
+	if (server_side->connection_num())
+		connection_label->setString("Total connection num: " + std::to_string(server_side->connection_num()));
+	else
+		connection_label->setString("Port already used, please change another one");
 }
 
 cocos2d::Scene * ClientMenu::createScene() {
@@ -237,11 +240,11 @@ bool ClientMenu::init() {
 void ClientMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
 	if (!client_side)
 	{
-		AllocConsole();
+	/*	AllocConsole();
 		freopen("CONIN$", "r", stdin);
 		freopen("CONOUT$", "w", stdout);
 		freopen("CONOUT$", "w", stderr);
-		log("client ok");
+		log("client ok");*/
 		auto ip_box = static_cast<ui::EditBox*>(getChildByTag(1));
 		std::string ip = ip_box->getText();
 

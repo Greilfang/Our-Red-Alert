@@ -105,7 +105,10 @@ public:
 		this->button_thread_ = new std::thread(std::bind(&chat_server::loop_process, this));
 		button_thread_->detach();
 	}
-
+	int connection_num() const
+	{
+		return connections_.size();
+	}
 private:
 	void do_accept()
 	{

@@ -365,7 +365,7 @@ void Unit::update(float f)
 
 void Unit::searchEnemy()
 {
-	const auto & auto_atk_rect = GridRect(_cur_pos - attack_range / 2, attack_range);
+	const auto & auto_atk_rect = GridRect(_cur_pos , attack_range);
 	const auto & unit_ids = grid_map->getUnitIDAt(auto_atk_rect);
 	for (auto its_id : unit_ids)
 	{
@@ -892,11 +892,12 @@ void UnitManager::selectPointUnits(Unit * _unit)
 			Unit* unit = id_map.at(id);
 			if (!unit || !unit->isMobile())
 				continue;
-			/*GridPoint target_pos = getGridPoint(_unit->getPosition());
+			GridPoint target_pos = getGridPoint(_unit->getPosition());
 			unit->setDestination(target_pos);
-			unit->tryToSearchForPath();*/
+			unit->tryToSearchForPath();
 			unit->attack_id = _unit->id;
 			unit->is_attack = true;
+			_unit->displayHP();
 		}
 	}
 }
