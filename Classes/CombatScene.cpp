@@ -65,6 +65,23 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	/*加载客户端和服务端*/
 	server_side = server_context_;
 	client_side = client_context_;
+	/*聊天输入窗口*/
+	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"));
+	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.2));
+	chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
+	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
+	chat_in_box->setFontSize(28);
+	chat_in_box->setMaxLength(20);
+	chat_in_box->setFontColor(Color3B::WHITE);
+	chat_in_box->setText("127.0.0.1");
+	chat_in_box->setTag(1);
+	this->addChild(chat_in_box, 2);
+	/*聊天输出窗口*/
+	auto chat_out_box = Text::create("Hello", "Arial", 20);
+	chat_out_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
+	chat_out_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
+	chat_out_box->setTag(2);
+	this->addChild(chat_out_box, 2);
 	/* 加载地图 */
 	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
@@ -378,6 +395,21 @@ void CombatScene::scrollMap() {
 				scroll += Vec2(0, -SCROLL_LENGTH); break;
 			case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 				scroll -= Vec2(0, -SCROLL_LENGTH); break;
+
+			case EventKeyboard::KeyCode::KEY_CTRL: {
+				auto chat_out_box = static_cast<ui::EditBox*>(this->getChildByTag(1));
+				std::string value = chat_out_box->getText();
+				// 如果数据大于0，显示在_messageValueLabel当中
+				if (value.length() > 0)
+				{
+					auto new_msg = msgs->add_game_message();
+					new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_CHT);
+					new_msg->set_chat_message(value);
+					new_msg->set_camp(client_side->camp());
+					chat_out_box->setText("\0");
+				}
+			}
+			break;
 			}
 		}
 	}

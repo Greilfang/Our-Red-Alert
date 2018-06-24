@@ -39,7 +39,6 @@ class GameMessageSetDefaultTypeInternal {
   ::google::protobuf::internal::ExplicitlyConstructed<GameMessageSet>
       _instance;
 } _GameMessageSet_default_instance_;
-
 namespace protobuf_GameMessage_2eproto {
 void InitDefaultsGameMessageImpl() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -110,7 +109,7 @@ void InitDefaultsGameMessageSetImpl() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
 #ifdef GOOGLE_PROTOBUF_ENFORCE_UNIQUENESS
-  ::google::protobuf::internal::();
+  ::google::protobuf::internal::InitProtobufDefaultsForceUnique();
 #else
   ::google::protobuf::internal::InitProtobufDefaults();
 #endif  // GOOGLE_PROTOBUF_ENFORCE_UNIQUENESS
@@ -144,6 +143,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, msg_grid_path_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, camp_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, unit_type_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::GameMessage, chat_message_),
   ~0u,  // no _has_bits_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::MsgGridPoint, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -166,9 +166,9 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::GameMessage)},
-  { 12, -1, sizeof(::MsgGridPoint)},
-  { 19, -1, sizeof(::MsgGridPath)},
-  { 25, -1, sizeof(::GameMessageSet)},
+  { 13, -1, sizeof(::MsgGridPoint)},
+  { 20, -1, sizeof(::MsgGridPath)},
+  { 26, -1, sizeof(::GameMessageSet)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -200,19 +200,20 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\021GameMessage.proto\"\321\001\n\013GameMessage\022&\n\010c"
+      "\n\021GameMessage.proto\"\360\001\n\013GameMessage\022&\n\010c"
       "md_code\030\001 \001(\0162\024.GameMessage.CmdCode\022\016\n\006u"
       "nit_0\030\002 \001(\005\022\016\n\006unit_1\030\003 \001(\005\022\016\n\006damage\030\004 "
       "\001(\005\022#\n\rmsg_grid_path\030\005 \001(\0132\014.MsgGridPath"
-      "\022\014\n\004camp\030\006 \001(\005\022\021\n\tunit_type\030\007 \001(\005\"$\n\007Cmd"
-      "Code\022\007\n\003CRT\020\000\022\007\n\003MOV\020\001\022\007\n\003ATK\020\002\"$\n\014MsgGr"
-      "idPoint\022\t\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\"4\n\013MsgGrid"
-      "Path\022%\n\016msg_grid_point\030\001 \003(\0132\r.MsgGridPo"
-      "int\"4\n\016GameMessageSet\022\"\n\014game_message\030\001 "
-      "\003(\0132\014.GameMessageb\006proto3"
+      "\022\014\n\004camp\030\006 \001(\005\022\021\n\tunit_type\030\007 \001(\005\022\024\n\014cha"
+      "t_message\030\010 \001(\t\"-\n\007CmdCode\022\007\n\003CRT\020\000\022\007\n\003M"
+      "OV\020\001\022\007\n\003ATK\020\002\022\007\n\003CHT\020\003\"$\n\014MsgGridPoint\022\t"
+      "\n\001x\030\001 \001(\005\022\t\n\001y\030\002 \001(\005\"4\n\013MsgGridPath\022%\n\016m"
+      "sg_grid_point\030\001 \003(\0132\r.MsgGridPoint\"4\n\016Ga"
+      "meMessageSet\022\"\n\014game_message\030\001 \003(\0132\014.Gam"
+      "eMessageb\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 385);
+      descriptor, 416);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "GameMessage.proto", &protobuf_RegisterTypes);
 }
@@ -237,6 +238,7 @@ bool GameMessage_CmdCode_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -247,6 +249,7 @@ bool GameMessage_CmdCode_IsValid(int value) {
 const GameMessage_CmdCode GameMessage::CRT;
 const GameMessage_CmdCode GameMessage::MOV;
 const GameMessage_CmdCode GameMessage::ATK;
+const GameMessage_CmdCode GameMessage::CHT;
 const GameMessage_CmdCode GameMessage::CmdCode_MIN;
 const GameMessage_CmdCode GameMessage::CmdCode_MAX;
 const int GameMessage::CmdCode_ARRAYSIZE;
@@ -266,6 +269,7 @@ const int GameMessage::kDamageFieldNumber;
 const int GameMessage::kMsgGridPathFieldNumber;
 const int GameMessage::kCampFieldNumber;
 const int GameMessage::kUnitTypeFieldNumber;
+const int GameMessage::kChatMessageFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 GameMessage::GameMessage()
@@ -281,6 +285,10 @@ GameMessage::GameMessage(const GameMessage& from)
       _internal_metadata_(NULL),
       _cached_size_(0) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
+  chat_message_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.chat_message().size() > 0) {
+    chat_message_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.chat_message_);
+  }
   if (from.has_msg_grid_path()) {
     msg_grid_path_ = new ::MsgGridPath(*from.msg_grid_path_);
   } else {
@@ -293,6 +301,7 @@ GameMessage::GameMessage(const GameMessage& from)
 }
 
 void GameMessage::SharedCtor() {
+  chat_message_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&msg_grid_path_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&unit_type_) -
       reinterpret_cast<char*>(&msg_grid_path_)) + sizeof(unit_type_));
@@ -305,6 +314,7 @@ GameMessage::~GameMessage() {
 }
 
 void GameMessage::SharedDtor() {
+  chat_message_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete msg_grid_path_;
 }
 
@@ -337,6 +347,7 @@ void GameMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  chat_message_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (GetArenaNoVirtual() == NULL && msg_grid_path_ != NULL) {
     delete msg_grid_path_;
   }
@@ -454,6 +465,22 @@ bool GameMessage::MergePartialFromCodedStream(
         break;
       }
 
+      // string chat_message = 8;
+      case 8: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(66u /* 66 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_chat_message()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "GameMessage.chat_message"));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -517,6 +544,16 @@ void GameMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->unit_type(), output);
   }
 
+  // string chat_message = 8;
+  if (this->chat_message().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "GameMessage.chat_message");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      8, this->chat_message(), output);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
@@ -569,6 +606,17 @@ void GameMessage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->unit_type(), target);
   }
 
+  // string chat_message = 8;
+  if (this->chat_message().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->chat_message().data(), static_cast<int>(this->chat_message().length()),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "GameMessage.chat_message");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        8, this->chat_message(), target);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), target);
@@ -586,6 +634,13 @@ size_t GameMessage::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()));
   }
+  // string chat_message = 8;
+  if (this->chat_message().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->chat_message());
+  }
+
   // .MsgGridPath msg_grid_path = 5;
   if (this->has_msg_grid_path()) {
     total_size += 1 +
@@ -663,6 +718,10 @@ void GameMessage::MergeFrom(const GameMessage& from) {
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (from.chat_message().size() > 0) {
+
+    chat_message_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.chat_message_);
+  }
   if (from.has_msg_grid_path()) {
     mutable_msg_grid_path()->::MsgGridPath::MergeFrom(from.msg_grid_path());
   }
@@ -704,12 +763,24 @@ bool GameMessage::IsInitialized() const {
   return true;
 }
 
+void GameMessage::genSetGridPath(const GridPath & _grid_path)
+{
+	MsgGridPath* msg_grid_path = mutable_msg_grid_path();
+	for (const auto & gp : _grid_path)
+	{
+		MsgGridPoint* msg_grid_point = msg_grid_path->add_msg_grid_point();
+		msg_grid_point->set_x(gp._x);
+		msg_grid_point->set_y(gp._y);
+	}
+}
+
 void GameMessage::Swap(GameMessage* other) {
   if (other == this) return;
   InternalSwap(other);
 }
 void GameMessage::InternalSwap(GameMessage* other) {
   using std::swap;
+  chat_message_.Swap(&other->chat_message_);
   swap(msg_grid_path_, other->msg_grid_path_);
   swap(cmd_code_, other->cmd_code_);
   swap(unit_0_, other->unit_0_);
@@ -1489,18 +1560,7 @@ void GameMessageSet::InternalSwap(GameMessageSet* other) {
 }
 
 
+
 // @@protoc_insertion_point(namespace_scope)
 
 // @@protoc_insertion_point(global_scope)
-
-void GameMessage::genSetGridPath(const GridPath & _grid_path)
-{
-	MsgGridPath* msg_grid_path = mutable_msg_grid_path();
-	for (const auto & gp : _grid_path)
-	{
-		MsgGridPoint* msg_grid_point = msg_grid_path->add_msg_grid_point();
-		msg_grid_point->set_x(gp._x);
-		msg_grid_point->set_y(gp._y);
-	}
-}
-

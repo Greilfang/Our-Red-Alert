@@ -5,7 +5,8 @@
 #define PROTOBUF_GameMessage_2eproto__INCLUDED
 
 #include <string>
-#include <GridMap.h>
+#include "GridMap.h"
+
 #include <google/protobuf/stubs/common.h>
 
 #if GOOGLE_PROTOBUF_VERSION < 3005000
@@ -75,12 +76,13 @@ enum GameMessage_CmdCode {
   GameMessage_CmdCode_CRT = 0,
   GameMessage_CmdCode_MOV = 1,
   GameMessage_CmdCode_ATK = 2,
+  GameMessage_CmdCode_CHT = 3,
   GameMessage_CmdCode_GameMessage_CmdCode_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
   GameMessage_CmdCode_GameMessage_CmdCode_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
 };
 bool GameMessage_CmdCode_IsValid(int value);
 const GameMessage_CmdCode GameMessage_CmdCode_CmdCode_MIN = GameMessage_CmdCode_CRT;
-const GameMessage_CmdCode GameMessage_CmdCode_CmdCode_MAX = GameMessage_CmdCode_ATK;
+const GameMessage_CmdCode GameMessage_CmdCode_CmdCode_MAX = GameMessage_CmdCode_CHT;
 const int GameMessage_CmdCode_CmdCode_ARRAYSIZE = GameMessage_CmdCode_CmdCode_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* GameMessage_CmdCode_descriptor();
@@ -132,8 +134,9 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   static PROTOBUF_CONSTEXPR int const kIndexInFileMessages =
     0;
 
-  void Swap(GameMessage* other);
   void genSetGridPath(const GridPath& _grid_path);
+
+  void Swap(GameMessage* other);
   friend void swap(GameMessage& a, GameMessage& b) {
     a.Swap(&b);
   }
@@ -183,6 +186,8 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
     GameMessage_CmdCode_MOV;
   static const CmdCode ATK =
     GameMessage_CmdCode_ATK;
+  static const CmdCode CHT =
+    GameMessage_CmdCode_CHT;
   static inline bool CmdCode_IsValid(int value) {
     return GameMessage_CmdCode_IsValid(value);
   }
@@ -205,8 +210,20 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   }
 
   // accessors -------------------------------------------------------
- // void genGameMessage(CmdCode _cmd_code, int _unit_0, int _unit_1, int _damage, int _camp, int _unit_type, const MsgGridPath& _grid_path);
-  //void genSetGridPath(const GridPath& _grid_path);
+
+  // string chat_message = 8;
+  void clear_chat_message();
+  static const int kChatMessageFieldNumber = 8;
+  const ::std::string& chat_message() const;
+  void set_chat_message(const ::std::string& value);
+  #if LANG_CXX11
+  void set_chat_message(::std::string&& value);
+  #endif
+  void set_chat_message(const char* value);
+  void set_chat_message(const char* value, size_t size);
+  ::std::string* mutable_chat_message();
+  ::std::string* release_chat_message();
+  void set_allocated_chat_message(::std::string* chat_message);
 
   // .MsgGridPath msg_grid_path = 5;
   bool has_msg_grid_path() const;
@@ -257,6 +274,7 @@ class GameMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  ::google::protobuf::internal::ArenaStringPtr chat_message_;
   ::MsgGridPath* msg_grid_path_;
   int cmd_code_;
   ::google::protobuf::int32 unit_0_;
@@ -727,6 +745,59 @@ inline void GameMessage::set_unit_type(::google::protobuf::int32 value) {
   
   unit_type_ = value;
   // @@protoc_insertion_point(field_set:GameMessage.unit_type)
+}
+
+// string chat_message = 8;
+inline void GameMessage::clear_chat_message() {
+  chat_message_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& GameMessage::chat_message() const {
+  // @@protoc_insertion_point(field_get:GameMessage.chat_message)
+  return chat_message_.GetNoArena();
+}
+inline void GameMessage::set_chat_message(const ::std::string& value) {
+  
+  chat_message_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:GameMessage.chat_message)
+}
+#if LANG_CXX11
+inline void GameMessage::set_chat_message(::std::string&& value) {
+  
+  chat_message_.SetNoArena(
+    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:GameMessage.chat_message)
+}
+#endif
+inline void GameMessage::set_chat_message(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  
+  chat_message_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:GameMessage.chat_message)
+}
+inline void GameMessage::set_chat_message(const char* value, size_t size) {
+  
+  chat_message_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:GameMessage.chat_message)
+}
+inline ::std::string* GameMessage::mutable_chat_message() {
+  
+  // @@protoc_insertion_point(field_mutable:GameMessage.chat_message)
+  return chat_message_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* GameMessage::release_chat_message() {
+  // @@protoc_insertion_point(field_release:GameMessage.chat_message)
+  
+  return chat_message_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void GameMessage::set_allocated_chat_message(::std::string* chat_message) {
+  if (chat_message != NULL) {
+    
+  } else {
+    
+  }
+  chat_message_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), chat_message);
+  // @@protoc_insertion_point(field_set_allocated:GameMessage.chat_message)
 }
 
 // -------------------------------------------------------------------

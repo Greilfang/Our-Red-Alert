@@ -547,6 +547,17 @@ void UnitManager::updateUnitsState()
 				unit_0->is_moving = true;
 			}
 		}
+		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_CHT)
+		{
+			static int timer = 0;
+			auto chat_out_box = static_cast<ui::Text*>(combat_scene->getChildByTag(2));
+			if (timer++ % 3 == 0) {
+				chat_out_box->setString("Player" + std::to_string(msg.camp()) + ":" + msg.chat_message());
+			}
+			else {
+				chat_out_box->setString(chat_out_box->getString() + "\nPlayer" + std::to_string(msg.camp()) + ":" + msg.chat_message());
+			}
+		}
 	}
 	msgs->clear_game_message();
 }

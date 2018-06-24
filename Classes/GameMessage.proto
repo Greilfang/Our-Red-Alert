@@ -9,6 +9,7 @@ message GameMessage {
         CRT = 0;
         MOV = 1;
         ATK = 2;
+		CHT = 3;
     }
 
 
@@ -21,6 +22,7 @@ message GameMessage {
     MsgGridPath msg_grid_path = 5;
     int32 camp =6;
     int32 unit_type = 7;
+	string chat_message = 8;
 }
 message MsgGridPoint {
     int32 x = 1;
