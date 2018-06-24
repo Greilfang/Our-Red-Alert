@@ -134,8 +134,6 @@ void PreLoad::loadAnimations(ValueVector animations) {
 		else if (str == "Mine.plist")
 		{
 			frame = 24;
-			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
-			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
@@ -149,8 +147,6 @@ void PreLoad::loadAnimations(ValueVector animations) {
 		else if (str == "TankFactory.plist")
 		{
 			frame = 24;
-			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
-			SpriteFrameCacheInstance->addSpriteFramesWithFile(str.c_str());
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
@@ -164,8 +160,6 @@ void PreLoad::loadAnimations(ValueVector animations) {
 		else if (str == "MilitaryCamp.plist")
 		{
 			frame = 24;
-			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
-			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
@@ -173,8 +167,99 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 70, 127));
 				animation->addSpriteFrame(spriteFrame);
 			}
-			animation->setDelayPerUnit(3.0f / (float)frame);
+			animation->setDelayPerUnit(1.5f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "MilitaryCampCreate");
+		}
+		else if (str == "DogMove.plist")
+		{
+			auto up = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveUp/DogMoveUp_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 12, 33));
+				up->addSpriteFrame(spriteFrame);
+			}
+			up->setDelayPerUnit(1.2f / 5.0);
+			up->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(up, "DogMoveUp");
+			
+			auto down = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveDown/DogMoveDown_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 12, 36));
+				down->addSpriteFrame(spriteFrame);
+			}
+			down->setDelayPerUnit(1.5f / 6.0);
+			down->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(down, "DogMoveDown");
+
+			auto left = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveLeft/DogMoveLeft_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0,35,23));
+				left->addSpriteFrame(spriteFrame);
+			}
+			left->setDelayPerUnit(1.5f / 6.0);
+			left->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(left, "DogMoveLeft");
+
+			auto right = Animation::create();
+			for (int i = 1; i <= 5; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveRight/DogMoveRight_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 35, 23));
+				right->addSpriteFrame(spriteFrame);
+			}
+			right->setDelayPerUnit(1.2f / 5.0);
+			right->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(right, "DogMoveRight");
+
+			auto top_left = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveTopLeft/DogMoveTopLeft_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 27, 30));
+				top_left->addSpriteFrame(spriteFrame);
+			}
+			top_left->setDelayPerUnit(1.5f / 6.0);
+			top_left->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(top_left, "DogMoveTopLeft");
+
+			auto top_right = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveTopRight/DogMoveTopRight_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 25, 29));
+				top_right->addSpriteFrame(spriteFrame);
+			}
+			top_right->setDelayPerUnit(1.5f / 6.0);
+			top_right->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(top_right, "DogMoveTopRight");
+
+			auto lower_right = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveLowerRight/DogMoveLowerRight_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 33, 31));
+				lower_right->addSpriteFrame(spriteFrame);
+			}
+			lower_right->setDelayPerUnit(1.5f / 6.0);
+			lower_right->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(lower_right, "DogMoveLowerRight");
+
+			auto lower_left = Animation::create();
+			for (int i = 1; i <= 6; i++)
+			{
+				std::string name = StringUtils::format("Picture/animation/moveLowerLeft/DogMoveLowerLeft_%d.png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 26, 31));
+				lower_left->addSpriteFrame(spriteFrame);
+			}
+			lower_left->setDelayPerUnit(1.5f / 6.0);
+			lower_left->setRestoreOriginalFrame(false);
+			AnimationCache::getInstance()->addAnimation(lower_left, "DogMoveLowerLeft");
+
 		}
 		progressUpdate();
 	}

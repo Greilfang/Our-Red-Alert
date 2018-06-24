@@ -18,6 +18,7 @@
 		<string>PowerPlant.plist</string>		
 		<string>TankFactory.plist</string>
 		<string>MilitaryCamp.plist</string>
+		<string>DogMove.plist</string>
 	</array>
 	<key>Musics</key>
 	<array>

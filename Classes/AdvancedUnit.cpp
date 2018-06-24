@@ -1,5 +1,5 @@
 #include "AdvancedUnit.h"
-
+#include "Const.h"
 USING_NS_CC;
 
 Fighter* Fighter::create(const std::string& filename)
@@ -39,7 +39,7 @@ void Fighter::move()
 	else {
 		grid_map->occupyPosition(id, next_gp, false);
 		setPosition(next_pos);
-		grid_map->leavePosition(_cur_pos, true);
+		grid_map->leavePosition(_cur_pos, false);
 		_cur_pos = next_gp;
 	}
 
@@ -150,13 +150,119 @@ Dog * Dog::create(const std::string & filename)
 	return nullptr;
 }
 
+void Dog::playMoveAnimation()
+{
+	log("111111111");
+	Animation * move;
+	std::string dir;
+	switch (_direction)
+	{
+	case 1:dir = "Right"; break;
+	case 2:dir = "TopRight"; break;
+	case 3:dir = "Up"; break;
+	case 4:dir = "TopLeft"; break;
+	case 5:dir = "Left"; break;
+	case 6:dir = "LowerRight"; break;
+	case 7:dir = "Down"; break;
+	case 8:dir = "LowerLeft"; break;
+	}
+	_preDirection = _direction;
+	std::string actionName = "DogMove" + dir;
+	move = AnimationCache::getInstance()->getAnimation(actionName);
+	auto animate = Animate::create(move);
+	auto run = RepeatForever::create(animate);
+	this->stopAllActions();
+	this->runAction(run);
+
+}
+
+bool Dog::checkDirectionChange(Vec2 direction)
+{
+	float x = direction.x;
+	float y = direction.y;
+	Animation * move;
+	if (y >= 0)
+	{
+		if (x > 0.92)
+			_direction = 1;//Right
+		else if (x > 0.38)
+			_direction = 2;//TopRight
+		else if (x > -0.38)
+			_direction = 3;//Up
+		else if (x > -0.92)
+			_direction = 4;// TopLeft
+		else
+			_direction = 5;// Left
+	}
+	else
+	{
+		if (x > 0.92)
+			_direction = 1;// Right
+		else if (x > 0.38)
+			_direction = 6;// LowerRight
+		else if (x > -0.38)
+			_direction = 7;// Down
+		else if (x > -0.92)
+			_direction = 8;// LowerLeft
+		else
+			_direction = 5;// Left
+	}
+	return _preDirection != _direction;
+}
+
 void Dog::setProperties()
 {
 	type = 4;
 
-	speed = 5.0f;
+	speed = 3.0f;
 
 	z_index = 10;
 	attack_range = GridSize(1, 1);
 	mobile = true;
+}
+
+void Dog::move()
+{
+	auto esp = (_cur_dest_point - getPosition()).getNormalized();
+	if (checkDirectionChange(esp))
+	{
+		playMoveAnimation();
+	}
+	Point next_position = esp * speed + getPosition();
+	GridPoint next_gpos = grid_map->getGridPoint(next_position);
+
+	if (_cur_pos == next_gpos)
+	{
+		setPosition(next_position);
+	}
+	else if (grid_map->occupyPosition(id, next_gpos))
+	{
+		setPosition(next_position);
+		grid_map->leavePosition(_cur_pos);
+		_cur_pos = next_gpos;
+	}
+	else
+	{
+		_cur_dest = _cur_pos;
+		setCurDestPoint(_cur_dest);
+		Point final_dest = grid_map->getPointWithOffset(_final_dest);
+		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > REFIND_PATH_MAX_RANGE) {
+			if (!is_delaying)
+				tryToSearchForPath();
+		}
+	}
+	if (hasArrivedFinalDest()) {
+		
+		if (_grid_path.size()) {
+			_cur_dest = _grid_path.back();
+			setCurDestPoint(_cur_dest);
+			_grid_path.pop_back();
+		}
+		else
+		{
+			is_moving = false;
+			this->stopAllActions();
+			_preDirection = 0;
+		}
+	}
 }

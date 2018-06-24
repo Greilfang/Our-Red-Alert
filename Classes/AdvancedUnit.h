@@ -9,8 +9,13 @@ class Dog : public Unit
 {
 public:
 	static Dog* create(const std::string& filename);
+	void playMoveAnimation();
+	bool checkDirectionChange(Vec2 direction);
 private:
+	int _direction = 0;
+	int _preDirection = 0;
 	void setProperties() override;
+	void move() override;
 };
 class Fighter : public Unit
 {

@@ -255,4 +255,14 @@ private:
 	int speed_ = 10;
 };
 
+class ExplosionEffect :public cocos2d::ParticleFire
+{
+public:
+	virtual bool init() override;
+
+	CREATE_FUNC(ExplosionEffect);
+private:
+	void remove(float f);
+};
+
 #endif

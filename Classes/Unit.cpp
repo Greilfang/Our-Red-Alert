@@ -79,15 +79,19 @@ void Unit::setProperties()
 
 void Unit::removeFromMaps()
 {
+	auto explosion_effect = ExplosionEffect::create();
+	explosion_effect->setPosition(this->getPosition());
+	getParent()->addChild(explosion_effect, 20);
+
 	if (isMobile())
 	{
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("die.mp3", true);
 		grid_map->leavePosition(_cur_pos);
-		//log("%d 死了，从格点上消除", type);
 	}
 	else
 	{
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bomb.mp3", true);
 		grid_map->leavePosition(rec);
-		//log("%d 死了(building)，从格点上消除", type);
 		if (camp == unit_manager->player_id)
 		{
 			if (type == 13)
@@ -578,6 +582,9 @@ void UnitManager::updateUnitsState()
 			{
 				unit_0->setGridPath(msg.msg_grid_path());
 				unit_0->is_moving = true;
+				if (unit_0->type == 1) {
+					grid_map->leavePosition(unit_0->_cur_pos);
+				}
 			}
 		}
 		else if (msg.cmd_code() == GameMessage::CmdCode::GameMessage_CmdCode_CHT)
@@ -893,7 +900,7 @@ void UnitManager::selectPointUnits(Unit * _unit)
 			if (!unit || !unit->isMobile())
 				continue;
 			GridPoint target_pos = getGridPoint(_unit->getPosition());
-			unit->setDestination(target_pos);
+			unit->setDestination(target_pos - unit->attack_range/2);
 			unit->tryToSearchForPath();
 			unit->attack_id = _unit->id;
 			unit->is_attack = true;
@@ -969,4 +976,23 @@ void ConstructRange::drawRange(Point p, float r)
 {
 
 	drawDot(p, r, color);
+}
+
+bool ExplosionEffect::init()
+{
+	if (!ParticleFire::init())
+		return false;
+
+	setScale(0.0000008);
+	setDuration(1);
+	auto action = ScaleBy::create(0.5, 500000);
+	runAction(action);
+	scheduleOnce(schedule_selector(ExplosionEffect::remove), 1.2);
+	setPositionType(PositionType::RELATIVE);
+	return true;
+}
+
+void ExplosionEffect::remove(float f)
+{
+	removeFromParent();
 }
