@@ -91,9 +91,10 @@ void PreLoad::loadEffect(ValueVector effectFiles) {
 }
 
 void PreLoad::loadSpriteSheets(ValueVector spriteSheets) {
+	auto a = SpriteFrameCache::getInstance();
 	for (Value &v : spriteSheets) {
-		string str = v.asString();
-		SpriteFrameCache::getInstance()->addSpriteFramesWithFile(str.c_str());
+		string str = v.asString();		
+		a->addSpriteFramesWithFile(str);
 		progressUpdate();
 	}
 }
@@ -102,17 +103,14 @@ void PreLoad::loadAnimations(ValueVector animations) {
 	for (Value &v : animations) {
 		int frame = 0;
 		string str = v.asString();
-		//SpriteFrameCache::getInstance()->addSpriteFramesWithFile(str.c_str());	
 		if (str == "Base.plist")
 		{
 			frame = 26;
-			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
-			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
-				std::string name = StringUtils::format("Base_1 (%d).png", i);
-				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				std::string name = StringUtils::format("Picture/animation/Base/Base_1 (%d).png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0,0,141,89));
 				animation->addSpriteFrame(spriteFrame);
 			}
 			animation->setDelayPerUnit(3.0f / (float)frame);
@@ -123,13 +121,11 @@ void PreLoad::loadAnimations(ValueVector animations) {
 		else if (str == "PowerPlant.plist")
 		{
 			frame = 25;
-			auto SpriteFrameCacheInstance = SpriteFrameCache::getInstance();
-			SpriteFrameCacheInstance->addSpriteFramesWithFile(str);
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
-				std::string name = StringUtils::format("PowerPlant_1 (%d).png", i);
-				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				std::string name = StringUtils::format("Picture/animation/PowerPlant/PowerPlant_1 (%d).png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 135, 121));
 				animation->addSpriteFrame(spriteFrame);
 			}
 			animation->setDelayPerUnit(3.0f / (float)frame);
@@ -143,8 +139,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
-				std::string name = StringUtils::format("Mine_1 (%d).png", i);
-				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				std::string name = StringUtils::format("Picture/animation/Mine/Mine_1 (%d).png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 134, 95));
 				animation->addSpriteFrame(spriteFrame);				
 			}
 			animation->setDelayPerUnit(3.0f / (float)frame);
@@ -158,8 +154,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
-				std::string name = StringUtils::format("TankFactory_1 (%d).png", i);
-				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				std::string name = StringUtils::format("Picture/animation/TankFactory/TankFactory_1 (%d).png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 140, 110));
 				animation->addSpriteFrame(spriteFrame);
 			}
 			animation->setDelayPerUnit(3.0f / (float)frame);
@@ -173,8 +169,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			auto animation = Animation::create();
 			for (int i = 1; i <= frame; i++)
 			{
-				std::string name = StringUtils::format("MilitaryCamp_1 (%d).png", i);
-				auto spriteFrame = SpriteFrameCache::getInstance()->getSpriteFrameByName(name);
+				std::string name = StringUtils::format("Picture/animation/MilitaryCamp/MilitaryCamp_1 (%d).png", i);
+				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 70, 127));
 				animation->addSpriteFrame(spriteFrame);
 			}
 			animation->setDelayPerUnit(3.0f / (float)frame);

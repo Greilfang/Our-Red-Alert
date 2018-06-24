@@ -5,6 +5,13 @@
 
 #include "Unit.h"
 
+class Dog : public Unit
+{
+public:
+	static Dog* create(const std::string& filename);
+private:
+	void setProperties() override;
+};
 class Fighter : public Unit
 {
 public:

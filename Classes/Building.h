@@ -13,7 +13,7 @@ class CombatScene;
 class Building : public Unit
 {
 private:
-	GridRect rec;
+
 	void setProperties() = 0;
 public:
 	Sprite * building;
@@ -25,7 +25,6 @@ public:
 	std::vector<int> prod_list;
 	Bar* prod_bar = nullptr;
 
-	Building() : rec(GridRect{ 0,0 }) {	Unit();	};
 	void addToGmap(Point p) override;
 	bool layer_is_created = false;
 	virtual void setListener();

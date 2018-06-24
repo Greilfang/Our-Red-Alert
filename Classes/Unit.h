@@ -157,7 +157,7 @@ protected:
 	int type;
 	bool mobile;
 
-	
+
 	bool is_moving = false;
 	bool is_delaying = false; //延迟寻路标志
 
@@ -166,7 +166,7 @@ protected:
 	int max_life=100;
 	int ATK = 0;
 	int attack_frequency ;
-	
+
 	int speed ;
 	Bar* hp_bar = nullptr;//用来给单位创建血条
 
@@ -200,6 +200,9 @@ public:
 	UnitManager* unit_manager = nullptr;
 	bool is_attack = false;
 	GridSize attack_range;
+	//中心位置（用于占据格点和设定攻击特效路径）
+	Point _center_position;
+	GridRect rec;
 	bool is_in_attack = false;
 	static Unit* create(const std::string & filename);
 
@@ -224,9 +227,9 @@ public:
 	bool isMobile();
 	//构造函数
 	Unit(int _max_life, int _atk_freq, double _atk_range, int _speed) 
-		:max_life(_max_life), attack_frequency(_atk_freq), attack_range(_atk_range), speed(_speed) 
+		:max_life(_max_life), attack_frequency(_atk_freq), attack_range(_atk_range), speed(_speed), rec(GridRect{ 0,0 })
 	{ ; };
-	Unit() :max_life(100), attack_frequency(1), speed(10) { ; };
+	Unit() :max_life(100), attack_frequency(1), speed(10), rec(GridRect{ 0,0 }) { ; };
 	//判断单位是不是在某个范围内
 	bool is_in(Point p1, Point p2);
 	//对血条的显示和隐藏操作
@@ -249,7 +252,7 @@ public:
 private:
 	void updatefire(float);
 	cocos2d::Vec2 from_, to_, move_;
-	int speed_ = 3;
+	int speed_ = 10;
 };
 
 #endif

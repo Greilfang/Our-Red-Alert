@@ -186,7 +186,7 @@ bool MilitaryCampLayer::init()
 	layout->setBackGroundImage("bc.png");
 	this->addChild(layout);
 
-	// 创建一个创建soldier的Button对象，设置在Layout的中左部
+	// 创建一个创建soldier的Button对象，设置在Layout的左上部
 	soldier = Button::create("/Picture/menu/SoldierMenu.png",
 		"/Picture/menu/SoldierMenu.png");
 	layout->addChild(soldier);
@@ -202,6 +202,29 @@ bool MilitaryCampLayer::init()
 			if (unit_manager->money->checkMoney(2000))
 			{
 				center->startProduce(3);
+				unit_manager->money->spendMoney(2000);
+			}
+			else
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+		}
+	});
+
+	// 创建一个创建dog的Button对象，设置在Layout的右上部
+	dog = Button::create("/Picture/menu/DogMenu.png",
+		"/Picture/menu/DogMenu.png");
+	layout->addChild(dog);
+	RelativeLayoutParameter* rp_TopRight = RelativeLayoutParameter::create();
+	rp_TopRight->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_TOP_RIGHT);
+	dog->setLayoutParameter(rp_TopRight);
+	dog->setScale(0.8);
+	//给dog添加监听器
+	dog->addTouchEventListener([=](Ref * pSender, Widget::TouchEventType type)
+	{
+		if (type == Widget::TouchEventType::BEGAN)
+		{
+			if (unit_manager->money->checkMoney(2000))
+			{
+				center->startProduce(4);
 				unit_manager->money->spendMoney(2000);
 			}
 			else
@@ -323,6 +346,11 @@ TankFactaryLayer * TankFactaryLayer::create()
 		CC_SAFE_DELETE(ret);
 		return nullptr;
 	}
+}
+
+Point CreateUnitLayer::findFirstPosition()
+{
+	return Point();
 }
 
 void CreateUnitLayer::addListenerToRect(int type)

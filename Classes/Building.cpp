@@ -4,11 +4,11 @@
 
 USING_NS_CC;
 
-Size Base::size = Size(150, 90);
-Size MilitaryCamp::size = Size(70, 120);
+Size Base::size = Size(141, 89);
+Size MilitaryCamp::size = Size(70, 127);
 Size TankFactary::size = Size(140, 110);
-Size PowerPlant::size = Size(130, 120);
-Size Mine::size = Size(130, 90);
+Size PowerPlant::size = Size(135, 120);
+Size Mine::size = Size(134, 96);
 
 void Base::setMenuEnable(bool able)
 {
@@ -127,6 +127,8 @@ void MilitaryCamp::setProperties()
 	current_life = max_life = 200;
 	//Soldier
 	period_map[3] = SOLDIER_PERIOD;
+	//Dog
+	period_map[4] = DOG_PERIOD;
 }
 
 void Base::update(float f)
@@ -190,13 +192,6 @@ void Base::update(float f)
 			auto onbuild = Animate::create(built);
 			File = "Picture/units/" + file + std::to_string(camp) + ".png";
 			building = Sprite::create(File);
-			switch(cur_prod)
-			{
-			case 11:building->setAnchorPoint(Point(0.5, 0)); break;
-			case 12:building->setAnchorPoint(Vec2(0.238, 0.437));break;
-			case 13: building->setAnchorPoint(Point(0, 0)); break;
-			case 14:building->setAnchorPoint(Point(0.2, 0.2)); break;
-			}
 			unit_manager->getTiledMap()->addChild(building, 1000);
 			building->setPosition(createPosition);
 			building->runAction(onbuild);
@@ -397,7 +392,8 @@ void Mine::setProperties()
 	type = 12;
 	z_index = 5;
 	mobile = false;
-	setIncreasingAmount(MONEY_INCREASE);
+	if(camp == unit_manager->player_id)
+		setIncreasingAmount(MONEY_INCREASE);
 }
 
 void Mine::setIncreasingAmount(int amount)
@@ -421,7 +417,8 @@ void PowerPlant::setProperties()
 	type = 13;
 	z_index = 5;
 	mobile = false;
-	addMax_Power(POWER_INCREASE);
+	if (camp == unit_manager->player_id)
+		addMax_Power(POWER_INCREASE);
 }
 
 void PowerPlant::addMax_Power(int delta)

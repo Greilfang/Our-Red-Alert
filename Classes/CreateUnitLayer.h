@@ -24,6 +24,8 @@ public:
 	UnitManager * unit_manager;
 	virtual bool init() = 0;	
 
+	Point findFirstPosition();
+	Point findFinalPosition();
 	void addListenerToRect(int type);
 	//检查金钱、电力是否足够建造
 	bool checkBuilding(int money, int power);
@@ -49,6 +51,7 @@ public:
 class MilitaryCampLayer : public CreateUnitLayer
 {
 private:
+	cocos2d::ui::Button *dog;
 	cocos2d::ui::Button *soldier;
 	cocos2d::ui::Button *exit;
 public:

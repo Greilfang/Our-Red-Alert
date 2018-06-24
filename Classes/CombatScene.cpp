@@ -81,7 +81,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	chat_out_box->setTag(2);
 	this->addChild(chat_out_box, 2);
 	/* 加载地图 */
-	_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
+	_combat_map = TMXTiledMap::create("map/BasicMap.tmx");
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
 	/* 加载格点地图 */
@@ -394,7 +394,7 @@ void CombatScene::scrollMap() {
 			case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
 				scroll -= Vec2(0, -SCROLL_LENGTH); break;
 
-			case EventKeyboard::KeyCode::KEY_CTRL: {
+			case EventKeyboard::KeyCode::KEY_ENTER: {
 				auto chat_out_box = static_cast<ui::EditBox*>(this->getChildByTag(1));
 				std::string value = chat_out_box->getText();
 				// 如果数据大于0，显示在_messageValueLabel当中

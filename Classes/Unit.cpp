@@ -79,7 +79,26 @@ void Unit::setProperties()
 
 void Unit::removeFromMaps()
 {
-	grid_map->leavePosition(_cur_pos);
+	if (isMobile())
+	{
+		grid_map->leavePosition(_cur_pos);
+		//log("%d 死了，从格点上消除", type);
+	}
+	else
+	{
+		grid_map->leavePosition(rec);
+		//log("%d 死了(building)，从格点上消除", type);
+		if (camp == unit_manager->player_id)
+		{
+			if (type == 13)
+			{
+				unit_manager->setMax_power(-POWER_INCREASE);
+				unit_manager->power->updatePowerDisplay();
+			}
+			else if (type == 12)
+				unit_manager->setIncreasingAmount(-MONEY_INCREASE);
+		}	
+	}
 	tiled_map->removeChild(this, 1);
 }
 
@@ -365,7 +384,7 @@ void Unit::update(float f)
 
 void Unit::searchEnemy()
 {
-	const auto & auto_atk_rect = GridRect(_cur_pos , attack_range);
+	const auto & auto_atk_rect = GridRect(_cur_pos, attack_range);
 	const auto & unit_ids = grid_map->getUnitIDAt(auto_atk_rect);
 	for (auto its_id : unit_ids)
 	{
@@ -521,14 +540,28 @@ void UnitManager::updateUnitsState()
 						unit_0->is_in_attack = false;
 					}
 				}
-				genAttackEffect(unitid_0, unitid_1);
-				if (unit_1->underAttack(damage))
+				/*如果是狗的话，无子弹特效*/
+				if (unit_0 && unit_0->type == 4)
 				{
-					if (unit_1->getType() == 0) {
-						player_num--;
-						checkWinOrLose(unitid_1);
+					/*不是士兵和狗不攻击*/
+					if (unit_1->type != 3 && unit_1->type != 4) { ; }
+					else
+					{
+						if (unit_1->underAttack(damage))
+							deleteUnit(unitid_1);
 					}
-					deleteUnit(unitid_1);
+				}
+				else
+				{
+					genAttackEffect(unitid_0, unitid_1);
+					if (unit_1->underAttack(damage))
+					{
+						if (unit_1->getType() == 0) {
+							player_num--;
+							checkWinOrLose(unitid_1);
+						}
+						deleteUnit(unitid_1);
+					}
 				}
 
 			}
@@ -561,7 +594,6 @@ void UnitManager::updateUnitsState()
 	}
 	msgs->clear_game_message();
 }
-
 void UnitManager::initializeUnitGroup() {
 	/* 加载初始化对象 */
 	auto* obj_group = tiled_map->getObjectGroup("InitialUnits");
@@ -666,13 +698,16 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 		file = "Base_";
 		break;
 	case 1:
-		file = "airplane_";
+		file = "Airplane_";
 		break;
 	case 2:
-		file = "footman_front_";
+		file = "Tank_";
 		break;
 	case 3:
-		file = "robot_front_";
+		file = "Soldier_";
+		break;
+	case 4:
+		file = "Dog_";
 		break;
 	case 11:
 		file = "MilitaryCamp_";
@@ -700,13 +735,15 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 	case 3:
 		nu = Soldier::create(pic_file);
 		break;
+	case 4:
+		nu = Dog::create(pic_file);
+		break;
 	case 0:
 		tmp_base = Base::create(pic_file);
 		playBaseCreateAnimation(tmp_base);
 		base = tmp_base;
 		base_map[id] = camp;
 		nu = tmp_base;
-		nu->setAnchorPoint(Point(0, 0));
 		if (camp == player_id)
 		{
 			playBaseCreateAnimation(tmp_base);
@@ -719,72 +756,35 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 		break;
 	case 11:
 		nu = MilitaryCamp::create(pic_file);
-		nu->setAnchorPoint(Point(0.5, 0));
 		break;
 	case 12:
 		nu = Mine::create(pic_file);
-		nu->setAnchorPoint(Vec2(0.238, 0.437));
 		break;
 	case 13:
 		nu = PowerPlant::create(pic_file);
-		nu->setAnchorPoint(Vec2(0, 0));
 		break;
 	case 14:
 		nu = TankFactary::create(pic_file);
-		nu->setAnchorPoint(Point(0.2, 0.2));
 	default:
 		break;
 	}
 
 	nu->unit_manager = this;
-	nu->setProperties();
-	nu->id = id;
 	nu->camp = camp;
+	nu->setProperties();
+	nu->id = id;	
 	nu->set(tiled_map, grid_map, (Layer*)combat_scene, spriteTouchListener);
-	if (nu->getType() == 0 && nu->camp == player_id)
+	//如果是己方基地创建，则基地播放建造动画
+	if (nu->camp == player_id && nu->getType() == 0)
 	{
 		nu->setListenerEnable(false);
 	}
-
+	nu->setPosition(x, y);
+	nu->addToGmap(Point(x, y));
+	nu->setCurPos(getGridPoint(Point(x, y)));
+	if (camp != player_id && !nu->isMobile())
+		nu->rec = getGridRect(Point(x, y), nu->getContentSize());
 	nu->initBar();
-	
-
-	if (nu->isMobile())
-	{
-		if (getUnitCreateCenter() != Point(0, 0))
-		{
-			auto centerGP = getGridPoint(Point(getUnitCreateCenter().x, getUnitCreateCenter().y));
-			for (int i = 1; i < 10; i++)
-			{
-				auto freeGP = GridPoint(centerGP._x, centerGP._y - i);
-				if (grid_map->checkPosition(freeGP))
-				{
-					nu->setPosition(grid_map->getPointWithOffset(freeGP));
-					if (nu->getType() != 1)
-					{
-						grid_map->occupyPosition(nu->id, freeGP);
-					}
-					nu->setCurPos(freeGP);
-					break;
-				}
-			}
-			nu->setDestination(getGridPoint(Point(x, y)));
-			nu->tryToSearchForPath();
-		}
-		else
-		{
-			nu->setPosition(x, y);
-			nu->addToGmap(Point(x, y));
-			nu->setCurPos(getGridPoint(Point(x, y)));
-		}
-	}
-	else
-	{
-		nu->setPosition(x, y);
-		nu->addToGmap(Point(x, y));
-		nu->setCurPos(getGridPoint(Point(x, y)));
-	}
-
 
 	//刷新电力条
 	power->updatePowerDisplay();
@@ -885,7 +885,7 @@ void UnitManager::selectPointUnits(Unit * _unit)
 		selected_ids.push_back(_unit->id);
 		getClickedUnit();
 	}
-	else {
+	else
 		for (auto & id : selected_ids)
 		{
 			//log("Unit ID: %d, tracing enemy id: %d", id, id_unit.second->id);
@@ -899,7 +899,7 @@ void UnitManager::selectPointUnits(Unit * _unit)
 			unit->is_attack = true;
 			_unit->displayHP();
 		}
-	}
+	return;
 }
 
 void UnitManager::getClickedUnit()
@@ -931,6 +931,10 @@ void UnitManager::genAttackEffect(int unit_id0, int unit_id1)
 	if (unit_0 && unit_1)
 	{
 		auto trajectory_effect = TrajectoryEffect::create();
+	/*	if (unit_1->isMobile())
+			trajectory_effect->setPath(unit_0->getPosition(), unit_1->getPosition());
+		else
+			trajectory_effect->setPath(unit_0->getPosition(), unit_1->_center_position);*/
 		trajectory_effect->setPath(unit_0->getPosition(), unit_1->getPosition());
 		tiled_map->addChild(trajectory_effect, 20);
 	}

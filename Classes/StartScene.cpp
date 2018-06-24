@@ -145,10 +145,10 @@ bool ServerMenu::init() {
 }
 
 void ServerMenu::menuStartServerCallback(cocos2d::Ref * pSender) {
-	//AllocConsole();
-	//freopen("CONIN$", "r", stdin);
-	//freopen("CONOUT$", "w", stdout);
-	//freopen("CONOUT$", "w", stderr);
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
 
 	server_side = chat_server::create();
 	client_side = chat_client::create();
@@ -240,11 +240,11 @@ bool ClientMenu::init() {
 void ClientMenu::menuStartGameCallback(cocos2d::Ref * pSender) {
 	if (!client_side)
 	{
-	/*	AllocConsole();
+		AllocConsole();
 		freopen("CONIN$", "r", stdin);
 		freopen("CONOUT$", "w", stdout);
 		freopen("CONOUT$", "w", stderr);
-		log("client ok");*/
+		log("client ok");
 		auto ip_box = static_cast<ui::EditBox*>(getChildByTag(1));
 		std::string ip = ip_box->getText();
 

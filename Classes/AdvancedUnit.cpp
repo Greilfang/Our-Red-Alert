@@ -14,19 +14,13 @@ Fighter* Fighter::create(const std::string& filename)
 
 	return nullptr;
 }
-/*
-void Fighter::motivate()
-{
-	moving = true;
-	grid_map->leavePosition(cur_pos, true);
-}
-*/
+
 void Fighter::setProperties()
 {
 	type = 1;
 
 
-	speed = 4.5f;
+	speed = 6.5f;
 
 	mobile = true;
 	attack_range = GridSize(7, 7);
@@ -45,7 +39,7 @@ void Fighter::move()
 	else {
 		grid_map->occupyPosition(id, next_gp, false);
 		setPosition(next_pos);
-		grid_map->leavePosition(_cur_pos, false);
+		grid_map->leavePosition(_cur_pos, true);
 		_cur_pos = next_gp;
 	}
 
@@ -110,7 +104,7 @@ void Tank::setProperties()
 {
 	type = 2;
 
-	speed = 1.5f;
+	speed = 5.5f;
 
 
 	z_index = 10;
@@ -136,9 +130,33 @@ void Soldier::setProperties()
 {
 	type = 3;
 
-	speed = 1.5f;
+	speed = 3.5f;
 
 	z_index = 10;
 	attack_range = GridSize(5, 5);
+	mobile = true;
+}
+
+Dog * Dog::create(const std::string & filename)
+{
+	Dog *ret = new (std::nothrow) Dog();
+	if (ret && ret->initWithFile(filename))
+	{
+		ret->autorelease();
+		return ret;
+	}
+	CC_SAFE_DELETE(ret);
+
+	return nullptr;
+}
+
+void Dog::setProperties()
+{
+	type = 4;
+
+	speed = 5.0f;
+
+	z_index = 10;
+	attack_range = GridSize(1, 1);
 	mobile = true;
 }
