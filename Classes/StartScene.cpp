@@ -135,6 +135,19 @@ bool ServerMenu::init() {
 	menu->alignItemsVerticallyWithPadding(35);
 	this->addChild(menu, 1);
 
+	auto map_menu = MenuItemImage::create("minimap1.png", "minimap1.png",
+		CC_CALLBACK_1(ServerMenu::menuSelectMap1Callback, this));
+	map_menu->setScale(1);
+
+	auto map2_menu = MenuItemImage::create("minimap2.png", "minimap2.png",
+		CC_CALLBACK_1(ServerMenu::menuSelectMap2Callback, this));
+	map2_menu->setScale(1);
+
+	auto menu2 = Menu::create(map_menu, map2_menu, NULL);
+	menu2->setPosition(Vec2(origin.x + visibleSize.width * 0.7, origin.y + visibleSize.height / 2));
+	menu2->alignItemsVerticallyWithPadding(35);
+	this->addChild(menu2, 1);
+
 	/* ConnectionLabel */
 	connection_label = Label::createWithTTF("", "fonts/Marker Felt.ttf", 24);
 	connection_label->setAnchorPoint(Vec2(0.5, 0));
@@ -143,7 +156,16 @@ bool ServerMenu::init() {
 
 	return true;
 }
+void ServerMenu::menuSelectMap1Callback(cocos2d::Ref * pSender) {
+	server_side->map = 1;
+	std::cout << "set map wei 1";
 
+}
+void ServerMenu::menuSelectMap2Callback(cocos2d::Ref * pSender) {
+	server_side->map = 2;
+	std::cout << "set map wei 2";
+
+}
 void ServerMenu::menuStartServerCallback(cocos2d::Ref * pSender) {
 	AllocConsole();
 	freopen("CONIN$", "r", stdin);

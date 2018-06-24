@@ -30,7 +30,8 @@ public:
 	void menuStartServerCallback(cocos2d::Ref* pSender);
 	void menuStartGameCallback(cocos2d::Ref* pSender);
 	void menuBackCallback(cocos2d::Ref* pSender);
-
+	void menuSelectMap1Callback(cocos2d::Ref* pSender);
+	void menuSelectMap2Callback(cocos2d::Ref* pSender);
 	void connectionUpdate(float f);
 
 	CREATE_FUNC(ServerMenu);

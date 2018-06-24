@@ -29,6 +29,11 @@ public:
 	bool error()const { return error_flag_; };
 	void close() { do_close(); };
 	bool started() const { return start_flag_; };
+	int map() const
+	{
+		while (!start_flag_);
+		return map_;
+	}
 	int camp() const
 	{
 		while (!start_flag_);
@@ -111,7 +116,13 @@ private:
 					char header[4 + 1] = "";
 					strncat(header, data + 10, 4);
 					total_ = atoi(header);
-					camp_ = atoi(data + 14);
+					char header2[4 + 1] = "";
+					strncat(header2, data + 14, 4);
+					camp_ = atoi(header2);
+					map_ = atoi(data + 18);
+					std::cout << "total:" << total_ << std::endl;
+					std::cout << "camp:" << camp_ << std::endl;
+					std::cout << "map:" << map_ << std::endl;
 					start_flag_ = true;
 					/*É§²Ù×÷µÄ½áÊø*/
 					do_read_header();
@@ -236,7 +247,7 @@ private:
 
 	std::thread *thread_, *read_thread_;
 
-	int camp_, total_;
+	int camp_, total_, map_;
 	
 	std::condition_variable data_cond_;
 	std::mutex mut;

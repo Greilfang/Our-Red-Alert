@@ -80,6 +80,7 @@ private:
 class chat_server
 {
 public:
+	int map;
 	chat_server(int port) :
 		acceptor_(*io_service_, tcp::endpoint(tcp::v4(), port))
 	{
@@ -99,9 +100,11 @@ public:
 		using namespace std; // For sprintf and memcpy.
 		char total[4 + 1] = "";
 		sprintf(total, "%4d", static_cast<int>(connections_.size()));
-
-		for (auto i = 0; i < connections_.size(); i++)
-			connections_[i]->write_data("PLAYER" + std::string(total) + std::to_string(i + 1));
+		char camp[4 + 1] = "";
+		for (auto i = 0; i < connections_.size(); i++) {
+			sprintf(camp, "%4d", i + 1);
+			connections_[i]->write_data("PLAYER" + std::string(total) + std::string(camp) + std::to_string(map));
+		}
 		this->button_thread_ = new std::thread(std::bind(&chat_server::loop_process, this));
 		button_thread_->detach();
 	}

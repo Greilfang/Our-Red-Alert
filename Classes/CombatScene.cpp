@@ -81,14 +81,25 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	chat_out_box->setTag(2);
 	this->addChild(chat_out_box, 2);
 	/* 加载地图 */
-	_combat_map = TMXTiledMap::create("map/BasicMap.tmx");
+	if (client_side->map() == 1) {
+		_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
+	}
+	else if (client_side->map() == 2) {
+		_combat_map = TMXTiledMap::create("map/BasicMap.tmx");
+	}
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
 	/* 加载格点地图 */
 	_grid_map = GridMap::create(_combat_map);
 	_grid_map->retain();
 	/*加载小地图*/
-	mini_map = Minimap::create("minimap.png");
+	mini_map = Minimap::create("minimap2.png");
+	if (client_side->map() == 1) {
+		mini_map = Minimap::create("minimap1.png");
+	}
+	else if (client_side->map() == 2) {
+		mini_map = Minimap::create("minimap2.png");
+	}
 	mini_map->setAnchorPoint(Vec2(0, 0));
 	mini_map->setPosition(0, 0);
 	addChild(mini_map);
