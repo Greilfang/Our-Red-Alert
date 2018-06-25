@@ -102,6 +102,7 @@ public:
 	void setIncreasingAmount(int amount);
 	void setUnitCreateCenter(Point center);
 	void setBasePosition(Point base_pos);
+	GridPoint getAttackPoint(Unit * attacker,Unit * target);
 	Point getBasePosition()const;
 	Point getUnitCreateCenter();
 
@@ -252,7 +253,7 @@ public:
 private:
 	void updatefire(float);
 	cocos2d::Vec2 from_, to_, move_;
-	int speed_ = 10;
+	int speed_ = 7;
 };
 
 class ExplosionEffect :public cocos2d::ParticleFire

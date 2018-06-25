@@ -85,12 +85,12 @@ void Unit::removeFromMaps()
 
 	if (isMobile())
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("die.mp3", true);
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("die.wav");
 		grid_map->leavePosition(_cur_pos);
 	}
 	else
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("bomb.mp3", true);
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("bomb.wav");
 		grid_map->leavePosition(rec);
 		if (camp == unit_manager->player_id)
 		{
@@ -377,7 +377,7 @@ void Unit::update(float f)
 		delay();
 
 	if (camp == unit_manager->player_id && timer % attack_freq == 0) {
-		if (!is_in_attack) {
+		if (!is_in_attack && !is_attack) {
 			searchEnemy();
 		}
 		if (is_attack) {
@@ -388,7 +388,7 @@ void Unit::update(float f)
 
 void Unit::searchEnemy()
 {
-	const auto & auto_atk_rect = GridRect(_cur_pos, attack_range);
+	const auto & auto_atk_rect = GridRect(unit_manager->grid_map->getGridPointWithOffset(getPosition()), attack_range);
 	const auto & unit_ids = grid_map->getUnitIDAt(auto_atk_rect);
 	for (auto its_id : unit_ids)
 	{
@@ -398,6 +398,7 @@ void Unit::searchEnemy()
 			log("its_camp:%d   camp:%d", its_camp, camp);
 			attack_id = its_id;
 			is_attack = true;
+			is_in_attack = true;
 			return;
 		}
 	}
@@ -534,40 +535,49 @@ void UnitManager::updateUnitsState()
 
 			if (unit_1) {
 				if (unit_0) {
-					/*如果两个都存在，标志正在攻击is_in_attack为true*/
-					unit_0->is_in_attack = true;
 					Vec2 distance = unit_1->getPosition() - unit_0->getPosition();
 					/*如果攻击者和被攻击者距离大于自动攻击的范围，标志攻击者是否攻击is_attack为false，标志正在攻击is_in_attack为false*/
 					if (distance.length() >= 1.414*unit_0->attack_range.height * 32)
 					{
-						unit_0->is_attack = false;
-						unit_0->is_in_attack = false;
+						if (unit_0->is_attack == false)
+						{
+							unit_0->is_in_attack = false;
+						}
 					}
-				}
-				/*如果是狗的话，无子弹特效*/
-				if (unit_0 && unit_0->type == 4)
-				{
-					/*不是士兵和狗不攻击*/
-					if (unit_1->type != 3 && unit_1->type != 4) { ; }
 					else
 					{
-						if (unit_1->underAttack(damage))
-							deleteUnit(unitid_1);
-					}
-				}
-				else
-				{
-					genAttackEffect(unitid_0, unitid_1);
-					if (unit_1->underAttack(damage))
-					{
-						if (unit_1->getType() == 0) {
-							player_num--;
-							checkWinOrLose(unitid_1);
+						unit_0->is_in_attack = true;
+						/*如果是狗的话，无子弹特效*/
+						if (unit_0 && unit_0->type == 4)
+						{
+							/*不是士兵和狗不攻击*/
+							if (unit_1->type != 3 && unit_1->type != 4) { ; }
+							else
+							{
+								if (unit_1->underAttack(damage))
+								{
+									deleteUnit(unitid_1);
+									unit_0->is_attack = false;
+									unit_0->is_in_attack = false;
+								}
+							}
 						}
-						deleteUnit(unitid_1);
+						else {
+							genAttackEffect(unitid_0, unitid_1);
+							if (unit_1->underAttack(damage))
+							{
+								if (unit_1->getType() == 0) {
+									player_num--;
+									checkWinOrLose(unitid_1);
+								}
+								deleteUnit(unitid_1);
+								unit_0->is_attack = false;
+								unit_0->is_in_attack = false;
+							}
+						}
 					}
-				}
 
+				}							
 			}
 			else if (unit_0) {
 				/*如果被攻击目标不存在，标志正在攻击is_in_attack为false,攻击者会重新搜索敌人*/
@@ -659,6 +669,29 @@ void UnitManager::setBasePosition(Point base_pos)
 {
 	_base_pos = base_pos;
 	combat_scene->focusOnBase();
+}
+
+GridPoint UnitManager::getAttackPoint(Unit * attacker, Unit * target)
+{
+	float rate = 0.75;
+	Point target_pos = target->getPosition();
+	Point attacker_pos = attacker->getPosition();
+	Vec2 distance = attacker_pos - target_pos;
+	if (distance.length() <= 1.414*attacker->attack_range.height * 32 * rate)
+	{
+		return getGridPoint(attacker_pos);
+	}
+
+	GridPoint attack_range = GridPoint(attacker->attack_range.width, attacker->attack_range.height);
+	Point attack_range_point = getPoint(attack_range);
+
+	auto esp = distance.getNormalized();
+	log("target position:(%f,%f),Grid(%d,%d)\n", target_pos.x, target_pos.y);
+	log("attack_range:(%f,%f)\n", attack_range_point.x * esp.x * rate, attack_range_point.y * esp.y * rate);
+	log("attack_position:(%f,%f)\n", (target_pos + Point(attack_range_point.x * esp.x * rate, attack_range_point.y * esp.y * rate)).x, (target_pos + Point(attack_range_point.x * esp.x * rate, attack_range_point.y * esp.y * rate)).y);
+	return getGridPoint(target_pos + Point(attack_range_point.x * esp.x * rate, attack_range_point.y * esp.y * rate));
+	
+
 }
 
 Point UnitManager::getBasePosition() const
@@ -876,11 +909,12 @@ void UnitManager::selectEmpty(Point position)
 			continue;
 
 		GridPoint grid_dest = grid_map->getGridPoint(position);
-		//log("Unit ID: %d, plan to move to:(%d, %d)", id, grid_dest.x, grid_dest.y);
+		unit->is_attack = false;
+		unit->is_in_attack = false;
 		unit->setDestination(grid_dest);
 		unit->setDelayPathFinding(PATH_FINDING_TERMINAL * static_cast<int>(order/5));
 		order += 1.f;
-		//unit->tryToSearchForPath();
+		
 	}
 }
 
@@ -895,12 +929,11 @@ void UnitManager::selectPointUnits(Unit * _unit)
 	else
 		for (auto & id : selected_ids)
 		{
-			//log("Unit ID: %d, tracing enemy id: %d", id, id_unit.second->id);
 			Unit* unit = id_map.at(id);
 			if (!unit || !unit->isMobile())
 				continue;
 			GridPoint target_pos = getGridPoint(_unit->getPosition());
-			unit->setDestination(target_pos - unit->attack_range/2);
+			unit->setDestination(getAttackPoint(unit,_unit));
 			unit->tryToSearchForPath();
 			unit->attack_id = _unit->id;
 			unit->is_attack = true;

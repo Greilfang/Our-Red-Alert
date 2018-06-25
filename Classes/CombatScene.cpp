@@ -1,6 +1,7 @@
 #include "CombatScene.h"
 #include "ui\CocosGUI.h"
 #include "Unit.h"
+#include "SimpleAudioEngine.h"
 
 #define DEBUG
 USING_NS_CC;
@@ -60,7 +61,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	if (!Layer::init()) {
 		return false;
 	}
-
+	CocosDenshion::SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	/*加载客户端和服务端*/
