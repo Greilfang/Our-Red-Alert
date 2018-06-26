@@ -27,18 +27,18 @@ bool GameMenu::init() {
 	//BackGroundMusic
 	if (!PreLoad::hasPlayedBgm)
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("SovietMarch.mp3", true);
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playBackgroundMusic("audio\\SovietMarch.mp3", true);
 		PreLoad::hasPlayedBgm = true;
 	}
 	/* BackGroundPicture */
-	auto back_ground = Sprite::create("background.png");
+	auto back_ground = Sprite::create("Picture/background/background.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
 	addChild(back_ground, -5);
 
 	/* StartGameButton */
-	auto start_button = Button::create("button.png");
+	auto start_button = Button::create("Picture/slider/button.png");
 	start_button->setScale(2);
 	start_button->setTitleText("Start Game");
 	start_button->setTitleFontName("fonts/Marker Felt.ttf");
@@ -53,7 +53,7 @@ bool GameMenu::init() {
 	this->addChild(start_button);
 
 	/* SettingButton */
-	auto setting_button = Button::create("button.png");
+	auto setting_button = Button::create("Picture/slider/button.png");
 	setting_button->setScale(2);
 	setting_button->setTitleText("Settings");
 	setting_button->setTitleFontName("fonts/Marker Felt.ttf");
@@ -68,7 +68,7 @@ bool GameMenu::init() {
 	this->addChild(setting_button);
 
 	/* QuitGameButton */
-	auto close_button = Button::create("button.png");
+	auto close_button = Button::create("Picture/slider/button.png");
 	close_button->setScale(2);
 	close_button->setTitleText("Quit Game");
 	close_button->setTitleFontName("fonts/Marker Felt.ttf");

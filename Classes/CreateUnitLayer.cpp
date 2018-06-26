@@ -32,13 +32,13 @@ void BaseLayer::setEnable(bool able)
 bool BaseLayer::init()
 {
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	auto bc = Sprite::create("bc.png");
+	auto bc = Sprite::create("Picture/background/bc.png");
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
 	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
-	layout->setBackGroundImage("bc.png");
+	layout->setBackGroundImage("Picture/background/bc.png");
 	this->addChild(layout);
 	//添加创建建筑的按钮
 	// 创建一个创建militaryCamp的Button对象，设置在Layout的左上角
@@ -137,8 +137,8 @@ bool BaseLayer::init()
 	});
 
 	// 创建一个退出该layer的Button对象
-	exit = Button::create("backNormal.png",
-		"backNormal.png");
+	exit = Button::create("Picture/menu/backNormal.png",
+		"Picture/menu/backNormal.png");
 	layout->addChild(exit);
 	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
 	rp_exit->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_RIGHT_BOTTOM);
@@ -177,13 +177,13 @@ bool MilitaryCampLayer::init()
 		return false;
 	}
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	auto bc = Sprite::create("bc.png");
+	auto bc = Sprite::create("Picture/background/bc.png");
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
 	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
-	layout->setBackGroundImage("bc.png");
+	layout->setBackGroundImage("Picture/background/bc.png");
 	this->addChild(layout);
 
 	// 创建一个创建soldier的Button对象，设置在Layout的左上部
@@ -199,13 +199,14 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			if (unit_manager->money->checkMoney(2000))
+			if (unit_manager->money->checkMoney(SOLDIER_MONEY))
 			{
 				center->startProduce(3);
-				unit_manager->money->spendMoney(2000);
+				unit_manager->money->spendMoney(SOLDIER_MONEY);
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\traning.wav");
 			}
 			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\insufficientfound.wav");
 		}
 	});
 
@@ -222,19 +223,20 @@ bool MilitaryCampLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			if (unit_manager->money->checkMoney(2000))
+			if (unit_manager->money->checkMoney(DOG_MONEY))
 			{
 				center->startProduce(4);
-				unit_manager->money->spendMoney(2000);
+				unit_manager->money->spendMoney(DOG_MONEY);
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\traning.wav");
 			}
 			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\insufficientfound.wav");
 		}
 	});
 
 	// 创建一个退出该layer的Button对象
-	exit = Button::create("backNormal.png",
-		"backNormal.png");
+	exit = Button::create("Picture/menu/backNormal.png",
+		"Picture/menu/backNormal.png");
 	layout->addChild(exit);
 	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
 	rp_exit->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_RIGHT_BOTTOM);
@@ -259,13 +261,13 @@ bool TankFactaryLayer::init()
 		return false;
 	}
 	Size visibleSize = Director::getInstance()->getVisibleSize();
-	auto bc = Sprite::create("bc.png");
+	auto bc = Sprite::create("Picture/background/bc.png");
 	//初始化layout
 	layout = Layout::create();
 	layout->setLayoutType(LayoutType::RELATIVE);
 	layout->setContentSize(Size(bc->getContentSize().width, bc->getContentSize().height*0.8));
 	layout->setAnchorPoint(Vec2::ANCHOR_MIDDLE_RIGHT);
-	layout->setBackGroundImage("bc.png");
+	layout->setBackGroundImage("Picture/background/bc.png");
 	this->addChild(layout);
 
 	// 创建一个创建天启坦克的Button对象，设置在Layout的左上角
@@ -281,13 +283,14 @@ bool TankFactaryLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			if (unit_manager->money->checkMoney(2000))
+			if (unit_manager->money->checkMoney(TANK_MONEY))
 			{
 				center->startProduce(2);
-				unit_manager->money->spendMoney(2000);
+				unit_manager->money->spendMoney(TANK_MONEY);
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\traning.wav");
 			}
 			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\insufficientfound.wav");
 		}
 	});
 
@@ -304,19 +307,20 @@ bool TankFactaryLayer::init()
 	{
 		if (type == Widget::TouchEventType::BEGAN)
 		{
-			if (unit_manager->money->checkMoney(2000))
+			if (unit_manager->money->checkMoney(AIRPLANE_MONEY))
 			{
 				center->startProduce(1);
-				unit_manager->money->spendMoney(2000);
+				unit_manager->money->spendMoney(AIRPLANE_MONEY);
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\traning.wav");
 			}
 			else
-				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+				CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\insufficientfound.wav");
 		}
 	});
 
 	// 创建一个退出该layer的Button对象
-	exit = Button::create("backNormal.png",
-		"backNormal.png");
+	exit = Button::create("Picture/menu/backNormal.png",
+		"Picture/menu/backNormal.png");
 	layout->addChild(exit);
 	RelativeLayoutParameter* rp_exit = RelativeLayoutParameter::create();
 	rp_exit->setAlign(RelativeLayoutParameter::RelativeAlign::PARENT_RIGHT_BOTTOM);
@@ -398,12 +402,13 @@ bool CreateUnitLayer::checkBuilding(int money, int power)
 		}
 		else
 		{
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\nopower.wav");
 			return false;
 		}
 	}
 	else
 	{
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/insufficientfound.wav");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\insufficientfound.wav");
 		return false;
 	}
 }
@@ -411,7 +416,8 @@ bool CreateUnitLayer::checkBuilding(int money, int power)
 void CreateUnitLayer::onBuilding(int type,Size size)
 {
 	unit_manager->constructRange->setVisible(true);
-	rec = Sprite::create("MagentaSquare.png");
+	rec = Sprite::create("Picture/display/buildingrec.png");
+	
 	rec->setAnchorPoint(Vec2(0.5, 0.5));
 	rec->setContentSize(size);
 	rec_size = size;
@@ -429,13 +435,15 @@ void CreateUnitLayer::onBuilding(int type,Size size)
 			rec_abs_center = rec_center - delta;
 			if (unit_manager->grid_map->checkPosition(unit_manager->getGridRect(rec_abs_center, rec_size)) && checkInRange(rec_abs_center))
 			{
+				//空地则可建，提示框为绿色
 				can_build = true;
-				rec->setOpacity(255);
+				rec->setColor(Color3B(0, 200, 0));
 			}
 			else
 			{
+				//该地被占用，提示框为红色
 				can_build = false;
-				rec->setOpacity(120);
+				rec->setColor(Color3B(200, 0, 0));
 			}
 			rec->setVisible(true);
 		}

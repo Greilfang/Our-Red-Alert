@@ -85,12 +85,12 @@ void Unit::removeFromMaps()
 
 	if (isMobile())
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("die.wav");
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//die.wav");
 		grid_map->leavePosition(_cur_pos);
 	}
 	else
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("bomb.wav");
+		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//bomb.wav");
 		grid_map->leavePosition(rec);
 		if (camp == unit_manager->player_id)
 		{
@@ -946,6 +946,10 @@ void UnitManager::getClickedUnit()
 {
 	for (auto& id : selected_ids)
 	{
+		if (id_map.at(id)->isMobile())
+		{
+			CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//selecttarget.wav");
+		}
 		id_map.at(id)->displayHP();
 		id_map.at(id)->setOpacity(180);
 	}

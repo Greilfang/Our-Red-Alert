@@ -148,7 +148,7 @@ void Base::update(float f)
 			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, createPosition.x, createPosition.y);
 			prod_bar->setVisible(false);
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/unitready.wav");
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\unitready.wav");
 		}
 		else
 		{
@@ -218,7 +218,7 @@ void Building::update(float f)
 			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, point.x, point.y);
 			prod_bar->setVisible(false);
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio/unitready.wav");
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\unitready.wav");
 		}
 		else
 		{

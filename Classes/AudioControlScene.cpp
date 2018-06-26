@@ -23,7 +23,7 @@ bool AudioControl::init() {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* BackGround */
-	auto back_ground = Sprite::create("background2.png");
+	auto back_ground = Sprite::create("Picture/background/background2.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -35,10 +35,11 @@ bool AudioControl::init() {
 	this->addChild(music_label);
 
 	auto music_slider = Slider::create();
-	music_slider->loadBarTexture("sliderTrack.png");
-	music_slider->loadSlidBallTextures("sliderThumb.png", "sliderThumb.png", "");
-	music_slider->loadProgressBarTexture("sliderProgress.png");
+	music_slider->loadBarTexture("Picture/slider/sliderTrack.png");
+	music_slider->loadSlidBallTextures("Picture/slider/sliderThumb.png", "Picture/slider/sliderThumb.png", "");
+	music_slider->loadProgressBarTexture("Picture/slider/sliderProgress.png");
 	float musicPercent = UserDefault::getInstance()->getFloatForKey("musicPercent");
+	
 	if (musicPercent == 0.0f)
 	{
 		musicPercent = 100.0f;
@@ -63,10 +64,10 @@ bool AudioControl::init() {
 	this->addChild(effect_label);
 
 	auto effect_slider = Slider::create();
-	effect_slider->loadBarTexture("sliderTrack.png");
-	effect_slider->loadSlidBallTextures("sliderThumb.png", "sliderThumb.png", "");
-	effect_slider->loadProgressBarTexture("sliderProgress.png");
-	float effectPercent = UserDefault::getInstance()->getFloatForKey("effectPercent");
+	effect_slider->loadBarTexture("Picture/slider/sliderTrack.png");
+	effect_slider->loadSlidBallTextures("Picture/slider/sliderThumb.png", "Picture/slider/sliderThumb.png", "");
+	effect_slider->loadProgressBarTexture("Picture/slider/sliderProgress.png");
+	float effectPercent = UserDefault::getInstance()->getFloatForKey("Picture/slider/effectPercent");
 	if (effectPercent == 0.0f)
 	{
 		effectPercent = 100.0f;
@@ -117,7 +118,7 @@ bool AudioControl::init() {
 	this->addChild(menu);
 	
 	/* ReturnButton */
-	auto return_button = Button::create("button.png");
+	auto return_button = Button::create("Picture/slider/button.png");
 	return_button->setScale(2);
 	return_button->setTitleText("Return");
 	return_button->setTitleFontName("fonts/Marker Felt.ttf");

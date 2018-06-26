@@ -29,7 +29,7 @@ bool StartScene::init() {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* BackGround */
-	auto back_ground = Sprite::create("background4.png");
+	auto back_ground = Sprite::create("Picture/background/background4.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -112,7 +112,7 @@ bool ServerMenu::init(int * map_choice) {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* BackGround */
-	auto back_ground = Sprite::create("background4.png");
+	auto back_ground = Sprite::create("Picture/background/background4.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -232,7 +232,7 @@ bool ClientMenu::init() {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* BackGround */
-	auto back_ground = Sprite::create("background4.png");
+	auto back_ground = Sprite::create("Picture/background/background4.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -361,15 +361,15 @@ bool MapChoiceScene::init()
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* BackGround */
-	auto back_ground = Sprite::create("background5.png");
+	auto back_ground = Sprite::create("Picture/background/background5.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
 	addChild(back_ground, 0);
 
 	/* Map1 Select */
-	MenuItemImage *rememberName1 = MenuItemImage::create("minimap1_unselected.png", "minimap1_unselected.png");
-	MenuItemImage *rememberName2 = MenuItemImage::create("minimap1.png", "minimap1.png");
+	MenuItemImage *rememberName1 = MenuItemImage::create("map/minimap1_unselected.png", "map/minimap1_unselected.png");
+	MenuItemImage *rememberName2 = MenuItemImage::create("map/minimap1.png", "map/minimap1.png");
 	MenuItemToggle *rememberNameItem = MenuItemToggle::createWithTarget(this, menu_selector(MapChoiceScene::menuSelectMap1Callback), rememberName1, rememberName2, NULL);
 	rememberNameItem->setPosition(Vec2(origin.x + visibleSize.width * 0.75, origin.y + visibleSize.height * 0.6));
 	auto menu1 = Menu::create(rememberNameItem, NULL);
@@ -377,25 +377,13 @@ bool MapChoiceScene::init()
 	this->addChild(menu1, 1);
 
 	/* Map2 Select */
-	MenuItemImage *rememberName3 = MenuItemImage::create("minimap2_unselected.png", "minimap2_unselected.png");
-	MenuItemImage *rememberName4 = MenuItemImage::create("minimap2.png", "minimap2.png");
+	MenuItemImage *rememberName3 = MenuItemImage::create("map/minimap2_unselected.png", "map/minimap2_unselected.png");
+	MenuItemImage *rememberName4 = MenuItemImage::create("map/minimap2.png", "map/minimap2.png");
 	MenuItemToggle *rememberNameItem2 = MenuItemToggle::createWithTarget(this, menu_selector(MapChoiceScene::menuSelectMap2Callback), rememberName3, rememberName4, NULL);
 	rememberNameItem2->setPosition(Vec2(origin.x + visibleSize.width * 0.25, origin.y + visibleSize.height * 0.6));
 	auto menu2 = Menu::create(rememberNameItem2, NULL);
 	menu2->setPosition(Vec2(0, 0));
 	this->addChild(menu2, 1);
-
-	///* MapChoiceMenu */
-	//auto map1_menu = MenuItemImage::create("minimap1_unselected.png", "minimap1.png",
-	//	CC_CALLBACK_1(MapChoiceScene::menuSelectMap1Callback, this));
-
-	//auto map2_menu = MenuItemImage::create("minimap2_unselected.png", "minimap2.png",
-	//	CC_CALLBACK_1(MapChoiceScene::menuSelectMap2Callback, this));
-
-	//auto menu = Menu::create(map2_menu, map1_menu, NULL);
-	//menu->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height * 0.6));
-	//menu->alignItemsHorizontallyWithPadding(visibleSize.width * 0.3);
-	//this->addChild(menu, 1);
 
 	/* MapNameLabel */
 	auto map2_label = Label::createWithTTF("Lost City", "fonts/Marker Felt.ttf", 32);

@@ -111,7 +111,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	mouse_rect->setVisible(false);
 	_combat_map->addChild(mouse_rect, 15);
 	/*加载金钱layer*/
-	auto moneyDisplay = Sprite::create("MoneyDisplay.png");
+	auto moneyDisplay = Sprite::create("Picture/display/MoneyDisplay.png");
 	addChild(moneyDisplay);
 	moneyDisplay->setScale(0.2);
 	moneyDisplay->setPosition(visibleSize.width - 150, visibleSize.height - 30);
@@ -121,7 +121,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	money->setPosition(visibleSize.width - 130, visibleSize.height - 30);
 	money->schedule(schedule_selector(Money::update));
 	/*加载电力条power*/
-	auto powerSprite = Sprite::create("powerDisplay.png");
+	auto powerSprite = Sprite::create("Picture/display/powerDisplay.png");
 	addChild(powerSprite);
 	powerSprite->setScale(0.2);
 	powerSprite->setPosition(visibleSize.width - 150, visibleSize.height - 80);
@@ -147,7 +147,8 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	unit_manager->setSocketClient(client_side);
 	unit_manager->setPlayerNum(client_side);
 #ifdef DEBUG//测试
-	auto farmer_sprite = Unit::create("MagentaSquare.png");
+	auto farmer_sprite = Unit::create("Picture/display/buildingrec.png");
+	farmer_sprite->setVisible(false);
 	farmer_sprite->setPosition(Vec2(visibleSize.width / 2 + 100, visibleSize.height / 2));
 	this->_combat_map->addChild(farmer_sprite, 10);
 #endif
@@ -293,41 +294,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	};
 	Director::getInstance()->getEventDispatcher()
 		->addEventListenerWithSceneGraphPriority(letterListener, this->_combat_map);
-	
-	/*加载小地图监听器事件*/
-	/*
-	minimapListener = EventListenerTouchOneByOne::create();
-	minimapListener->setSwallowTouches(true);
-	minimapListener->onTouchBegan =[this](Touch* touch, Event* event) {
-	auto touch_point = touch->getLocation();
-	auto visibleSize = Director::getInstance()->getVisibleSize();
-	if (touch_point.x < mini_map->mini_width&&touch_point.y < mini_map->mini_height) {
-	float ratio_x = touch_point.x / mini_map->mini_width;
-	float ratio_y = touch_point.y / mini_map->mini_height;
-	Point practical_point = Point(_combat_map->getBoundingBox().size.width*ratio_x,
-	_combat_map->getBoundingBox().size.height*ratio_y);
-	Vec2 move_amount = Point(0, 0) + visibleSize / 2 - cdelta - practical_point;
-	cdelta = cdelta + move_amount;
-	}
-	if (cdelta.x >0) {
-	cdelta.x = 0;
-	}
-	else if (cdelta.x + _combat_map->getBoundingBox().size.width < visibleSize.width) {
-	cdelta.x = visibleSize.width - _combat_map->getBoundingBox().size.width;
-	}
 
-	if (cdelta.y > 0) {
-	cdelta.y = 0;
-	}
-	else if (cdelta.y + _combat_map->getBoundingBox().size.height < visibleSize.height) {
-	cdelta.y = visibleSize.height - _combat_map->getBoundingBox().size.height;
-	}
-	_combat_map->setPosition(cdelta);
-	return true;
-	};
-	Director::getInstance()->getEventDispatcher()
-	->addEventListenerWithSceneGraphPriority(minimapListener, this->mini_map);
-	*/
 	
 	return true;
 }

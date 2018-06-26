@@ -4,25 +4,29 @@
 <dict>
 	<key>Sounds</key>
 	<array>
-		<string>unitready.wav</string>
-		<string>insufficientfound.wav</string>
-		<string>traning.wav</string>
+		<string>audio\unitready.wav</string>
+		<string>audio\insufficientfound.wav</string>
+		<string>audio\traning.wav</string>
+		<string>audio\die.wav</string>
+		<string>audio\bomb.wav</string>
+		<string>audio\selecttarget.wav</string>
+		<string>audio\nopower.wav</string>
 	</array>
 	<key>SpriteSheets</key>
 	<array>
 	</array>
 	<key>Animotions</key>
 	<array>
-		<string>Mine.plist</string>
-		<string>Base.plist</string>
-		<string>PowerPlant.plist</string>		
-		<string>TankFactory.plist</string>
-		<string>MilitaryCamp.plist</string>
-		<string>DogMove.plist</string>
+		<string>Picture\plist\Mine.plist</string>
+		<string>Picture\plist\Base.plist</string>
+		<string>Picture\plist\PowerPlant.plist</string>		
+		<string>Picture\plist\TankFactory.plist</string>
+		<string>Picture\plist\MilitaryCamp.plist</string>
+		<string>Picture\plist\DogMove.plist</string>
 	</array>
 	<key>Musics</key>
 	<array>
-		<string>SovietMarch.mp3</string>
+		<string>audio\SovietMarch.mp3</string>
 	</array>
 </dict>
 </plist>

@@ -25,7 +25,7 @@ bool PreLoad::init() {
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	/* ÉèÖÃ±³¾°Í¼Æ¬ */
-	auto back_ground = Sprite::create("background3.png");
+	auto back_ground = Sprite::create("Picture/background/background3.png");
 	back_ground->setPosition(origin + visibleSize / 2);
 	back_ground->setScaleX(visibleSize.width / back_ground->getContentSize().width);
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
@@ -103,7 +103,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 	for (Value &v : animations) {
 		int frame = 0;
 		string str = v.asString();
-		if (str == "Base.plist")
+		if (str == "Picture\\plist\\Base.plist")
 		{
 			frame = 26;
 			auto animation = Animation::create();
@@ -118,7 +118,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			AnimationCache::getInstance()->addAnimation(animation, "BaseCreate");
 		}
 	
-		else if (str == "PowerPlant.plist")
+		else if (str == "Picture\\plist\\PowerPlant.plist")
 		{
 			frame = 25;
 			auto animation = Animation::create();
@@ -131,7 +131,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			animation->setDelayPerUnit(3.0f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "PowerPlantCreate");
 		}
-		else if (str == "Mine.plist")
+		else if (str == "Picture\\plist\\Mine.plist")
 		{
 			frame = 24;
 			auto animation = Animation::create();
@@ -144,7 +144,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			animation->setDelayPerUnit(3.0f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "MineCreate");
 		}	
-		else if (str == "TankFactory.plist")
+		else if (str == "Picture\\plist\\TankFactory.plist")
 		{
 			frame = 24;
 			auto animation = Animation::create();
@@ -157,7 +157,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			animation->setDelayPerUnit(3.0f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "TankFactoryCreate");
 		}
-		else if (str == "MilitaryCamp.plist")
+		else if (str == "Picture\\plist\\MilitaryCamp.plist")
 		{
 			frame = 24;
 			auto animation = Animation::create();
@@ -170,7 +170,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 			animation->setDelayPerUnit(1.5f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "MilitaryCampCreate");
 		}
-		else if (str == "DogMove.plist")
+		else if (str == "Picture\\plist\\DogMove.plist")
 		{
 			auto up = Animation::create();
 			for (int i = 1; i <= 6; i++)
