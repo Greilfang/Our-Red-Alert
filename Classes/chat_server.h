@@ -1,6 +1,6 @@
 // chat_server.cpp
 // ~~~~~~~~~~~~~~~
-//
+//借鉴了asio库的官网demo
 // Copyright (c) 2003-2018 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -115,7 +115,7 @@ private:
 	bool error_flag_{ false };       //错误标志
 
 	chat_message read_msg_;          //当前读取消息
-	std::deque<chat_message> read_msg_deque_; //读取消息要存入带解析队列
+	std::deque<chat_message> read_msg_deque_; //读取消息要存入待解析队列
 	std::condition_variable data_cond_;  //条件变量
 	std::mutex mut_;                 //进程锁
 	//	asio::steady_timer steady_timer_;
