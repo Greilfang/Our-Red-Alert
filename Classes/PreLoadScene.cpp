@@ -167,7 +167,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 70, 127));
 				animation->addSpriteFrame(spriteFrame);
 			}
-			animation->setDelayPerUnit(1.5f / (float)frame);
+			animation->setDelayPerUnit(3.0f / (float)frame);
 			AnimationCache::getInstance()->addAnimation(animation, "MilitaryCampCreate");
 		}
 		else if (str == "Picture\\plist\\DogMove.plist")
@@ -180,7 +180,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				up->addSpriteFrame(spriteFrame);
 			}
 			up->setDelayPerUnit(1.2f / 5.0);
-			up->setRestoreOriginalFrame(false);
+			up->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(up, "DogMoveUp");
 			
 			auto down = Animation::create();
@@ -190,8 +190,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 12, 36));
 				down->addSpriteFrame(spriteFrame);
 			}
-			down->setDelayPerUnit(1.5f / 6.0);
-			down->setRestoreOriginalFrame(false);
+			down->setDelayPerUnit(1.2f / 6.0);
+			down->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(down, "DogMoveDown");
 
 			auto left = Animation::create();
@@ -201,8 +201,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0,35,23));
 				left->addSpriteFrame(spriteFrame);
 			}
-			left->setDelayPerUnit(1.5f / 6.0);
-			left->setRestoreOriginalFrame(false);
+			left->setDelayPerUnit(1.2f / 6.0);
+			left->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(left, "DogMoveLeft");
 
 			auto right = Animation::create();
@@ -213,7 +213,7 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				right->addSpriteFrame(spriteFrame);
 			}
 			right->setDelayPerUnit(1.2f / 5.0);
-			right->setRestoreOriginalFrame(false);
+			right->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(right, "DogMoveRight");
 
 			auto top_left = Animation::create();
@@ -223,8 +223,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 27, 30));
 				top_left->addSpriteFrame(spriteFrame);
 			}
-			top_left->setDelayPerUnit(1.5f / 6.0);
-			top_left->setRestoreOriginalFrame(false);
+			top_left->setDelayPerUnit(1.2f / 6.0);
+			top_left->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(top_left, "DogMoveTopLeft");
 
 			auto top_right = Animation::create();
@@ -234,8 +234,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 25, 29));
 				top_right->addSpriteFrame(spriteFrame);
 			}
-			top_right->setDelayPerUnit(1.5f / 6.0);
-			top_right->setRestoreOriginalFrame(false);
+			top_right->setDelayPerUnit(1.2f / 6.0);
+			top_right->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(top_right, "DogMoveTopRight");
 
 			auto lower_right = Animation::create();
@@ -245,8 +245,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 33, 31));
 				lower_right->addSpriteFrame(spriteFrame);
 			}
-			lower_right->setDelayPerUnit(1.5f / 6.0);
-			lower_right->setRestoreOriginalFrame(false);
+			lower_right->setDelayPerUnit(1.2f / 6.0);
+			lower_right->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(lower_right, "DogMoveLowerRight");
 
 			auto lower_left = Animation::create();
@@ -256,8 +256,8 @@ void PreLoad::loadAnimations(ValueVector animations) {
 				auto spriteFrame = SpriteFrame::create(name, Rect(0, 0, 26, 31));
 				lower_left->addSpriteFrame(spriteFrame);
 			}
-			lower_left->setDelayPerUnit(1.5f / 6.0);
-			lower_left->setRestoreOriginalFrame(false);
+			lower_left->setDelayPerUnit(1.2f / 6.0);
+			lower_left->setRestoreOriginalFrame(true);
 			AnimationCache::getInstance()->addAnimation(lower_left, "DogMoveLowerLeft");
 
 		}

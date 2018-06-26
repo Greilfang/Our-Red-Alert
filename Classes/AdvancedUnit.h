@@ -22,12 +22,14 @@ class Fighter : public Unit
 public:
 	static Fighter* create(const std::string& filename);
 
+	float getRotation(Vec2 direction);
+
 	GridPath findPath(const GridPoint& dest)const override;
 
 private:
 
 	void setProperties() override;
-
+	//重载实现“飞行(移动不占用格点)”功能
 	void move() override;
 };
 
@@ -36,9 +38,14 @@ class Tank : public Unit
 {
 public:
 	static Tank* create(const std::string& filename);
+
+	float getRotation(Vec2 direction);
+
 private:
 
 	void setProperties() override;
+	//重载实现旋转功能
+	void move() override;
 };
 
 class Soldier : public Unit

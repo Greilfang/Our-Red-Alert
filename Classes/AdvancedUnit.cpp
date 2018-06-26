@@ -15,11 +15,21 @@ Fighter* Fighter::create(const std::string& filename)
 	return nullptr;
 }
 
+float Fighter::getRotation(Vec2 direction)
+{
+	float x = direction.x;
+	float y = direction.y;
+	float radian = atan2f(y, x);
+	float degrees = CC_RADIANS_TO_DEGREES(radian);
+	return 90 - degrees;
+
+}
+
 void Fighter::setProperties()
 {
 	type = 1;
 
-
+	ATK = 10;
 	speed = 6.5f;
 
 	mobile = true;
@@ -33,7 +43,7 @@ void Fighter::move()
 	auto esp = (grid_map->getPointWithOffset(_cur_dest) - getPosition()).getNormalized();
 	Point next_pos = getPosition() + esp * speed;
 	GridPoint next_gp = grid_map->getGridPoint(next_pos);
-
+	setRotation(getRotation(esp));
 	if (_cur_pos == next_gp)
 		setPosition(next_pos);
 	else {
@@ -78,38 +88,65 @@ Tank* Tank::create(const std::string& filename)
 
 	return nullptr;
 }
-/*
-void Tank::attack()
-{
-	if (!cd)
-	{
-		const auto& splash_center = unit_manager->getUnitPosition(target_id);
-		const auto& splash_rect = GridRect(splash_center - splash_range / 2, splash_range);
-		const auto& splash_ids = grid_map->getUnitIDAt(splash_rect);
-		for (const auto& its_id : splash_ids)
-		{
-			log("Tank %d attack! Unit: %d been splashed", id, its_id);
-			int its_camp = unit_manager->getUnitCamp(its_id);
-			if (its_camp != 0 && its_camp != camp)
-				unit_manager->msgs->add_game_message()->genGameMessage(GameMessage::CmdCode::GameMessage_CmdCode_ATK, id, its_id, atk, camp, 0, {});
-		}
 
-		cd = cd_max;
-	}
-	else
-		cd--;
+float Tank::getRotation(Vec2 direction)
+{
+	float x = direction.x;
+	float y = direction.y;
+	float radian = atan2f(y, x);
+	float degrees = CC_RADIANS_TO_DEGREES(radian);
+	return 90 - degrees;
 }
-*/
+
 void Tank::setProperties()
 {
 	type = 2;
 
 	speed = 5.5f;
-
+	ATK = 7;
 
 	z_index = 10;
 	attack_range = GridSize(5, 5);
 	mobile = true;
+}
+
+void Tank::move()
+{
+	//esp为当前格点指向当前终点的单位向量
+	auto esp = (_cur_dest_point - getPosition()).getNormalized();
+	setRotation(getRotation(esp));
+	Point next_position = esp * speed + getPosition();
+	GridPoint next_gpos = grid_map->getGridPoint(next_position);
+
+	if (_cur_pos == next_gpos)
+	{
+		setPosition(next_position);
+	}
+	else if (grid_map->occupyPosition(id, next_gpos))
+	{
+		setPosition(next_position);
+		grid_map->leavePosition(_cur_pos);
+		_cur_pos = next_gpos;
+	}
+	else
+	{
+		_cur_dest = _cur_pos;
+		setCurDestPoint(_cur_dest);
+		Point final_dest = grid_map->getPointWithOffset(_final_dest);
+		if (camp == unit_manager->player_id && (final_dest - getPosition()).length() > REFIND_PATH_MAX_RANGE) {
+			if (!is_delaying)
+				tryToSearchForPath();
+		}
+	}
+	if (hasArrivedFinalDest()) {
+		if (_grid_path.size()) {
+			_cur_dest = _grid_path.back();
+			setCurDestPoint(_cur_dest);
+			_grid_path.pop_back();
+		}
+		else
+			is_moving = false;
+	}
 }
 
 
@@ -131,7 +168,7 @@ void Soldier::setProperties()
 	type = 3;
 
 	speed = 3.5f;
-
+	ATK = 5;
 	z_index = 10;
 	attack_range = GridSize(5, 5);
 	mobile = true;
@@ -152,7 +189,6 @@ Dog * Dog::create(const std::string & filename)
 
 void Dog::playMoveAnimation()
 {
-	log("111111111");
 	Animation * move;
 	std::string dir;
 	switch (_direction)
@@ -215,7 +251,7 @@ void Dog::setProperties()
 	type = 4;
 
 	speed = 3.0f;
-
+	ATK = 10;
 	z_index = 10;
 	attack_range = GridSize(1, 1);
 	mobile = true;

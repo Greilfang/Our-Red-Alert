@@ -24,7 +24,7 @@ void Bar::updateBarDisplay(float rate) {
 #endif // DEBUG
 
 	auto s = tg->getContentSize();
-
+	length = s.width * 0.8;
 	drawRect(Point((s.width - length) / 2, s.height + height), Point((s.width + length) / 2, s.height + height + width), color);
 	Point endpoint{ s.width / 2 - length / 2 + length * rate,s.height + height + width };
 	drawSolidRect(Point((s.width - length) / 2, s.height + height), endpoint, color);
@@ -85,7 +85,14 @@ void Unit::removeFromMaps()
 
 	if (isMobile())
 	{
-		CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//die.wav");
+		if (type == 3 || type == 4) 
+		{
+			CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//die.wav");
+		}
+		else
+		{
+			CocosDenshion::SimpleAudioEngine::sharedEngine()->playEffect("audio//bomb.wav");
+		}
 		grid_map->leavePosition(_cur_pos);
 	}
 	else
@@ -121,7 +128,7 @@ void Unit::hideHP()
 
 void Unit::move()
 {
-	//esp为当前格点指向当前终点的单位向量(这步可以优化）
+	//esp为当前格点指向当前终点的单位向量
 	auto esp = (_cur_dest_point - getPosition()).getNormalized();
 	Point next_position = esp * speed + getPosition();
 	GridPoint next_gpos = grid_map->getGridPoint(next_position);
@@ -412,7 +419,7 @@ void Unit::attack()
 	new_msg->set_cmd_code(GameMessage::CmdCode::GameMessage_CmdCode_ATK);
 	new_msg->set_unit_0(id);
 	new_msg->set_unit_1(attack_id);
-	new_msg->set_damage(5);
+	new_msg->set_damage(ATK);
 	new_msg->set_camp(camp);
 	//is_attack = false;
 }

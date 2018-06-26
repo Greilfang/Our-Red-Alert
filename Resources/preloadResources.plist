@@ -11,6 +11,9 @@
 		<string>audio\bomb.wav</string>
 		<string>audio\selecttarget.wav</string>
 		<string>audio\nopower.wav</string>
+		<string>audio\building.wav</string>
+		<string>audio\construction.wav</string>
+		<string>audio\start.wav</string>
 	</array>
 	<key>SpriteSheets</key>
 	<array>

@@ -135,7 +135,10 @@ void Base::update(float f)
 {
 	timer++;
 	if (timer == 180)
+	{
 		setListenerEnable(true);
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\start.wav");
+	}
 	//状态为1表示正在生产，状态为2表示生产结束，状态为0表示没有生产的单位
 	if (state == 1)
 	{
@@ -148,7 +151,7 @@ void Base::update(float f)
 			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, createPosition.x, createPosition.y);
 			prod_bar->setVisible(false);
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\unitready.wav");
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\construction.wav");
 		}
 		else
 		{
@@ -188,7 +191,7 @@ void Base::update(float f)
 				built = AnimationCache::getInstance()->getAnimation("TankFactoryCreate"); 
 				break;
 			}
-
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\building.wav");
 			auto onbuild = Animate::create(built);
 			File = "Picture/units/" + file + std::to_string(camp) + ".png";
 			building = Sprite::create(File);
