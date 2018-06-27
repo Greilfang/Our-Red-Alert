@@ -68,7 +68,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	server_side = server_context_;
 	client_side = client_context_;
 	/*聊天输入窗口*/
-	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"), Scale9Sprite::create("button.png"));
+	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("Picture/slider/button.png"), Scale9Sprite::create("Picture/slider/button.png"), Scale9Sprite::create("Picture/slider/button.png"));
 	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
 	//chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
@@ -95,13 +95,13 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	_grid_map = GridMap::create(_combat_map);
 	_grid_map->retain();
 	/*加载小地图*/
-	mini_map = Minimap::create("minimap2.png");
+	mini_map = Minimap::create("map/minimap2.png");
 	if (client_side->map() == 1) {
-		mini_map = Minimap::create("minimap1.png");
+		mini_map = Minimap::create("map/minimap1.png");
 		
 	}
 	else if (client_side->map() == 2) {
-		mini_map = Minimap::create("minimap2.png");
+		mini_map = Minimap::create("map/minimap2.png");
 	}
 	mini_map->setAnchorPoint(Vec2(0, 0));
 	mini_map->setPosition(0, 0);

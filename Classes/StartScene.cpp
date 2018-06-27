@@ -36,7 +36,7 @@ bool StartScene::init() {
 	addChild(back_ground, 0);
 
 	/* ServerMenu */
-	auto server_menu = MenuItemImage::create("button.png", "button.png",
+	auto server_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(StartScene::menuServerCallback, this));
 	server_menu->setScale(2);
 	auto server_label = Label::createWithTTF("Create Game", "fonts/Marker Felt.ttf", 32);
@@ -44,7 +44,7 @@ bool StartScene::init() {
 	this->addChild(server_label, 2);
 
 	/* ClientMenu */
-	auto client_menu = MenuItemImage::create("button.png", "button.png",
+	auto client_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(StartScene::menuClientCallback, this));
 	client_menu->setScale(2);
 	auto client_label = Label::createWithTTF("Join Game", "fonts/Marker Felt.ttf", 32);
@@ -52,7 +52,7 @@ bool StartScene::init() {
 	this->addChild(client_label, 2);
 
 	/* ReturnMenu */
-	auto back_menu = MenuItemImage::create("button.png", "button.png",
+	auto back_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(StartScene::menuBackCallback, this));
 	back_menu->setScale(2);
 	auto back_label = Label::createWithTTF("Back", "fonts/Marker Felt.ttf", 32);
@@ -119,7 +119,7 @@ bool ServerMenu::init(int * map_choice) {
 	addChild(back_ground, 0);
 
 	/* StartServerMenu */
-	auto start_server_menu = MenuItemImage::create("button.png", "button.png",
+	auto start_server_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(ServerMenu::menuStartServerCallback, this));
 	start_server_menu->setScale(2);
 	auto start_server_label = Label::createWithTTF("Start Server", "fonts/Marker Felt.ttf", 32);
@@ -127,7 +127,7 @@ bool ServerMenu::init(int * map_choice) {
 	this->addChild(start_server_label, 2);
 
 	/* StartGameMenu */
-	auto start_game_menu = MenuItemImage::create("button.png", "button.png",
+	auto start_game_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(ServerMenu::menuStartGameCallback, this));
 	start_game_menu->setScale(2);
 	auto start_game_label = Label::createWithTTF("Start Game", "fonts/Marker Felt.ttf", 32);
@@ -138,7 +138,7 @@ bool ServerMenu::init(int * map_choice) {
 	_map_choice = *map_choice == 1 ? 1 : 2;
 
 	/* BackMenu */
-	auto back_menu = MenuItemImage::create("button.png", "button.png",
+	auto back_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(ServerMenu::menuBackCallback, this));
 	back_menu->setScale(2);
 	auto back_label = Label::createWithTTF("Back", "fonts/Marker Felt.ttf", 32);
@@ -239,7 +239,7 @@ bool ClientMenu::init() {
 	addChild(back_ground, 0);
 
 	/* IpBox */
-	auto ip_box = EditBox::create(Size(300, 60), Scale9Sprite::create("button.png"));
+	auto ip_box = EditBox::create(Size(300, 60), Scale9Sprite::create("Picture/slider/button.png"));
 	ip_box->setPosition(Vec2(origin.x + visibleSize.width * 0.35, origin.y + visibleSize.height * 0.7));
 	ip_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	ip_box->setFontName("/fonts/Marker Felt.ttf");
@@ -256,7 +256,7 @@ bool ClientMenu::init() {
 	this->addChild(ip_label, 2);
 
 	/* StartGameMenu */
-	auto start_game_menu = MenuItemImage::create("button.png", "button.png",
+	auto start_game_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(ClientMenu::menuStartGameCallback, this));
 	start_game_menu->setScale(2);
 	auto start_game_label = Label::createWithTTF("Start Game", "fonts/Marker Felt.ttf", 32);
@@ -264,7 +264,7 @@ bool ClientMenu::init() {
 	this->addChild(start_game_label, 2);
 
 	/* BackMenu */
-	auto back_menu = MenuItemImage::create("button.png", "button.png",
+	auto back_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(ClientMenu::menuBackCallback, this));
 	back_menu->setScale(2);
 	auto back_label = Label::createWithTTF("Back", "fonts/Marker Felt.ttf", 32);
@@ -395,7 +395,7 @@ bool MapChoiceScene::init()
 	this->addChild(map1_label);
 
 	/* NextMenu */
-	auto next_menu = MenuItemImage::create("button.png", "button.png",
+	auto next_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(MapChoiceScene::menuNextCallback, this));
 	next_menu->setScale(2);
 	auto next_label = Label::createWithTTF("Next", "fonts/Marker Felt.ttf", 32);
@@ -403,7 +403,7 @@ bool MapChoiceScene::init()
 	this->addChild(next_label, 2);
 
 	/* BackMenu */
-	auto back_menu = MenuItemImage::create("button.png", "button.png",
+	auto back_menu = MenuItemImage::create("Picture/slider/button.png", "Picture/slider/button.png",
 		CC_CALLBACK_1(MapChoiceScene::menuBackCallback, this));
 	back_menu->setScale(2);
 	auto back_label = Label::createWithTTF("Back", "fonts/Marker Felt.ttf", 32);

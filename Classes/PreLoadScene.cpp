@@ -31,8 +31,8 @@ bool PreLoad::init() {
 	back_ground->setScaleY(visibleSize.height / back_ground->getContentSize().height);
 	addChild(back_ground, -5);
 
-	auto bar_sprite = Sprite::create("slider2.png");
-	auto bar_back_ground_sprite = Sprite::create("slider1.png");
+	auto bar_sprite = Sprite::create("Picture/slider/slider2.png");
+	auto bar_back_ground_sprite = Sprite::create("Picture/slider/slider1.png");
 	bar_back_ground_sprite->setScale(2);
 	bar_back_ground_sprite->setPosition(Vec2(visibleSize.width / 2, visibleSize.height * 0.15));
 	this->addChild(bar_back_ground_sprite);
