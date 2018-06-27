@@ -1,6 +1,6 @@
 //
 // chat_client.cpp
-// ~~~~~~~~~~~~~~~
+// 借鉴了asio库官网demo
 //
 // Copyright (c) 2003-2018 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
@@ -20,12 +20,21 @@
 #include<string>
 using asio::ip::tcp;
 
+//----------------------------------------------------------------------------
+
 typedef std::deque<chat_message> chat_message_queue;
 
+//----------------------------------------------------------------------------
+
+/* @brief                        创建一个客户端
+*
+*
+*/
 class chat_client
 {
 public:
-	//辅助函数
+	
+	//辅助函数用于返回成员
 	bool error()const { return error_flag_; };
 	void close() { do_close(); };
 	bool started() const { return start_flag_; };
@@ -45,6 +54,13 @@ public:
 		while (!start_flag_);
 		return total_;
 	}
+
+	/**
+	* @brief                        创建一个客户端连接
+	*
+	* @param io_service             给客户端分配一个任务队列
+	* @param port                   要接入的服务端端口号
+	*/
 	static chat_client * create(std::string ip = "127.0.0.1", int port=1024)
 	{
 		auto s = new chat_client(ip, port);
@@ -54,12 +70,22 @@ public:
 			return s;
 	}
 
+	/**
+	* @brief                        客户端构造函数
+	*
+	* @param io_service             给客户端分配一个任务队列
+	* @param port                 要连接的端口号
+	*/
 	chat_client(std::string ip,int port): socket_(io_context_),
 		endpoint_(asio::ip::address_v4::from_string(ip),port)
 	{
 		do_connect();
 	}
-
+	
+	/**
+	* @brief                        写入内容
+	*
+	*/
 	void write_data(std::string s)
 	{
 		if (error_flag_)
@@ -77,6 +103,11 @@ public:
 		asio::write(socket_, asio::buffer(msg.data(), msg.length()));
 		std::cout << "client write success\n";
 	}
+
+	/**
+	* @brief                        读取内容
+	*
+	*/
 	std::string read_data()
 	{
 		if (error_flag_)
@@ -93,6 +124,7 @@ public:
 		return ret;
 	}
 private:
+	//以下内容和TcpConnection一样...
 	void do_connect()
 	{
 		socket_.async_connect(endpoint_,
@@ -120,11 +152,10 @@ private:
 					strncat(header2, data + 14, 4);
 					camp_ = atoi(header2);
 					map_ = atoi(data + 18);
-					std::cout << "total:" << total_ << std::endl;
-					std::cout << "camp:" << camp_ << std::endl;
-					std::cout << "map:" << map_ << std::endl;
+					//std::cout << "total:" << total_ << std::endl;
+					//std::cout << "camp:" << camp_ << std::endl;
+					//std::cout << "map:" << map_ << std::endl;
 					start_flag_ = true;
-					/*骚操作的结束*/
 					do_read_header();
 				}
 				else
@@ -192,14 +223,9 @@ private:
 
 			std::cout << "before notify";
 			data_cond_.notify_one();
-			/****************疑似中断网络连接的************************/
 			io_context_.stop();
 			asio::error_code ec;
 			socket_.shutdown(asio::ip::tcp::socket::shutdown_both, ec);
-			/*
-			if (!ec)
-				throw asio::system_error(ec);
-				*/
 			socket_.close();
 			thread_->join();
 
