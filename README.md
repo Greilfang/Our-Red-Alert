@@ -10,16 +10,24 @@
     - [游戏加载方式](#游戏加载方式)
         - [Server端口启动方式](#server端口启动方式)
         - [Client端口启动方式](#client端口启动方式)
+        - [单一平台演示、测试方式](#单一平台演示测试方式)
     - [项目安排](#项目安排)
         - [项目分工及权值分配](#项目分工及权值分配)
         - [项目的开发流程](#项目的开发流程)
     - [评分项的完成度](#评分项的完成度)
         - [基础功能](#基础功能)
         - [基础功能外的可选功能](#基础功能外的可选功能)
+        - [建造动画](#建造动画)
+        - [移动动画](#移动动画)
+        - [寻路算法](#寻路算法)
     - [C++规范的使用](#c规范的使用)
         - [C++特性的使用](#c特性的使用)
         - [C++11新特性的使用](#c11新特性的使用)
-    - [最后致谢](#最后致谢)
+        - [代码规范](#代码规范)
+    - [踩坑记录 & 避坑指南](#踩坑记录--避坑指南)
+        - [cocos2d-x游戏设计模块 & TMX瓦片地图设计 & 精灵帧plist的制作](#cocos2d-x游戏设计模块--tmx瓦片地图设计--精灵帧plist的制作)
+        - [Google ProtoBuf & Boost::Asio 网络消息模块](#google-protobuf--boostasio-网络消息模块)
+    - [致谢](#致谢)
 
 <!-- /TOC -->
 ## 游戏概述与游戏玩法
@@ -66,12 +74,22 @@ Red Alert是一款即时战略(RTS)游戏，支持最多四人对战，可以实
 6. 等待Client端玩家加入直至右端显示的连接人数达到2人及以上
 7. 点击`Start Game`进入游戏场景
 
+![ServerStart](documents/server_start.gif)
+
 ### Client端口启动方式
 1. 执行Server端口启动方式的1、2两步
 2. 单击`Join Game`进入房间列表
 3. 在输入框中输入服务端的IPv4地址
 4. 单击`Start Game`接入服务器
 5. 等待Server端的响应，当Server段玩家发出游戏开始指令时进入游戏场景
+
+![ClientStart](documents/client_start.gif)
+
+### 单一平台演示、测试方式
+1. Server端口开启方式同上
+2. Client端口中IP地址选用默认参数
+
+![Debugging](documents/debugging.gif)
 
 ## 项目安排
 ### 项目分工及权值分配
@@ -102,6 +120,25 @@ Red Alert是一款即时战略(RTS)游戏，支持最多四人对战，可以实
 - [x] 支持聊天(目前只支持全局聊天)
 - [x] 支持两张地图
 - [x] 支持小地图(可以实现点击快速移动以及标注单位)
+
+### 建造动画
+使用了plist与SpriteFrame展现了建筑建造的动画
+
+![Construction](documents/construction.gif)
+
+### 移动动画
+使用plist加载了狗奔跑时的动画，而其它单位则使用cocos2dx动画中的Rotate方法
+
+![Run](documents/dog_run.gif)
+
+### 寻路算法
+游戏采用了A*寻路算法(A Star Path Finding Algorithm)</br>
+游戏中的寻路算法以欧几里得距离(Euclidian distance)为基础并结合启发函数做深度优先的路径搜索</br>
+为减少计算量，本算法采用的启发函数(Heuristic Evaluation)为曼哈顿距离(Manhattan distance)，即出租车距离</br>
+最后搜索出来的路径往往遵从切比雪夫距离(Chebyshev distance),也称棋盘距离</br>
+更多的算法内容请移步CSDN: https://blog.csdn.net/u010946556/article/details/49027301
+
+![distance](documents/distance.jpg)
 
 ## C++规范的使用
 ### C++特性的使用
@@ -269,7 +306,28 @@ void PreLoad::loadSpriteSheets(ValueVector spriteSheets) {
     this->button_thread_ = new std::thread(std::bind(&chat_server::loop_process, this));
 ```
 
-## 最后致谢
+### 代码规范
+* 项目代码尽可能地在缩进进、命名等⽅⾯基本遵循了统⼀和⼀致的⻛格(尽可能地采用了Google C++ Style同时也结合了我们自己书写的习惯)
+* 项目结构清晰，头文件、cpp文件以其项目包含的库全部放在Classes目录下并基于其类型进行了分类，游戏所引资源文件在Resources目录下并同样也进行了分类
+* 我们为游戏控制模块和网络消息模块的代码写了详尽的注释，便于修改
+
+## 踩坑记录 & 避坑指南
+### cocos2d-x游戏设计模块 & TMX瓦片地图设计 & 精灵帧plist的制作
+1. 本项目所使用的cocos2d-x 3.16版本中`SimpleAudioEngine`中有代码缺失(只有函数声明没用函数定义)的情况，以致无法调节音量大小，需自行将这部分的函数定义补全。
+2. cocos2d-x 3.16版本读取xml文件(tmx, plist等)时尽可能将其依赖的资源文件(jpg, png等)放在同一目录下，且注意路径中尽量避免空格与中文字符，cocos2d-x 3.16在读取xml文件中所包含的路径时会有各种奇怪的错误。
+3. 使用Tiled制作Tiled Map时应当注意不要再同一个图层上加载两张png资源上的图块，否则虽在Tiled中预览正常，但可能会在进入游戏时加载不出来。
+4. Tiled Map的图块数尽可能不要超过200 * 200,否则可能加载出黑屏
+5. 使用TexturePacker制作plist时，应当注意到其在生成png的时候会自动裁切多余的画布大小。若所用图片的锚点并不是在每一张裁切后图片的中心，则需要手动设置锚点位置。
+6. cocos2d-x 3.16 所能加载的音频文件不宜过大，否则可能会导致无法播放。
+7. 使用cocos2d-x 的preloadXXXXX()函数时应当注意到资源的缓存存在上限，不宜预载过多资源。
+8. 在cocos2d-x国内外论坛以及StackoverFlow上找不到处理鼠标右键触摸事件的方法。在对`EventMouse`类研究后可以发现cocos2d-x 3.16中有`void setMouseButton (MouseButton button)`与`MouseButton getMouseButton () const`两个函数处理鼠标按键的问题，但是这也导致了鼠标左右键不能兼容的问题，目前我们尚未找到解决方案。
+9. 注意ZOder是个无符号数，不可以赋负值(虽然可以正常运行)，建议采用匿名枚举类型来给各图层设置高度。
+10. 在设置VS的运行库从多线程(/MD)转为多线程调试(/MTD)时可能会报错，问题大多出在初始化与默认类型转换上。
+11. 假如在定义继承自`cocos2d::Layer`的类时不使用`CREATE_FUN()`来创建`void create()`函数，需要手动声明并定义该函数，这点对于在创建该类的时候需传入初始参数的情况很重要。
+
+### Google ProtoBuf & Boost::Asio 网络消息模块
+
+## 致谢
 * 感谢助教在群里对我们提出的问题做出的解答
 * 感谢15级李坤学长为我们网络端编程提供的建议与帮助
 * 感谢设计与创意学院某不愿透露姓名的同学给与的PS图像处理帮助

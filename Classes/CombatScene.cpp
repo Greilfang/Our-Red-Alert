@@ -3,13 +3,8 @@
 #include "Unit.h"
 #include "SimpleAudioEngine.h"
 
-#define DEBUG
 USING_NS_CC;
 using namespace ui;
-
-#define BOX_EDGE_WITDH_SMALL 10
-#define BOX_EDGE_WITDH 40
-#define SCROLL_LENGTH 10
 
 void MouseRect::update(float f)
 {
@@ -17,14 +12,18 @@ void MouseRect::update(float f)
 	Node* parent = getParent();
 	drawRect(touch_start_map, touch_end_map, Color4F(0, 1, 0, 1));
 }
-void CombatScene::DrawRectArea(Point p1, Point p2) {
+
+void CombatScene::DrawRectArea(Point p1, Point p2)
+{
 	DrawNode* drawNode = DrawNode::create();
 	this->addChild(drawNode);
 	drawNode->drawRect(p1, p2, Color4F(0, 1, 0, 1));
 }
-//将框中的友方单位加入selectedd_ids
+
+//将框中的友方单位加入selected_ids
 //p1,p2是相对于地图的坐标
-void CombatScene::getLayerUnit(Point p1, Point p2) {
+void CombatScene::getLayerUnit(Point p1, Point p2)
+{
 	const auto&arrayNode = this->_combat_map->getChildren();
 	for (auto&child : arrayNode) {
 		Unit * pnode = static_cast<Unit *>(child);
@@ -34,14 +33,16 @@ void CombatScene::getLayerUnit(Point p1, Point p2) {
 		}
 	}
 }
-Scene * CombatScene::createScene(chat_server * server_context_, chat_client * client_context_) {
 
+Scene * CombatScene::createScene(chat_server * server_context_, chat_client * client_context_)
+{
 	auto scene = Scene::create();
 	auto layer = CombatScene::create(server_context_, client_context_);
 	scene->addChild(layer);
 
 	return scene;
 }
+
 CombatScene * CombatScene::create(chat_server * server_context_, chat_client * client_context_)
 {
 
@@ -57,31 +58,36 @@ CombatScene * CombatScene::create(chat_server * server_context_, chat_client * c
 
 }
 
-bool CombatScene::init(chat_server * server_context_, chat_client * client_context_) {
+bool CombatScene::init(chat_server * server_context_, chat_client * client_context_)
+{
 	if (!Layer::init()) {
 		return false;
 	}
+
 	CocosDenshion::SimpleAudioEngine::sharedEngine()->stopBackgroundMusic();
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 	/*加载客户端和服务端*/
 	server_side = server_context_;
 	client_side = client_context_;
+
 	/*聊天输入窗口*/
 	auto chat_in_box = EditBox::create(Size(300, 60), Scale9Sprite::create("Picture/slider/button.png"), Scale9Sprite::create("Picture/slider/button.png"), Scale9Sprite::create("Picture/slider/button.png"));
 	chat_in_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.1));
-	//chat_in_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_in_box->setFontName("/fonts/Marker Felt.ttf");
 	chat_in_box->setFontSize(28);
 	chat_in_box->setMaxLength(20);
 	chat_in_box->setTag(1);
 	this->addChild(chat_in_box, 2);
+
 	/*聊天输出窗口*/
 	auto chat_out_box = Text::create("Input the chat message ", "Arial", 20);
 	chat_out_box->setPosition(Vec2(origin.x + visibleSize.width * 0.9, origin.y + visibleSize.height * 0.2));
 	chat_out_box->setTextHorizontalAlignment(TextHAlignment::CENTER);
 	chat_out_box->setTag(2);
 	this->addChild(chat_out_box, 2);
+
 	/* 加载地图 */
 	if (client_side->map() == 1) {
 		_combat_map = TMXTiledMap::create("map/BasicMap1.tmx");
@@ -91,14 +97,15 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	}
 	_combat_map->setAnchorPoint(Vec2(0, 0));
 	addChild(_combat_map, 0);
+
 	/* 加载格点地图 */
 	_grid_map = GridMap::create(_combat_map);
 	_grid_map->retain();
+
 	/*加载小地图*/
 	mini_map = Minimap::create("map/minimap2.png");
 	if (client_side->map() == 1) {
 		mini_map = Minimap::create("map/minimap1.png");
-		
 	}
 	else if (client_side->map() == 2) {
 		mini_map = Minimap::create("map/minimap2.png");
@@ -106,11 +113,13 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	mini_map->setAnchorPoint(Vec2(0, 0));
 	mini_map->setPosition(0, 0);
 	addChild(mini_map);
+
 	/*加载矩形选框对象*/
 	mouse_rect = MouseRect::create();
 	mouse_rect->setVisible(false);
 	_combat_map->addChild(mouse_rect, 15);
-	/*加载金钱layer*/
+
+	/*加载金钱Layer*/
 	auto moneyDisplay = Sprite::create("Picture/display/MoneyDisplay.png");
 	addChild(moneyDisplay);
 	moneyDisplay->setScale(0.2);
@@ -120,6 +129,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	money->setScale(2);
 	money->setPosition(visibleSize.width - 130, visibleSize.height - 30);
 	money->schedule(schedule_selector(Money::update));
+
 	/*加载电力条power*/
 	auto powerSprite = Sprite::create("Picture/display/powerDisplay.png");
 	addChild(powerSprite);
@@ -127,6 +137,8 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	powerSprite->setPosition(visibleSize.width - 150, visibleSize.height - 80);
 	power = Power::create();
 	addChild(power, 40);
+
+	/* 加载电力条的显示 */
 	power->setPosition(visibleSize.width - 190, visibleSize.height - 95);
 	PowerDisplay* powerDisplay = PowerDisplay::create();
 	powerDisplay->setScale(2);
@@ -135,6 +147,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	power->powerDisplay = powerDisplay;
 	power->updatePowerDisplay();
 
+	/* 设置游戏控制器 */
 	msgs = new GameMessageSet;
 	unit_manager = UnitManager::create();
 	unit_manager->retain();
@@ -146,6 +159,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 	unit_manager->power = power;
 	unit_manager->setSocketClient(client_side);
 	unit_manager->setPlayerNum(client_side);
+
 #ifdef DEBUG//测试
 	auto farmer_sprite = Unit::create("Picture/display/buildingrec.png");
 	farmer_sprite->setVisible(false);
@@ -185,10 +199,12 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 		}
 		return false;
 	};
+
 	spriteListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		mouse_rect->touch_end = touch->getLocation();
 	};
 	unit_manager->setSpriteTouchListener(spriteListener);
+
 #ifdef DEBUG
 	schedule(schedule_selector(CombatScene::update));
 	Director::getInstance()->getEventDispatcher()
@@ -244,6 +260,7 @@ bool CombatScene::init(chat_server * server_context_, chat_client * client_conte
 		mouse_rect->touch_end_map = mouse_rect->touch_end - cdelta;
 		mouse_rect->setVisible(true);
 	};
+
 	/*加载框选监听器时间*/
 	destListener->onTouchEnded = [this](Touch* touch, Event* event) {
 		if (mouse_rect->isScheduled(schedule_selector(MouseRect::update)))
@@ -304,6 +321,7 @@ void CombatScene::focusOnBase() {
 	auto base_point = unit_manager->getBasePosition() + cdelta;
 	Vec2 base_vec = Point(0, 0) + visibleSize / 2 - base_point;
 	cdelta += base_vec;
+
 	/* 如果以基地为中心的视野超出了TiledMap的大小 */
 	if (cdelta.x >0) {
 		cdelta.x = 0;
@@ -322,10 +340,10 @@ void CombatScene::focusOnBase() {
 	_combat_map->setPosition(cdelta);
 }
 
-//更新位置
 void CombatScene::updateMircoLocation() {
 	mini_map->drawNode->clear();
 	const auto&arrayNode = this->_combat_map->getChildren();
+
 	for (auto&child : arrayNode) {
 		Unit * pnode = static_cast<Unit *>(child);
 		int combat_x = _combat_map->getBoundingBox().size.width;
@@ -340,17 +358,17 @@ void CombatScene::updateMircoLocation() {
 
 void CombatScene::update(float f){
 	message_update++;
-	scrollMap();
+	dragMap();
 	cdelta = _combat_map->getPosition();
+
 	if (message_update ==10) {
 		unit_manager->updateUnitsState();
 		updateMircoLocation();
 		message_update -= 10;
 	}
 }
-void CombatScene::scrollMap() {
+void CombatScene::dragMap() {
 	auto map_center = _combat_map->getPosition();
-	//std::cout << map_center.x << " " << map_center.y;
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -365,10 +383,10 @@ void CombatScene::scrollMap() {
 		- (origin.y + BOX_EDGE_WITDH_SMALL > _cursor_position.y)
 		- (origin.y + BOX_EDGE_WITDH > _cursor_position.y);
 
-	Vec2 scroll(0, 0);
+	Vec2 drag(0, 0);
 	if (_cursor_position.x > mini_map->mini_width || _cursor_position.y > mini_map->mini_height) {
-		scroll += Vec2(-SCROLL_LENGTH, 0)*horizontal_state;
-		scroll += Vec2(0, -SCROLL_LENGTH)*vertical_state;
+		drag += Vec2(-drag_LENGTH, 0)*horizontal_state;
+		drag += Vec2(0, -drag_LENGTH)*vertical_state;
 	}
 
 
@@ -378,13 +396,13 @@ void CombatScene::scrollMap() {
 			case EventKeyboard::KeyCode::KEY_SPACE:
 				focusOnBase(); break;
 			case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
-				scroll -= Vec2(-SCROLL_LENGTH, 0); break;
+				drag -= Vec2(-drag_LENGTH, 0); break;
 			case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
-				scroll += Vec2(-SCROLL_LENGTH, 0); break;
+				drag += Vec2(-drag_LENGTH, 0); break;
 			case EventKeyboard::KeyCode::KEY_UP_ARROW:
-				scroll += Vec2(0, -SCROLL_LENGTH); break;
+				drag += Vec2(0, -drag_LENGTH); break;
 			case EventKeyboard::KeyCode::KEY_DOWN_ARROW:
-				scroll -= Vec2(0, -SCROLL_LENGTH); break;
+				drag -= Vec2(0, -drag_LENGTH); break;
 
 			case EventKeyboard::KeyCode::KEY_ENTER: {
 				auto chat_out_box = static_cast<ui::EditBox*>(this->getChildByTag(1));
@@ -403,15 +421,12 @@ void CombatScene::scrollMap() {
 			}
 		}
 	}
-	map_center += scroll;
-	//move_amount -= scroll;
+	map_center += drag;
 	if (keys[EventKeyboard::KeyCode::KEY_SPACE] == false
-		&& _combat_map->getBoundingBox().containsPoint((-scroll) + Director::getInstance()->getVisibleSize())
-		&& _combat_map->getBoundingBox().containsPoint(-scroll)) {
+		&& _combat_map->getBoundingBox().containsPoint((-drag) + Director::getInstance()->getVisibleSize())
+		&& _combat_map->getBoundingBox().containsPoint(-drag)) {
 		_combat_map->setPosition(map_center);
 	}
-
-
 }
 
 void Money::update(float f)
@@ -527,6 +542,7 @@ Minimap * Minimap::create(const std::string &filename) {
 		ret->autorelease();
 		return ret;
 	}
+
 	CC_SAFE_DELETE(ret);
 	return nullptr;
 }
