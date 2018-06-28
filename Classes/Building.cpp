@@ -148,7 +148,6 @@ void Base::update(float f)
 			setMenuEnable(false);
 			prod_process = 0;
 			unit_manager->getTiledMap()->removeChild(building);
-			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, createPosition.x, createPosition.y);
 			prod_bar->setVisible(false);
 			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\construction.wav");
@@ -218,7 +217,6 @@ void Building::update(float f)
 			state = 2;
 			prod_process = 0;
 			Point point = findFreePosition();
-			unit_manager->setUnitCreateCenter(this->getPosition());
 			unit_manager->genCreateMessage(cur_prod, camp, point.x, point.y);
 			prod_bar->setVisible(false);
 			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("audio\\unitready.wav");
@@ -442,7 +440,6 @@ PowerPlant * PowerPlant::create(const std::string & filename)
 
 void Building::addToGmap(Point p)
 {
-	rec = unit_manager->getGridRect(p, this->getContentSize());
 	unit_manager->grid_map->occupyPosition(id, rec);
 }
 
@@ -494,8 +491,8 @@ void Building::startProduce(int _unit_type, Point _point)
 
 Point Building::findFreePosition()
 {
-	GridPoint a = unit_manager->grid_map->findFreePositionNear(_cur_pos);
-	Point p = unit_manager->getPoint(a);
-	return p;
+	GridPoint freeGridPoint = unit_manager->grid_map->findFreePositionNear(_cur_pos);
+	Point freePoint = unit_manager->getPoint(freeGridPoint);
+	return freePoint;
 }
 

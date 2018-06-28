@@ -636,10 +636,10 @@ void UnitManager::initializeUnitGroup() {
 	}
 }
 
-void UnitManager::playBaseCreateAnimation(Base * s)
+void UnitManager::playBaseCreateAnimation(Base * base)
 {
 	auto built = AnimationCache::getInstance()->getAnimation("BaseCreate");
-	s->runAction(Animate::create(built));
+	base->runAction(Animate::create(built));
 }
 
 void UnitManager::setMax_power(int delta)
@@ -652,10 +652,6 @@ void UnitManager::setIncreasingAmount(int amount)
 	money->setIncreasingAmount(amount);
 }
 
-void UnitManager::setUnitCreateCenter(Point center)
-{
-	unit_create_center = center;
-}
 
 void UnitManager::deleteUnit(int id)
 {
@@ -706,30 +702,25 @@ Point UnitManager::getBasePosition() const
 	return _base_pos;
 }
 
-Point UnitManager::getUnitCreateCenter()
-{
-	return unit_create_center;
-}
-
 GridSize UnitManager::getGridSize(Size _size)
 {
 	auto size = getGridPoint(_size);
 	return GridSize(size._x, size._y);
 }
 
-GridRect UnitManager::getGridRect(Point _p, Size _size)
+GridPoint UnitManager::getGridPoint(Point point)
 {
-	return GridRect(getGridPoint(_p), getGridSize(_size));
+	return grid_map->getGridPoint(point);
 }
 
-GridPoint UnitManager::getGridPoint(Point p)
+Point UnitManager::getPoint(GridPoint grid_point)
 {
-	return grid_map->getGridPoint(p);
+	return grid_map->getPoint(grid_point);
 }
 
-Point UnitManager::getPoint(GridPoint gp)
+GridRect UnitManager::getGridRect(Point center, Size size)
 {
-	return grid_map->getPoint(gp);
+	return GridRect(getGridPoint(center), getGridSize(size));
 }
 
 
@@ -827,10 +818,9 @@ Unit* UnitManager::createNewUnit(int id, int camp, int unit_type, float x, float
 		nu->setListenerEnable(false);
 	}
 	nu->setPosition(x, y);
-	nu->addToGmap(Point(x, y));
 	nu->setCurPos(getGridPoint(Point(x, y)));
-	if (camp != player_id && !nu->isMobile())
-		nu->rec = getGridRect(Point(x, y), nu->getContentSize());
+	nu->rec = getGridRect(Point(x, y), nu->getContentSize());
+	nu->addToGmap(Point(x, y));
 	nu->initBar();
 
 	//刷新电力条
@@ -853,13 +843,6 @@ void UnitManager::genCreateMessage(int _unit_type, int camp, float x, float y)
 	newgridpoint->set_y(y);
 	new_msg->set_allocated_msg_grid_path(gridpath);
 	next_id += MAX_PLAYER_NUM;
-}
-
-float UnitManager::getPlayerMoveTime(Vec2 start_pos, Vec2 end_pos, int _speed)
-{
-	float duration = sqrtf((end_pos.x - start_pos.x)*(end_pos.x - start_pos.x) +
-		(end_pos.y - start_pos.y)*(end_pos.y - start_pos.y)) / _speed;
-	return duration;
 }
 
 void UnitManager::checkWinOrLose(int base_id)
@@ -892,14 +875,6 @@ void UnitManager::setPlayerNum(chat_client * _socket_client)
 	player_num = _socket_client->total();
 }
 
-void UnitManager::playMover(Point position, Unit * _sprite) {
-	//获得精灵移动的时间
-	float duration = getPlayerMoveTime(_sprite->getPosition(), position, _sprite->getSpeed());
-	log("%f,%f", _sprite->getPositionX(), _sprite->getPositionY());
-	auto moveTo = MoveTo::create(duration, position);
-	auto sequence = Sequence::create(moveTo, nullptr);
-	_sprite->runAction(sequence);
-}
 int UnitManager::genRandom(int start, int end)
 {
 	std::uniform_int_distribution<> rd(start, end);
@@ -1016,10 +991,10 @@ void TrajectoryEffect::updatefire(float)
 		setPosition(getPosition() + move_);
 }
 
-void ConstructRange::drawRange(Point p, float r)
+void ConstructRange::drawRange(Point center, float radius)
 {
 
-	drawDot(p, r, color);
+	drawDot(center, radius, color);
 }
 
 bool ExplosionEffect::init()

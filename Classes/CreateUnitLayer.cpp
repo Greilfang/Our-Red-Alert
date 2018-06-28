@@ -352,11 +352,6 @@ TankFactaryLayer * TankFactaryLayer::create()
 	}
 }
 
-Point CreateUnitLayer::findFirstPosition()
-{
-	return Point();
-}
-
 void CreateUnitLayer::addListenerToRect(int type)
 {
 	auto spriteListener = EventListenerTouchOneByOne::create();
@@ -371,7 +366,6 @@ void CreateUnitLayer::addListenerToRect(int type)
 			{
 				rec->setVisible(false);
 				center->startProduce(type, rec_abs_center);
-				//unit_manager->genCreateMessage(type,1,rec_abs_center.x,rec_abs_center.y);
 				building = false;
 				//ÏÔÊ¾²Ëµ¥
 				this->setVisible(true);
